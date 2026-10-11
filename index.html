@@ -42,12 +42,22 @@ body.tool-open .menu-fab{opacity:.55}
 body.tool-open .menu-fab:hover,
 body.tool-open .menu-fab:focus-visible,
 body.tool-open .menu-fab.open{opacity:1}
-/* 抽屉打开时浮标退场：抽屉里已经有自己的 ✕ 了，两个圆圈同时压在标题上会打架。
-   抽屉关着时浮标照旧是唯一的入口，所以只在 body.panel-open 期间藏。
-   引导进行中浮标会被 .spot 强行点亮（带 !important），这里按更高优先级压回去，
-   免得「亮着的靶子」和抽屉里那个 ✕ 同时出现；指引气泡同理一起收掉。 */
-body.panel-open .menu-fab{opacity:0;pointer-events:none;transform:scale(.88)}
-body.panel-open .menu-fab.spot{opacity:0!important;pointer-events:none!important;animation:none!important}
+/* 抽屉打开时，浮标就是**唯一的关闭按钮**：显示 ✕、亮着、可点。
+   卡片里那个 .brand-x 已去掉 —— 两个 ✕ 并排既重复又让人不知道点哪个。
+   ⚠️⚠️ 特异性是这个 bug 的全部原因，改动时盯住这条：
+      `body.tool-open .menu-fab.open` 是 (0,3,1)，比 `body.panel-open .menu-fab`
+      (0,2,1) **高** —— 所以下面必须把 `.open` 也写上。
+      漏了它，在"工具页 + 抽屉打开"时浮标会以 opacity:1 露出来压住品牌卡，
+      却带着 pointer-events:none，于是变成一个**看得见却没用的 ×**
+      （用户就是这么报的：'点进某个功能页后点击靶子按钮还是会有一个×挡住，
+      甚至这个×按钮没有用途'）。目录页上看不出来，因为那时没有 body.tool-open。
+      验收：verify_hub_fit.js 里有一条专盯"工具页开着抽屉时浮标可见且可点"。 */
+body.panel-open .menu-fab,
+body.panel-open .menu-fab.open{opacity:1;pointer-events:auto}
+body.panel-open .menu-fab:hover,
+body.panel-open .menu-fab:focus-visible{opacity:1}
+/* 引导的 .spot 也带 !important，这里按同等优先级压回去 */
+body.panel-open .menu-fab.spot{opacity:1!important;pointer-events:auto!important;animation:none!important}
 body.panel-open .guide-callout{opacity:0}
 .menu-fab .fab-ico{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
@@ -68,6 +78,12 @@ body.panel-open .guide-callout{opacity:0}
   opacity:0;transition:opacity .3s ease,transform .34s cubic-bezier(.22,1,.36,1);
 }
 body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
+/* ⚠️ 抽屉打开时必须把这条小药丸收掉：它挂在浮标右边（left:100% + 7px），
+   而浮标现在正好落在品牌卡的左上角 —— 那条深色药丸会盖住标题的第一个字。
+   用户报的"挡住"有一半是这个：肉眼看像"来"字被啃了一块。放大 3 倍才看出来，
+   因为它是深色半透明（rgba(45,27,66,.84)）压在紫底上，颜色很接近。
+   抽屉里那个"音乐"开关本来就会显示"播放中"，信息没丢。 */
+body.panel-open .fab-eq{opacity:0}
 .fab-eq i{
   display:block;width:3px;border-radius:2px;background:#c9a6ff;
   height:16px;transform:scaleY(.28);transform-origin:50% 100%;
@@ -100,9 +116,12 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
   box-shadow:6px 0 34px rgba(60,40,110,.30);
   border-radius:0 26px 26px 0;
   transform:translateX(-103%);
-  /* visibility 跟着一起切：收起后彻底移出可聚焦范围，不然 Tab 键还能钻进隐藏的菜单 */
+  /* visibility 跟着一起切：收起后彻底移出可聚焦范围，不然 Tab 键还能钻进隐藏的菜单。
+     ⚠️ 这两个时长必须一致（visibility 的延迟 = transform 的时长），
+        改一个忘另一个，抽屉会在滑到位之后才"出现"或提前消失。
+     ⚠️ 曲线不能带过冲（y 不能 >1）：到位是 translateX(0)，往右冲会露出左边一条缝。 */
   visibility:hidden;
-  transition:transform .34s cubic-bezier(.22,1,.36,1),visibility 0s linear .34s;
+  transition:transform .44s cubic-bezier(.16,1,.3,1),visibility 0s linear .44s;
   display:flex;flex-direction:column;gap:7px;overflow-y:auto;
   /* 内容已压到装得下（见 .sbar / .mbar 的说明）。这里再把滚动条本身去掉：
      极矮的窗口（横屏手机、小笔电）仍会溢出，那时也**不要那条竖条** ——
@@ -113,7 +132,7 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
 .panel::-webkit-scrollbar{width:0;height:0}
 .panel.on{
   transform:none;visibility:visible;
-  transition:transform .34s cubic-bezier(.22,1,.36,1),visibility 0s;
+  transition:transform .44s cubic-bezier(.16,1,.3,1),visibility 0s;
 }
 /* ===== 抽屉顶部：品牌卡 =====
    这里原本是光秃秃一行标题，而左上角那个 fixed 浮标（打开时是 ✕）正好压在它左边，
@@ -140,12 +159,13 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
     radial-gradient(circle at 63% 84%,rgba(255,255,255,.26) 0 1.4px,transparent 2px),
     radial-gradient(circle at 22% 93%,rgba(255,255,255,.22) 0 1.2px,transparent 1.8px);
 }
-.brand-row{position:relative;display:flex;align-items:center;gap:10px}
-.brand-badge{
-  flex:0 0 auto;width:38px;height:38px;border-radius:13px;
-  display:flex;align-items:center;justify-content:center;font-size:1.2rem;
-  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.24);
+.brand-row{position:relative;display:flex;align-items:center;gap:10px;
+  /* 左上角那一块留给浮标：抽屉打开时它就是那个 ✕（position:fixed 在 12,12、
+     48x48），卡片左上角正好压在它下面。所以标题这一行要往右让出 46px ——
+     浮标右沿 60px，让完文字从 70px 开始，留 10px 余量，不挡也不挤。
+     ⚠️ 只让第一行：作者行在浮标下沿（y≈82）以下，满宽排更整齐，
+        也让"作者 / 名字 / 邮箱"这条线左对齐得干净。 */
+  padding-left:46px;
 }
 .brand-txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
 .brand-name{
@@ -158,16 +178,8 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
      .94 是 4.84 —— 这行字只有 11.5px，没有"大字"的豁免额度 */
   color:rgba(255,255,255,.94);
 }
-.brand-x{
-  flex:0 0 auto;width:32px;height:32px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-family:inherit;font-size:.9rem;font-weight:700;line-height:1;
-  color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;
-  background:rgba(45,27,66,.26);border:1px solid rgba(255,255,255,.30);
-  transition:background .18s,transform .18s;
-}
-.brand-x:hover{background:rgba(45,27,66,.44)}
-.brand-x:active{transform:scale(.9)}
+/* 这里原先还有 .brand-x（卡片里那个 ✕）的样式：已经去掉 ——
+   唯一关闭按钮是左上角那个浮标，两个 ✕ 并排既重复又让人不知道点哪个 */
 /* 作者行 */
 .brand-au{
   position:relative;display:flex;align-items:center;gap:7px;
@@ -210,8 +222,21 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
 .pitem .plb{flex:1 1 auto}
 .pitem .pgo{font-size:1.1rem;opacity:.45}
 .pitem.on .pgo{opacity:.9}
-@keyframes pIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
-.panel.on .anim-in{animation:pIn .36s cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--i,0) * 42ms)}
+@keyframes pIn{
+  /* 起点带一点缩放，落点用带轻微回弹的贝塞尔 —— 条目是"滑到位再轻轻顿一下"，
+     比纯位移的直线感优雅。位移用 translate3d 走合成层，不吃重绘。 */
+  0%{opacity:0;transform:translate3d(-26px,0,0) scale(.955)}
+  60%{opacity:1}
+  100%{opacity:1;transform:none}
+}
+.panel.on .anim-in{
+  /* 慢一档 + 曲线：.36s/42ms -> .62s/46ms。
+     cubic-bezier(.2,1.14,.32,1) 的 y 超过 1，结尾会有一点点过冲再回位（弹簧感）。
+     ⚠️ 过冲只放在条目上：抽屉本体（.panel）**不能**过冲 ——
+        它到位是 translateX(0)，往右冲会露出左边一条缝。 */
+  animation:pIn .62s cubic-bezier(.2,1.14,.32,1) both;
+  animation-delay:calc(var(--i,0) * 46ms);
+}
 
 /* ===== 站台设置：一行三个开关 + 一行音乐控制 =====
    原来这里是三张两栏卡片（74+74+172 = 335px），加上 6 个条目后抽屉内容
@@ -271,7 +296,6 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
 @media (max-height:680px){
   .panel{padding:11px 13px calc(11px + env(safe-area-inset-bottom,0px));gap:5px}
   .brand{padding:8px;margin-bottom:2px}
-  .brand-badge{width:34px;height:34px;border-radius:11px;font-size:1.06rem}
   .brand-au{margin-top:6px;padding-top:6px}
   .panel-sec{margin:7px 6px 2px}
   .sbtn{min-height:50px}
@@ -466,7 +490,7 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
   .menu-fab.spot{animation:none!important;box-shadow:0 0 0 4px rgba(255,214,0,.85)}
   /* 玻璃开关的渐变也一并去掉（系统要求减弱动效时，任何过渡都不该有） */
   body,.card,.resume button,.foot-hint,.panel,.guide-card,.menu-fab,
-  .brand-x,.brand-au .au-mail,
+  .brand-au .au-mail,
   body::before,body::after,
   .card::before,.guide-card::before,.foot-hint::before{transition:none!important}
 }
@@ -526,14 +550,14 @@ body{transition:background .45s cubic-bezier(.4,0,.2,1)}
              -webkit-backdrop-filter .42s cubic-bezier(.4,0,.2,1);
 }
 .panel{
-  transition:transform .34s cubic-bezier(.22,1,.36,1), visibility 0s linear .34s,
+  transition:transform .44s cubic-bezier(.16,1,.3,1), visibility 0s linear .44s,
              background .42s cubic-bezier(.4,0,.2,1),
              border-color .42s cubic-bezier(.4,0,.2,1),
              backdrop-filter .42s cubic-bezier(.4,0,.2,1),
              -webkit-backdrop-filter .42s cubic-bezier(.4,0,.2,1);
 }
 .panel.on{
-  transition:transform .34s cubic-bezier(.22,1,.36,1), visibility 0s,
+  transition:transform .44s cubic-bezier(.16,1,.3,1), visibility 0s,
              background .42s cubic-bezier(.4,0,.2,1),
              border-color .42s cubic-bezier(.4,0,.2,1),
              backdrop-filter .42s cubic-bezier(.4,0,.2,1),
@@ -684,12 +708,10 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
   <aside class="panel" id="panel" aria-hidden="true">
     <div class="brand anim-in" style="--i:0">
       <div class="brand-row">
-        <span class="brand-badge" aria-hidden="true">🚀</span>
         <span class="brand-txt">
           <span class="brand-name">来自太空的英语站台</span>
           <span class="brand-sub">小学英语练习 · 5 个工具</span>
         </span>
-        <button class="brand-x" id="panelClose" type="button" aria-label="收起菜单">✕</button>
       </div>
       <div class="brand-au">
         <span class="au-k">作者</span>
@@ -18688,9 +18710,17 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     if (!liquidOn || weakHints || document.visibilityState !== 'visible' || frame) return;
     if (lsGet(LS_PERF, '') !== '') return;        // 这台设备已经有结论了，不重复测
     sampleFrames(700, function (off) {
+      // ⚠️⚠️ 这 700ms 里老师可能已经把玻璃关掉了。那就**别再点亮去测**，
+      //    否则他会看到"明明关掉了，画面又亮了一下"—— 而且类要拖到测完
+      //    才被 paintLiquid() 摘掉，中间那一段是实打实的开着。
+      //    （verify_quality.js 的 B 段逮到过：关玻璃那一击正好落在采样窗口里，
+      //      读出来 shown=false + liquid=true —— 没弹窗，但玻璃亮着。）
+      if (!liquidOn) return;
       document.body.classList.add('liquid');
       requestAnimationFrame(function () { requestAnimationFrame(function () {
         sampleFrames(700, function (on) {
+          // 测到一半被关掉：既不写结论（结论会污染下次的降档判断），也别留着类
+          if (!liquidOn) { paintLiquid(); return; }
           var bad = on.med > Math.max(20, off.med * 1.35);
           perfTier = bad ? 'low' : 'high';
           lsSet(LS_PERF, perfTier);
@@ -18829,7 +18859,11 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   /* ================================================================
      抽屉菜单
      ================================================================ */
-  var panelClose = document.getElementById('panelClose');
+  /* 唯一的关闭按钮就是那个浮标（抽屉打开时它显示 ✕，且**必须看得见、点得动**）。
+     卡片里原来还有个 .brand-x，两个 ✕ 并排既重复又让人不知道点哪个，已去掉。
+     ⚠️ 浮标可见不可点 = 用户眼里"一个没用的 ×"（曾经真的这样：CSS 特异性让它在
+        工具页里以 opacity:1 露出来，却带着 pointer-events:none）。
+        验收脚本 verify_hub_fit.js 里有一条专门盯这个。 */
   var menuOpen = false;
   function setMenu(open) {
     menuOpen = open;
@@ -18838,16 +18872,54 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     scrim.classList.toggle('on', open);
     panel.classList.toggle('on', open);
     panel.setAttribute('aria-hidden', open ? 'false' : 'true');
-    // 抽屉打开时浮标要退场（品牌卡里已经有自己的 ✕），样式挂在这个类上
+    // 样式挂在这个类上：抽屉打开时浮标变 ✕、亮着、可点
     document.body.classList.toggle('panel-open', open);
-    // 用卡里的 ✕ 收起时，焦点还留在抽屉内部；还给浮标，键盘用户才不会掉到 body 上
+    // 收起时若焦点还在抽屉里（在某个条目或音量条上），还给浮标 ——
+    // 否则 Esc / 点遮罩收起后焦点会掉到 body 上，键盘用户就找不到位置了
     if (!open && panel.contains(document.activeElement)) menuBtn.focus();
     if (open) openSfx();
   }
   menuBtn.addEventListener('click', function () { setMenu(!menuOpen); });
-  if (panelClose) panelClose.addEventListener('click', function () { setMenu(false); });
   scrim.addEventListener('click', function () { setMenu(false); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menuOpen) setMenu(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menuOpen && !gwShown) setMenu(false); });
+
+  /* ----------------------------------------------------------------
+     滚轮快捷切换练习（只给鼠标/触控板）
+     抽屉内容现在装得下（见 hub.css 第 14 条那套说明），滚轮本来是空着的 ——
+     那就拿它来翻练习：滚一格切一个，**抽屉保持开着**，这样能一路扫过去
+     看右边画面跟着变。想看就点 ✕/遮罩/Esc 收起。
+     ⚠️ 节流必须要有：鼠标惯性一次会甩出七八个 wheel 事件，不节流会一路跳到底。
+     ⚠️ 抽屉真能滚的时候（320x568 那种老机器）要让位给滚动，别抢。
+     ⚠️ **移动端保持原判断：点条目 = 进功能页 + 收回侧边栏。**
+        这里用 `hover: hover and pointer: fine` 把滚轮那条路整体闸掉
+        （族里既有惯例，消消乐的 hoverCapable 就是这个），而不是指望
+        "手机没有滚轮" —— 触屏笔记本、带触摸屏的一体机是可能发出 wheel 的，
+        那种机器上滚轮该能用；而手机上 `hover: none`，这道闸直接不成立。
+     ---------------------------------------------------------------- */
+  var WHEEL_GAP = 260;
+  var wheelAt = 0;
+  var hoverCapable = false;
+  try { hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)').matches; } catch (e) {}
+  function stepPractice(dir) {
+    var order = [null].concat(toolItems.map(function (b) { return b.dataset.tool; }));
+    var at = order.indexOf(current);
+    if (at < 0) at = 0;
+    var next = order[(at + dir + order.length) % order.length];
+    if (next === null) { backSfx(); goHome(true); }
+    else { tapSfx(); showTool(next, true); }   // keepMenu：滚轮切完不收回侧边栏
+  }
+  panel.addEventListener('wheel', function (e) {
+    if (!menuOpen || !hoverCapable) return;
+    if (e.target && e.target.closest && e.target.closest('input[type=range]')) return;
+    if (panel.scrollHeight > panel.clientHeight + 2) return;   // 能滚就让它滚
+    var dy = e.deltaY;
+    if (Math.abs(dy) < 4) return;
+    e.preventDefault();
+    var now = Date.now();
+    if (now - wheelAt < WHEEL_GAP) return;
+    wheelAt = now;
+    stepPractice(dy > 0 ? 1 : -1);
+  }, { passive: false });
 
   /* ================================================================
      小药丸提示：切换后浮出「当前练习」，自己淡掉
@@ -18890,8 +18962,9 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     document.body.classList.toggle('tool-open', !!key);
   }
 
-  function showTool(key) {
-    if (current === key) { setMenu(false); return; }
+  /* keepMenu：滚轮翻练习时用 —— 抽屉要一直开着，才能一路扫过去看右边画面变化 */
+  function showTool(key, keepMenu) {
+    if (current === key) { if (!keepMenu) setMenu(false); return; }
     if (frame) { fadeOut(frame); frame = null; }     // 先让上一个淡出
     var tpl = document.getElementById('tpl-' + key);
     if (!tpl) return;
@@ -18939,19 +19012,19 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     current = key;
     markItems(key);
     lsSet(LS_TOOL, key);
-    setMenu(false);
+    if (!keepMenu) setMenu(false);
     // 顺手说一句为什么音乐没了 —— 否则老师会以为音乐坏了
     toast('🎯 ' + nameOf(key) + (quieted ? ' · 已暂停背景音乐' : ''), quieted ? 2600 : 1900);
   }
 
-  function goHome() {
-    if (!frame && home.style.display !== 'none') { setMenu(false); return; }
+  function goHome(keepMenu) {
+    if (!frame && home.style.display !== 'none') { if (!keepMenu) setMenu(false); return; }
     if (frame) { fadeOut(frame); frame = null; }
     current = null;
     leaveQuiet();                       // 离开"要听录音"的工具，把音乐还回去
     markItems(null);
     showHome();
-    setMenu(false);
+    if (!keepMenu) setMenu(false);
     toast('🏠 目录', 1400);
     // 回到目录页（画面上没有工具）才是量玻璃帧率的好时机；开玻璃时若正开着
     // 工具就跳过没测，在这里补上
@@ -18959,6 +19032,8 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   }
 
   toolItems.forEach(function (b) {
+    // 点条目 = 进功能页 + 收回侧边栏。**移动端走的就是这条路**（手机没有滚轮，
+    // 而且上面那道 hover/pointer 闸也不成立），所以别给它加 keepMenu。
     b.addEventListener('click', function () { tapSfx(); showTool(b.dataset.tool); });
   });
   Array.prototype.forEach.call(document.querySelectorAll('.card[data-tool]'), function (b) {
