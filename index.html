@@ -153,6 +153,21 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
 .ctxt{flex:1 1 auto;min-width:0}
 .ctitle{display:block;font-size:.9rem;font-weight:800;color:#3b2460}
 .chint{display:block;font-size:.73rem;color:#7a6a9a;line-height:1.35;margin-top:1px}
+/* 切歌行：上一首 / 当前曲名 / 下一首 */
+.mtrack{display:flex;align-items:center;gap:8px}
+.mnav{
+  width:44px;height:44px;flex:0 0 auto;border-radius:12px;cursor:pointer;
+  font-family:inherit;font-size:1rem;line-height:1;
+  background:rgba(124,74,158,.10);border:1.5px solid rgba(124,74,158,.22);color:#5b3b8c;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .18s,transform .16s;
+}
+.mnav:hover{background:rgba(124,74,158,.18)}
+.mnav:active{transform:scale(.93)}
+.mname{
+  flex:1 1 auto;min-width:0;font-size:.78rem;font-weight:700;color:#6b5a8a;
+  text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
 /* 音量条 */
 .mvol{display:flex;align-items:center;gap:9px;padding-left:2px}
 .mvol input[type=range]{
@@ -548,6 +563,11 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
         <div class="ctxt"><span class="ctitle">背景音乐</span>
         <span class="chint" id="musicHint">播放中 · 点左边的按钮停止</span></div>
       </div>
+      <div class="mtrack">
+        <button class="mnav" id="musicPrev" type="button" aria-label="上一首">⏮</button>
+        <span class="mname" id="musicName">—</span>
+        <button class="mnav" id="musicNext" type="button" aria-label="下一首">⏭</button>
+      </div>
       <div class="mvol"><input type="range" id="musicVol" min="0" max="100" step="1" value="5" aria-label="音乐音量"><span class="vlab" id="volLab">5%</span></div>
     </div>
   </aside>
@@ -609,7 +629,7 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
       <p class="foot-hint">⚠️ 本文件和 <b>audio</b> 文件夹必须在同一目录，不要把网页单独拷走。<br>听力 / 句型 / 认读三种练习共用这一个 audio 文件夹（录音已去重）；消消乐不发音，不需要录音。背景音乐也放在里面。</p>
     </section>
   </main>
-  <audio id="bgm" loop preload="auto" src="audio/L!!!!ght.mp3"></audio>
+  <audio id="bgm" preload="auto"></audio>
 <template id="tpl-xxl"><!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -18171,6 +18191,8 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   var LS_TOOL = 'hub.lastTool';
   var LS_SOUND = 'hub.soundOff';
   var LS_MUSIC = 'hub.musicOff';
+  var LS_TRACK = 'hub.musicTrack';           // 记住放到第几首
+  var TRACKS = [{"name": "L!!!!ght", "src": "audio/bgm/L%21%21%21%21ght.mp3"}, {"name": "What Do You Mean", "src": "audio/bgm/What%20Do%20You%20Mean.mp3"}, {"name": "Ghost On The Radio", "src": "audio/bgm/Ghost%20On%20The%20Radio.mp3"}, {"name": "Rumors", "src": "audio/bgm/Rumors.mp3"}, {"name": "Paris", "src": "audio/bgm/Paris.mp3"}, {"name": "Yummy", "src": "audio/bgm/Yummy.mp3"}, {"name": "Breathe", "src": "audio/bgm/Breathe.mp3"}];                    // 构建时注入的播放列表
   var LS_VOL = 'hub.musicVol';
   var LS_GUIDE = 'hub.guideDone';             // 首次引导「走完」才置 1（中途关掉不算）
   var VOL_DEFAULT = 5;                        // 默认音量 5%（只影响没动过音量条的人）
@@ -18253,6 +18275,29 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   if (isNaN(vol)) vol = VOL_DEFAULT;
   vol = Math.max(0, Math.min(100, vol));
 
+  // ---- 播放列表 ----
+  var trackIdx = 0;
+  (function () {
+    var t = parseInt(lsGet(LS_TRACK, '0'), 10);
+    if (!isNaN(t) && t >= 0 && t < TRACKS.length) trackIdx = t;
+  })();
+  function paintTrack() {
+    var el = document.getElementById('musicName');
+    if (!el) return;
+    var t = TRACKS[trackIdx];
+    el.textContent = t ? (t.name + ' · ' + (trackIdx + 1) + '/' + TRACKS.length) : '—';
+    el.title = t ? t.name : '';
+  }
+  // 换歌只换源，不改变"开着还是关着" —— 开关由用户那个按钮说了算
+  function loadTrack(i, autoplay) {
+    if (!bgm || !TRACKS.length) return;
+    trackIdx = ((i % TRACKS.length) + TRACKS.length) % TRACKS.length;
+    bgm.src = TRACKS[trackIdx].src;
+    lsSet(LS_TRACK, String(trackIdx));
+    paintTrack();
+    if (autoplay) { var p = bgm.play(); if (p && p.catch) p.catch(function () {}); }
+  }
+
   function paintMusic() {
     if (!musicBtn) return;
     // 按**真实播放状态**画，不按那个偏好开关 —— 浏览器可能把自动播放拦下来，
@@ -18293,10 +18338,26 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     if (volLab) { volLab.textContent = vol + '%'; }
     bgm.addEventListener('play', paintMusic);
     bgm.addEventListener('pause', paintMusic);
-    bgm.addEventListener('ended', paintMusic);
+    // 一首放完自动接下一首；只有一首时就是循环它自己
+    bgm.addEventListener('ended', function () { loadTrack(trackIdx + 1, true); });
+    if (TRACKS.length) bgm.src = TRACKS[trackIdx].src;
+    paintTrack();
     paintMusic();
     startMusic();
   }
+  var prevBtn = document.getElementById('musicPrev');
+  var nextBtn = document.getElementById('musicNext');
+  function stepTrack(d) {
+    if (!TRACKS.length) return;
+    var wasPlaying = bgm && !bgm.paused;
+    loadTrack(trackIdx + d, false);
+    // 原本在放就接着放；原本停着就只换歌不吵人
+    if (wasPlaying) { var p = bgm.play(); if (p && p.catch) p.catch(function () {}); }
+    if (d > 0) tapSfx(); else backSfx();
+    paintMusic();
+  }
+  if (prevBtn) prevBtn.addEventListener('click', function () { stepTrack(-1); });
+  if (nextBtn) nextBtn.addEventListener('click', function () { stepTrack(1); });
   if (musicBtn) {
     musicBtn.addEventListener('click', function () {
       // 有声就停，没声就放 —— 跟用户看到的按钮状态一致
