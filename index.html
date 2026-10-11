@@ -329,6 +329,10 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
 @media (prefers-reduced-motion: reduce){
   .guide-mask.show,.guide-card,.guide-body.anim,.guide-callout{animation:none!important}
   .menu-fab.spot{animation:none!important;box-shadow:0 0 0 4px rgba(255,214,0,.85)}
+  /* 玻璃开关的渐变也一并去掉（系统要求减弱动效时，任何过渡都不该有） */
+  body,.card,.resume button,.foot-hint,.panel,.guide-card,.menu-fab,
+  body::before,body::after,
+  .card::before,.guide-card::before,.foot-hint::before{transition:none!important}
 }
 
 /* ============================================================
@@ -337,17 +341,68 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
    用两个只动 transform 的色斑给玻璃提供可折射的内容（走合成层，几乎免费）。
    弱设备上由 [data-perf="low"] 自动关掉（见下）。
    ============================================================ */
+/* ---- 开关玻璃时的渐变动效 ----
+   backdrop-filter 在 Chromium 里**能原生插值**（实测 26 个中间值：
+   blur(0px) → 11.67px → 23.33px → 28px），所以不用绕 @property。
+   ⚠️ 过渡必须声明在**基础规则**里：CSS 过渡取自新状态的计算值，
+   只写在 body.liquid 里的话，"关→开"有动画、"开→关"会瞬间切换。 */
+body{transition:background .45s cubic-bezier(.4,0,.2,1)}
+.card{
+  transition:transform .18s,
+             box-shadow .42s cubic-bezier(.4,0,.2,1),
+             border-color .42s cubic-bezier(.4,0,.2,1),
+             background .42s cubic-bezier(.4,0,.2,1),
+             backdrop-filter .42s cubic-bezier(.4,0,.2,1),
+             -webkit-backdrop-filter .42s cubic-bezier(.4,0,.2,1);
+}
+.resume button,.foot-hint,.guide-card{
+  transition:background .42s cubic-bezier(.4,0,.2,1),
+             border-color .42s cubic-bezier(.4,0,.2,1),
+             box-shadow .42s cubic-bezier(.4,0,.2,1),
+             backdrop-filter .42s cubic-bezier(.4,0,.2,1),
+             -webkit-backdrop-filter .42s cubic-bezier(.4,0,.2,1);
+}
+.panel{
+  transition:transform .34s cubic-bezier(.22,1,.36,1), visibility 0s linear .34s,
+             background .42s cubic-bezier(.4,0,.2,1),
+             border-color .42s cubic-bezier(.4,0,.2,1),
+             backdrop-filter .42s cubic-bezier(.4,0,.2,1),
+             -webkit-backdrop-filter .42s cubic-bezier(.4,0,.2,1);
+}
+.panel.on{
+  transition:transform .34s cubic-bezier(.22,1,.36,1), visibility 0s,
+             background .42s cubic-bezier(.4,0,.2,1),
+             border-color .42s cubic-bezier(.4,0,.2,1),
+             backdrop-filter .42s cubic-bezier(.4,0,.2,1),
+             -webkit-backdrop-filter .42s cubic-bezier(.4,0,.2,1);
+}
+.menu-fab{
+  transition:opacity .22s ease, transform .22s cubic-bezier(.34,1.56,.64,1),
+             box-shadow .22s, border-color .42s cubic-bezier(.4,0,.2,1),
+             background .42s cubic-bezier(.4,0,.2,1),
+             backdrop-filter .42s cubic-bezier(.4,0,.2,1),
+             -webkit-backdrop-filter .42s cubic-bezier(.4,0,.2,1);
+}
+
 body.liquid{background:linear-gradient(158deg,#dfe8ff 0%,#f3e8ff 44%,#e2f1ff 100%)}
+/* 色斑：常驻但不可见，靠 opacity 淡入淡出（visibility 保证关着时完全不光栅化） */
+body::before,
+body::after{
+  content:'';position:fixed;z-index:0;pointer-events:none;border-radius:50%;
+  filter:blur(42px);will-change:transform;
+  opacity:0;visibility:hidden;
+  transition:opacity .5s cubic-bezier(.4,0,.2,1), visibility 0s linear .5s;
+}
 body.liquid::before,
 body.liquid::after{
-  content:'';position:fixed;z-index:0;pointer-events:none;border-radius:50%;
-  filter:blur(42px);opacity:.72;will-change:transform;
+  opacity:.72;visibility:visible;
+  transition:opacity .5s cubic-bezier(.4,0,.2,1), visibility 0s;
 }
-body.liquid::before{
+body::before{
   width:52vmax;height:52vmax;left:-15vmax;top:-17vmax;
   background:radial-gradient(circle at 42% 42%,rgba(138,118,255,.62),rgba(138,118,255,0) 68%);
 }
-body.liquid::after{
+body::after{
   width:46vmax;height:46vmax;right:-13vmax;bottom:-15vmax;
   background:radial-gradient(circle at 58% 58%,rgba(86,198,255,.55),rgba(86,198,255,0) 68%);
 }
@@ -356,6 +411,21 @@ body.liquid::after{
   body.liquid::after{animation:blobB 26s ease-in-out infinite alternate}
   @keyframes blobA{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(9vmax,7vmax,0) scale(1.14)}}
   @keyframes blobB{from{transform:translate3d(0,0,0) scale(1.08)}to{transform:translate3d(-8vmax,-6vmax,0) scale(1)}}
+}
+/* 过渡期间临时挂上的"零值滤镜"。
+   为什么需要它：Chromium **不能在 `none` 和 `blur()` 之间插值**（实测开的那一下
+   是从 none 直接跳到 blur(24px)），而 blur(0px) 与 none 视觉上完全一样 ——
+   所以先把零值挂上、下一帧再切真值，就有了平滑的起点。
+   稳态关闭时仍然是 none，不用为没开的用户付那份模糊开销。
+   ⚠️ 这条必须写在下面 body.liquid 的规则**之前**：两者特异性相同，
+      同时存在时靠源码顺序决定，过渡中要让 .liquid 的真值胜出。 */
+body.lg-anim .card,
+body.lg-anim .resume button,
+body.lg-anim .foot-hint,
+body.lg-anim .panel,
+body.lg-anim .guide-card{
+  backdrop-filter:blur(0px) saturate(1) brightness(1);
+  -webkit-backdrop-filter:blur(0px) saturate(1) brightness(1);
 }
 /* 玻璃面：卡片 / 目录提示 / 抽屉 / 引导卡 */
 body.liquid .card,
@@ -371,17 +441,20 @@ body.liquid .guide-card{
   backdrop-filter:blur(28px) saturate(1.9) brightness(1.06);
   -webkit-backdrop-filter:blur(28px) saturate(1.9) brightness(1.06);
 }
-/* 镜面高光（iOS 液态玻璃那道光边）—— 必须绝对定位，否则在 flex 卡片里会变成流内元素 */
-body.liquid .card,
-body.liquid .guide-card,
-body.liquid .foot-hint{position:relative}
-body.liquid .card::before,
-body.liquid .guide-card::before,
-body.liquid .foot-hint::before{
+/* 镜面高光（iOS 液态玻璃那道光边）：常驻但透明，靠 opacity 淡入淡出。
+   必须绝对定位，否则在 flex 卡片里会变成流内元素。 */
+.card,.guide-card,.foot-hint{position:relative}
+.card::before,
+.guide-card::before,
+.foot-hint::before{
   content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   background:linear-gradient(133deg,rgba(255,255,255,.88) 0%,rgba(255,255,255,.14) 27%,rgba(255,255,255,0) 56%);
-  mix-blend-mode:screen;
+  mix-blend-mode:screen;opacity:0;
+  transition:opacity .45s cubic-bezier(.4,0,.2,1);
 }
+body.liquid .card::before,
+body.liquid .guide-card::before,
+body.liquid .foot-hint::before{opacity:1}
 body.liquid .card:hover{
   border-color:rgba(255,255,255,.92);
   box-shadow:0 26px 56px rgba(52,34,96,.22),
@@ -397,21 +470,32 @@ body.liquid .menu-fab{
 }
 
 /* ============================================================
-   低画质档：设备不行就别硬撑
-   模糊、装饰性动画全部退场；但**保留视图切换的淡入淡出**
-   （那只是一个元素的 opacity，很便宜，去掉反而生硬）
+   轻量玻璃：用户主动开了玻璃、但设备吃力时用它
+   —— 降的是效果成本，**不是替他关掉**（自动关掉同样是越权）
    ============================================================ */
-body[data-perf="low"] .card,
-body[data-perf="low"] .resume button,
-body[data-perf="low"] .foot-hint,
-body[data-perf="low"] .panel,
-body[data-perf="low"] .guide-card,
-body[data-perf="low"] .menu-fab{
-  backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
+body.liquid.lite .card,
+body.liquid.lite .resume button,
+body.liquid.lite .foot-hint,
+body.liquid.lite .panel,
+body.liquid.lite .guide-card{
+  backdrop-filter:blur(11px) saturate(1.35);
+  -webkit-backdrop-filter:blur(11px) saturate(1.35);
 }
-body[data-perf="low"]::before,
-body[data-perf="low"]::after{display:none!important}
+/* 轻量档也走淡出（用 opacity 而不是 display:none，否则这一档切换会"啪"地跳） */
+body.liquid.lite::before,
+body.liquid.lite::after{opacity:0}
+body.liquid.lite .card::before,
+body.liquid.lite .guide-card::before,
+body.liquid.lite .foot-hint::before{opacity:0}
+body.liquid.lite .menu-fab{
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+
+/* ============================================================
+   低画质档：动的只是**装饰性动画**（模糊由 .lite 那一档管）
+   视图切换的淡入淡出保留 —— 只是一个元素的 opacity，去掉反而生硬
+   ============================================================ */
 body[data-perf="low"] .menu-fab,
 body[data-perf="low"] .menu-fab.spot,
 body[data-perf="low"] .panel.on .anim-in,
@@ -2094,6 +2178,7 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
                 <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
                 <button class="glass-toggle" id="glassToggle" title="高级渲染">✨</button>
                 <button class="btn btn-info" id="scoreInfoBtn" style="padding:2px 12px;font-size:12px;">📊</button>
+<button class="btn btn-info" id="tutorialBtn" title="玩法教学" style="padding:2px 12px;font-size:12px;">❓</button>
             </div>
             <div class="header-right">
                 <div class="score-area" id="scoreArea">
@@ -2827,6 +2912,37 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
 
         function getAllUnits(grade) { const g = WORD_BANK[grade]; if (!g) return []; return Object.keys(g); }
 
+        // ===== 多单元 =====
+        // selectedUnits 是"这一轮玩哪几个单元"的唯一真相（空数组=跟着 unitSelect 走）。
+        // 下面两个函数对外只暴露 getSelectedWords()，把"一个单元"和"多个单元"抹平成同一件事。
+        let selectedUnits = [];
+        function currentUnits() {
+            const g = gradeSelect.value;
+            const all = getAllUnits(g);
+            const picked = selectedUnits.filter(u => all.indexOf(u) >= 0);
+            if (picked.length) return picked;
+            return unitSelect.value ? [unitSelect.value] : (all.length ? [all[0]] : []);
+        }
+        function getSelectedWords(grade) {
+            const out = [], seen = new Set();
+            currentUnits().forEach(u => {
+                (getWordsForUnit(grade, u) || []).forEach(w => {
+                    if (!seen.has(w.en)) { seen.add(w.en); out.push(w); }   // 跨单元重复的词只留一次
+                });
+            });
+            return out.length ? out : getWordsForUnit(grade, unitSelect.value);
+        }
+        // 给二级卡片选择器用
+        window.__xxlSetUnits = function (grade, units) {
+            const list = getAllUnits(grade);
+            const want = (units || []).filter(u => list.indexOf(u) >= 0);
+            gradeSelect.value = grade;
+            unitSelect.innerHTML = list.map(u => `<option value="${u}">${u}</option>`).join('');
+            unitSelect.value = want[0] || list[0] || '';
+            selectedUnits = want;
+            onUnitChange();
+        };
+
         function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
         // ================================================================
@@ -2884,7 +3000,7 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
         function renderWordPanel() {
             const grade = gradeSelect.value,
                 unit = unitSelect.value;
-            const words = getWordsForUnit(grade, unit);
+            const words = getSelectedWords(grade);
             app.availableWords = words.slice();
             const availableEn = new Set(words.map(w => w.en));
             app.selectedWords = app.selectedWords.filter(w => availableEn.has(w.en));
@@ -2932,7 +3048,7 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
         function onUnitChange() {
             const grade = gradeSelect.value,
                 unit = unitSelect.value;
-            const words = getWordsForUnit(grade, unit);
+            const words = getSelectedWords(grade);
             app.selectedWords = words.slice();
             app.currentGrade = grade;
             app.currentUnit = unit;
@@ -3772,6 +3888,17 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
 .pk-chip:hover{background:rgba(124,74,158,.18)}
 .pk-chip:active{transform:scale(.97)}
 .pk-chip.on{background:linear-gradient(135deg,#7c4a9e,#a06bc8);border-color:transparent;color:#fff}
+/* 多选层的工具栏 + "至少选一个"提示 */
+.pk-tools{display:flex;gap:8px;margin-bottom:9px}
+.pk-mini{
+  min-height:36px;padding:0 13px;border-radius:30px;cursor:pointer;font-family:inherit;
+  font-size:.78rem;font-weight:700;background:rgba(124,74,158,.09);
+  border:1.5px solid rgba(124,74,158,.22);color:#5b3b8c;
+}
+.pk-mini:hover{filter:brightness(1.06)}
+.pk-warn{font-size:.78rem;font-weight:700;color:#c0392b;margin-top:8px}
+.pk-mask.dark .pk-warn{color:#ff9f93}
+.pk-act .pk-ok[disabled]{opacity:.42;cursor:not-allowed}
 .pk-act{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
 .pk-act button{
   min-height:46px;padding:0 22px;border-radius:40px;cursor:pointer;font-family:inherit;
@@ -3797,12 +3924,14 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
 .pk-mask.dark .pk-chip{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14)}
 .pk-mask.dark .pk-chip:hover{background:rgba(255,255,255,.16)}
 .pk-mask.dark .pk-act button{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16)}
+.pk-mask.dark .pk-mini{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18);color:#d8ccec}
+.pk-mini{background:rgba(124,74,158,.09);border-color:rgba(124,74,158,.22);color:#5b3b8c}
 
 </style>
 <script>
 /* ====== 单元选择：二级卡片（自动注入）====== */
 (function () {
-  var LVS = [{"sel": "gradeSelect", "sec": "册别", "src": "select"}, {"sel": "unitSelect", "sec": "单元", "src": "data"}];
+  var LVS = [{"sel": "gradeSelect", "sec": "册别", "src": "select"}, {"sel": "unitSelect", "sec": "单元", "src": "data", "multi": true}];
   var ROW = '.settings-group';
   var LABEL = '选择单元';
 
@@ -3811,6 +3940,12 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
       if (typeof WORD_BANK === 'undefined' || !WORD_BANK[v.gradeSelect]) return [];
       return Object.keys(WORD_BANK[v.gradeSelect]).map(function (u) { return { v: u, t: u }; });
     }
+    function multiGet() { return (typeof selectedUnits !== 'undefined' && selectedUnits) ? selectedUnits.slice() : []; }
+    function multiSet(g, units) { if (window.__xxlSetUnits) window.__xxlSetUnits(g, units); }
+
+  // 哪一层是多选（没有就是 -1）
+  var MULTI_IDX = -1;
+  for (var _mi = 0; _mi < LVS.length; _mi++) { if (LVS[_mi].multi) { MULTI_IDX = _mi; break; } }
 
   function boot() {
     var els = [], rows = [];
@@ -3825,7 +3960,18 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
 
     // ---- 状态 ----
     var pick = {};
-    function snapshot() { for (var i = 0; i < LVS.length; i++) pick[LVS[i].sel] = els[i].value; }
+    function snapshot() {
+      for (var i = 0; i < LVS.length; i++) {
+        var L = LVS[i];
+        if (L.multi) {
+          var cur = (typeof multiGet === 'function') ? (multiGet() || []) : [];
+          if (!cur.length && els[i].value) cur = [els[i].value];
+          pick[L.sel] = cur.slice();
+        } else {
+          pick[L.sel] = els[i].value;
+        }
+      }
+    }
 
     // ---- 取某一层的可选项 ----
     function optionsOf(i) {
@@ -3839,12 +3985,22 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
     }
 
     // ---- 按钮上的当前选择 ----
-    function curLabel() {
+    // live=true 表示读工具的真实状态，而不是卡片里的临时选择
+    function curLabel(live) {
       var parts = [];
       for (var i = 0; i < LVS.length; i++) {
-        var L = LVS[i], opts = optionsOf(i), hit = null;
-        for (var j = 0; j < opts.length; j++) if (opts[j].v === els[i].value) { hit = opts[j]; break; }
-        parts.push(hit ? hit.t : els[i].value);
+        var L = LVS[i];
+        if (L.multi) {
+          var arr = live ? ((typeof multiGet === 'function') ? (multiGet() || []) : [])
+                         : (pick[L.sel] || []);
+          if (!arr.length && els[i].value) arr = [els[i].value];   // 工具里还没记就按它当前值兜一个
+          parts.push(arr.length ? arr.map(function (v) { return String(v).toUpperCase(); }).join('、') : '未选');
+          continue;
+        }
+        var val = live ? els[i].value : pick[L.sel];
+        var opts = optionsOf(i), hit = null;
+        for (var j = 0; j < opts.length; j++) if (opts[j].v === val) { hit = opts[j]; break; }
+        parts.push(hit ? hit.t : val);
       }
       return parts.join(' · ');
     }
@@ -3898,11 +4054,26 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
           var L = LVS[idx];
           var sec = document.createElement('div');
           sec.className = 'pk-sec';
-          sec.textContent = L.sec;
+          sec.textContent = L.sec + (L.multi ? '（' + '可多选' + '）' : '');
           body.appendChild(sec);
+          var opts = optionsOf(idx);
+          var isMulti = !!L.multi;
+          if (isMulti && opts.length) {
+            var tools = document.createElement('div');
+            tools.className = 'pk-tools';
+            var btnAll = document.createElement('button');
+            btnAll.type = 'button'; btnAll.className = 'pk-mini'; btnAll.textContent = '本册全选';
+            btnAll.addEventListener('click', function () {
+              pick[L.sel] = opts.map(function (o) { return o.v; }); draw();
+            });
+            var btnNone = document.createElement('button');
+            btnNone.type = 'button'; btnNone.className = 'pk-mini'; btnNone.textContent = '清空';
+            btnNone.addEventListener('click', function () { pick[L.sel] = []; draw(); });
+            tools.appendChild(btnAll); tools.appendChild(btnNone);
+            body.appendChild(tools);
+          }
           var box = document.createElement('div');
           box.className = 'pk-chips';
-          var opts = optionsOf(idx);
           if (!opts.length) {
             var em = document.createElement('div');
             em.className = 'pk-sub';
@@ -3910,15 +4081,43 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
             box.appendChild(em);
           }
           opts.forEach(function (o) {
-            box.appendChild(chip(o.t, o.v === pick[L.sel], function () {
-              pick[L.sel] = o.v;
-              for (var k = idx + 1; k < LVS.length; k++) pick[LVS[k].sel] = null;   // 换上层就清下层
+            var on = isMulti ? (pick[L.sel] || []).indexOf(o.v) >= 0 : pick[L.sel] === o.v;
+            box.appendChild(chip(o.t, on, function () {
+              if (isMulti) {
+                var arr = (pick[L.sel] || []).slice();
+                var k0 = arr.indexOf(o.v);
+                if (k0 >= 0) arr.splice(k0, 1); else arr.push(o.v);
+                pick[L.sel] = arr;
+              } else {
+                pick[L.sel] = o.v;
+                for (var k = idx + 1; k < LVS.length; k++) {
+                  var Lk = LVS[k];
+                  if (Lk.multi) {                        // 换了册就给个合理默认：新册的第一个单元
+                    var ok2 = optionsOf(k);
+                    pick[Lk.sel] = ok2.length ? [ok2[0].v] : [];
+                  } else {
+                    pick[Lk.sel] = null;
+                  }
+                }
+              }
               draw();
             }));
           });
           body.appendChild(box);
+          if (isMulti && !(pick[L.sel] || []).length) {
+            var w = document.createElement('div');
+            w.className = 'pk-warn';
+            w.textContent = '至少选一个单元';
+            body.appendChild(w);
+          }
         })(i);
       }
+      // 多选层一个都没选 → 不让确定
+      var ok = mask.querySelector('#pkOk');
+      var bad = MULTI_IDX >= 0 && !(pick[LVS[MULTI_IDX].sel] || []).length;
+      ok.disabled = bad;
+      ok.style.opacity = bad ? '.45' : '';
+      ok.style.cursor = bad ? 'not-allowed' : '';
     }
     function onKey(e) { if (e.key === 'Escape') close(); }
     function open() {
@@ -3938,7 +4137,13 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
       }, 160);
     }
     function apply() {
-      // 按层级顺序赋值 + 派发 change：工具自己的更新与存档逻辑原封不动跑一遍
+      // 多选：交给工具自己的钩子（只有它知道怎么把"多个单元"写回内部状态）
+      if (MULTI_IDX >= 0 && typeof multiSet === 'function') {
+        var g = pick[LVS[0].sel];
+        var us = pick[LVS[MULTI_IDX].sel] || [];
+        if (g != null && us.length) { multiSet(g, us); syncLabel(); close(); return; }
+      }
+      // 单选：按层级顺序赋值 + 派发 change：工具自己的更新与存档逻辑原封不动跑一遍
       for (var i = 0; i < LVS.length; i++) {
         var L = LVS[i];
         if (pick[L.sel] == null) continue;
@@ -3950,8 +4155,8 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
       close();
     }
     function syncLabel() {
-      var t = curLabel();
-      lab.textContent = LVS.length > 1 ? t : t;
+      var t = curLabel(true);
+      lab.textContent = t;
       btn.title = LABEL + '：' + t;
     }
 
@@ -3990,6 +4195,136 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
 })();
 
 </script>
+<style>
+/* ===== 玩法教学 ===== */
+.tut-body{
+  background: var(--panel-bg); border: 1px solid var(--container-border);
+  border-radius: 16px; padding: 16px 18px; margin: 12px 0;
+  min-height: 168px; text-align: left; line-height: 1.85;
+  font-size: 15px; font-weight: 600; transition: all 0.3s;
+}
+.glass-mode .tut-body{ background: var(--glass-panel-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.tut-ico{ font-size: 34px; line-height: 1; margin-bottom: 8px; }
+.tut-h{ font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+.tut-p{ opacity: 0.86; }
+.tut-p b{ color: #8b5fc0; }
+[data-theme="dark"] .tut-p b{ color: #c9a6ff; }
+.tut-step{ font-size: 12px; font-weight: 800; opacity: 0.5; letter-spacing: 0.4px; margin-bottom: 8px; }
+.tut-nav{ display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.tut-dots{ display: flex; gap: 6px; flex: 1 1 auto; align-items: center; }
+.tut-dots i{
+  width: 8px; height: 8px; border-radius: 50%; background: rgba(124, 74, 158, 0.22);
+  transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tut-dots i.on{ width: 22px; border-radius: 5px; background: linear-gradient(135deg, #7c4a9e, #a06bc8); }
+.tut-btn{
+  min-height: 44px; padding: 0 20px; border-radius: 40px; cursor: pointer; font-family: inherit;
+  font-size: 14px; font-weight: 800; color: var(--text-primary);
+  background: rgba(124, 74, 158, 0.10); border: 1.5px solid rgba(124, 74, 158, 0.24);
+  transition: all 0.18s;
+}
+.tut-btn:hover{ background: rgba(124, 74, 158, 0.18); }
+.tut-btn:disabled{ opacity: 0.35; cursor: not-allowed; }
+.tut-btn.primary{ background: linear-gradient(135deg, #7c4a9e, #a06bc8); border-color: transparent; color: #fff; }
+@media (max-width: 640px){
+  .tut-body{ font-size: 13px; padding: 12px 14px; min-height: 150px; }
+  .tut-btn{ padding: 0 15px; font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .tut-dots i{ transition: none; }
+}
+</style>
+
+<!-- ============================================================
+     玩法教学（❓ 按钮 / 首次自动弹一次）
+     ============================================================ -->
+<div class="modal-overlay" id="tutorialModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tutH">
+        <h2>🎓 玩法教学</h2>
+        <div class="tut-body">
+            <div class="tut-step" id="tutStepNo">第 1 步 / 共 7 步</div>
+            <div class="tut-ico" id="tutIco">✏️</div>
+            <div class="tut-h" id="tutH">选词</div>
+            <div class="tut-p" id="tutP"></div>
+        </div>
+        <div class="tut-nav">
+            <div class="tut-dots" id="tutDots"></div>
+            <button class="tut-btn" id="tutPrev">上一步</button>
+            <button class="tut-btn primary" id="tutNext">下一步 →</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var KEY = 'xxl.tutorialShown';
+    var STEPS = [
+        { ico: '✏️', h: '第一步：选词', p: '点「✏️ 选词」挑这一轮要练的单词。可以只挑一个单元，也可以<b>同时勾好几个单元</b>——卡片里有「本册全选」一键全勾。至少选 5 个词。' },
+        { ico: '🚀', h: '第二步：开始发牌', p: '点「🚀 开始」，英文卡和中文卡会<b>随机散布</b>在棋盘上。' },
+        { ico: '👉', h: '第三步：点两张配成一对', p: '先点一张英文卡（它会亮起来），再点它对应的中文卡。配上了就一起消失并加分；配错了扣 3 分。' },
+        { ico: '⏱️', h: '第四步：每对都倒计时', p: '每配一对有几秒钟（默认 10 秒，可在设置栏改）。时间到还没配上就扣 2 分，然后重新计时。' },
+        { ico: '⭐', h: '第五步：得分怎么算', p: '满分 100：正确率占 70 分，配得越快速度奖励越高（每对最多 +3），失误每次 −3、超时每次 −2。想看细则点「📊」。' },
+        { ico: '🔁', h: '第六步：词多会自动分轮', p: '一屏放不下时不会硬塞，而是<b>分成几轮</b>：这一轮消完自动接下一轮，正确率按选中的<b>全部词</b>算。' },
+        { ico: '📐', h: '第七步：布局与分栏', p: '窄屏上卡片放不下时会自动改成<b>规整网格</b>，不会互相盖住；「📐 分栏」能把中文和英文左右分开——屏幕太窄时这个按钮会自动禁用。' }
+    ];
+    var idx = 0;
+    var modal = document.getElementById('tutorialModal');
+    if (!modal) return;
+    var body = modal.querySelector('.tut-body');
+    var elIco = document.getElementById('tutIco');
+    var elH = document.getElementById('tutH');
+    var elP = document.getElementById('tutP');
+    var elNo = document.getElementById('tutStepNo');
+    var dots = document.getElementById('tutDots');
+    var prev = document.getElementById('tutPrev');
+    var next = document.getElementById('tutNext');
+
+    function draw() {
+        var s = STEPS[idx];
+        elIco.textContent = s.ico;
+        elH.textContent = s.h;
+        elP.innerHTML = s.p;
+        elNo.textContent = '第 ' + (idx + 1) + ' 步 / 共 ' + STEPS.length + ' 步';
+        dots.innerHTML = '';
+        STEPS.forEach(function (_, i) {
+            var d = document.createElement('i');
+            if (i <= idx) d.className = 'on';
+            dots.appendChild(d);
+        });
+        prev.disabled = (idx === 0);
+        next.textContent = (idx === STEPS.length - 1) ? '开始玩 🚀' : '下一步 →';
+    }
+    function open() {
+        idx = 0;
+        draw();
+        modal.classList.add('open');
+        try { localStorage.setItem(KEY, '1'); } catch (e) {}
+    }
+    function close() { modal.classList.remove('open'); }
+    next.addEventListener('click', function () {
+        if (idx < STEPS.length - 1) { idx++; draw(); return; }
+        close();
+    });
+    prev.addEventListener('click', function () { if (idx > 0) { idx--; draw(); } });
+    modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('open')) close();
+        if (modal.classList.contains('open')) {
+            if (e.key === 'ArrowRight') next.click();
+            if (e.key === 'ArrowLeft') prev.click();
+        }
+    });
+
+    var btn = document.getElementById('tutorialBtn');
+    if (btn) btn.addEventListener('click', open);
+
+    // 首次打开自动弹一次（看完就记下，之后只从 ❓ 进）
+    var seen = '0';
+    try { seen = localStorage.getItem(KEY) || '0'; } catch (e) {}
+    if (seen !== '1') setTimeout(open, 700);
+})();
+</script>
+
 </body>
 </html></template>
 <template id="tpl-pattern"><!DOCTYPE html>
@@ -16098,6 +16433,17 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
 .pk-chip:hover{background:rgba(124,74,158,.18)}
 .pk-chip:active{transform:scale(.97)}
 .pk-chip.on{background:linear-gradient(135deg,#7c4a9e,#a06bc8);border-color:transparent;color:#fff}
+/* 多选层的工具栏 + "至少选一个"提示 */
+.pk-tools{display:flex;gap:8px;margin-bottom:9px}
+.pk-mini{
+  min-height:36px;padding:0 13px;border-radius:30px;cursor:pointer;font-family:inherit;
+  font-size:.78rem;font-weight:700;background:rgba(124,74,158,.09);
+  border:1.5px solid rgba(124,74,158,.22);color:#5b3b8c;
+}
+.pk-mini:hover{filter:brightness(1.06)}
+.pk-warn{font-size:.78rem;font-weight:700;color:#c0392b;margin-top:8px}
+.pk-mask.dark .pk-warn{color:#ff9f93}
+.pk-act .pk-ok[disabled]{opacity:.42;cursor:not-allowed}
 .pk-act{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
 .pk-act button{
   min-height:46px;padding:0 22px;border-radius:40px;cursor:pointer;font-family:inherit;
@@ -16140,6 +16486,10 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
       return Object.keys(b).map(function (u) { return { v: u, t: u }; });
     }
 
+  // 哪一层是多选（没有就是 -1）
+  var MULTI_IDX = -1;
+  for (var _mi = 0; _mi < LVS.length; _mi++) { if (LVS[_mi].multi) { MULTI_IDX = _mi; break; } }
+
   function boot() {
     var els = [], rows = [];
     for (var i = 0; i < LVS.length; i++) {
@@ -16153,7 +16503,18 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
 
     // ---- 状态 ----
     var pick = {};
-    function snapshot() { for (var i = 0; i < LVS.length; i++) pick[LVS[i].sel] = els[i].value; }
+    function snapshot() {
+      for (var i = 0; i < LVS.length; i++) {
+        var L = LVS[i];
+        if (L.multi) {
+          var cur = (typeof multiGet === 'function') ? (multiGet() || []) : [];
+          if (!cur.length && els[i].value) cur = [els[i].value];
+          pick[L.sel] = cur.slice();
+        } else {
+          pick[L.sel] = els[i].value;
+        }
+      }
+    }
 
     // ---- 取某一层的可选项 ----
     function optionsOf(i) {
@@ -16167,12 +16528,22 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     }
 
     // ---- 按钮上的当前选择 ----
-    function curLabel() {
+    // live=true 表示读工具的真实状态，而不是卡片里的临时选择
+    function curLabel(live) {
       var parts = [];
       for (var i = 0; i < LVS.length; i++) {
-        var L = LVS[i], opts = optionsOf(i), hit = null;
-        for (var j = 0; j < opts.length; j++) if (opts[j].v === els[i].value) { hit = opts[j]; break; }
-        parts.push(hit ? hit.t : els[i].value);
+        var L = LVS[i];
+        if (L.multi) {
+          var arr = live ? ((typeof multiGet === 'function') ? (multiGet() || []) : [])
+                         : (pick[L.sel] || []);
+          if (!arr.length && els[i].value) arr = [els[i].value];   // 工具里还没记就按它当前值兜一个
+          parts.push(arr.length ? arr.map(function (v) { return String(v).toUpperCase(); }).join('、') : '未选');
+          continue;
+        }
+        var val = live ? els[i].value : pick[L.sel];
+        var opts = optionsOf(i), hit = null;
+        for (var j = 0; j < opts.length; j++) if (opts[j].v === val) { hit = opts[j]; break; }
+        parts.push(hit ? hit.t : val);
       }
       return parts.join(' · ');
     }
@@ -16226,11 +16597,26 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
           var L = LVS[idx];
           var sec = document.createElement('div');
           sec.className = 'pk-sec';
-          sec.textContent = L.sec;
+          sec.textContent = L.sec + (L.multi ? '（' + '可多选' + '）' : '');
           body.appendChild(sec);
+          var opts = optionsOf(idx);
+          var isMulti = !!L.multi;
+          if (isMulti && opts.length) {
+            var tools = document.createElement('div');
+            tools.className = 'pk-tools';
+            var btnAll = document.createElement('button');
+            btnAll.type = 'button'; btnAll.className = 'pk-mini'; btnAll.textContent = '本册全选';
+            btnAll.addEventListener('click', function () {
+              pick[L.sel] = opts.map(function (o) { return o.v; }); draw();
+            });
+            var btnNone = document.createElement('button');
+            btnNone.type = 'button'; btnNone.className = 'pk-mini'; btnNone.textContent = '清空';
+            btnNone.addEventListener('click', function () { pick[L.sel] = []; draw(); });
+            tools.appendChild(btnAll); tools.appendChild(btnNone);
+            body.appendChild(tools);
+          }
           var box = document.createElement('div');
           box.className = 'pk-chips';
-          var opts = optionsOf(idx);
           if (!opts.length) {
             var em = document.createElement('div');
             em.className = 'pk-sub';
@@ -16238,15 +16624,43 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
             box.appendChild(em);
           }
           opts.forEach(function (o) {
-            box.appendChild(chip(o.t, o.v === pick[L.sel], function () {
-              pick[L.sel] = o.v;
-              for (var k = idx + 1; k < LVS.length; k++) pick[LVS[k].sel] = null;   // 换上层就清下层
+            var on = isMulti ? (pick[L.sel] || []).indexOf(o.v) >= 0 : pick[L.sel] === o.v;
+            box.appendChild(chip(o.t, on, function () {
+              if (isMulti) {
+                var arr = (pick[L.sel] || []).slice();
+                var k0 = arr.indexOf(o.v);
+                if (k0 >= 0) arr.splice(k0, 1); else arr.push(o.v);
+                pick[L.sel] = arr;
+              } else {
+                pick[L.sel] = o.v;
+                for (var k = idx + 1; k < LVS.length; k++) {
+                  var Lk = LVS[k];
+                  if (Lk.multi) {                        // 换了册就给个合理默认：新册的第一个单元
+                    var ok2 = optionsOf(k);
+                    pick[Lk.sel] = ok2.length ? [ok2[0].v] : [];
+                  } else {
+                    pick[Lk.sel] = null;
+                  }
+                }
+              }
               draw();
             }));
           });
           body.appendChild(box);
+          if (isMulti && !(pick[L.sel] || []).length) {
+            var w = document.createElement('div');
+            w.className = 'pk-warn';
+            w.textContent = '至少选一个单元';
+            body.appendChild(w);
+          }
         })(i);
       }
+      // 多选层一个都没选 → 不让确定
+      var ok = mask.querySelector('#pkOk');
+      var bad = MULTI_IDX >= 0 && !(pick[LVS[MULTI_IDX].sel] || []).length;
+      ok.disabled = bad;
+      ok.style.opacity = bad ? '.45' : '';
+      ok.style.cursor = bad ? 'not-allowed' : '';
     }
     function onKey(e) { if (e.key === 'Escape') close(); }
     function open() {
@@ -16266,7 +16680,13 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
       }, 160);
     }
     function apply() {
-      // 按层级顺序赋值 + 派发 change：工具自己的更新与存档逻辑原封不动跑一遍
+      // 多选：交给工具自己的钩子（只有它知道怎么把"多个单元"写回内部状态）
+      if (MULTI_IDX >= 0 && typeof multiSet === 'function') {
+        var g = pick[LVS[0].sel];
+        var us = pick[LVS[MULTI_IDX].sel] || [];
+        if (g != null && us.length) { multiSet(g, us); syncLabel(); close(); return; }
+      }
+      // 单选：按层级顺序赋值 + 派发 change：工具自己的更新与存档逻辑原封不动跑一遍
       for (var i = 0; i < LVS.length; i++) {
         var L = LVS[i];
         if (pick[L.sel] == null) continue;
@@ -16278,8 +16698,8 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
       close();
     }
     function syncLabel() {
-      var t = curLabel();
-      lab.textContent = LVS.length > 1 ? t : t;
+      var t = curLabel(true);
+      lab.textContent = t;
       btn.title = LABEL + '：' + t;
     }
 
@@ -17939,19 +18359,37 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   var mem = navigator.deviceMemory || 0;
   var weakHints = (cores > 0 && cores <= 4) || (mem > 0 && mem <= 4) || reducedMotion;
 
-  var liquidOn = lsGet(LS_LIQUID, '1') !== '0';        // 默认开：这是用户要的新皮肤
+  // 默认**关**：液态玻璃是可选的皮肤，任何情况下都不自动打开
+  var liquidOn = lsGet(LS_LIQUID, '0') === '1';
   var verdict = lsGet(LS_PERF, '');
-  // 没测过就先按"低档"渲染（纯色最省），等空闲了做一次 A/B 实测再决定是否升级
-  var perfTier = weakHints ? 'low' : (verdict === 'high' ? 'high' : 'low');
-  var needAB = !weakHints && verdict === '';
+  // 默认 high：只有"设备线索弱"或"实测结论是吃力"才降。
+  // ⚠️ 别把"还没测过"当成 low —— 玻璃默认关、A/B 根本不跑，
+  //    那样会让好机器也永久失去抽屉错峰/引导入场这些动画。
+  var perfTier = weakHints ? 'low' : (verdict === 'low' ? 'low' : 'high');
 
   var liquidBtn = document.getElementById('liquidBtn');
   var liquidHint = document.getElementById('liquidHint');
 
+  var lgTimer = null;
   function paintLiquid() {
-    var on = liquidOn && perfTier !== 'low';
-    document.body.classList.toggle('liquid', on);
+    var on = liquidOn;                       // 开着与否只由用户决定，别人不许替他改
+    var lite = on && perfTier === 'low';     // 设备吃力 → 退化成轻量玻璃，而不是关掉
+    var wasOn = document.body.classList.contains('liquid');
+    var apply = function () {
+      document.body.classList.toggle('liquid', on);
+      document.body.classList.toggle('lite', lite);
+    };
     document.body.dataset.perf = perfTier;
+    if (REDUCED || on === wasOn) {
+      document.body.classList.remove('lg-anim');
+      apply();
+    } else {
+      // 先挂零值滤镜（与 none 视觉等效），下一帧再切真值 —— 两个方向才都能平滑
+      document.body.classList.add('lg-anim');
+      requestAnimationFrame(function () { requestAnimationFrame(apply); });
+      if (lgTimer) clearTimeout(lgTimer);
+      lgTimer = setTimeout(function () { document.body.classList.remove('lg-anim'); }, 560);
+    }
     if (liquidBtn) {
       liquidBtn.classList.toggle('off', !on);
       liquidBtn.querySelector('.cico').textContent = on ? '💧' : '🚫';
@@ -17981,13 +18419,12 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
      比相对值就稳了 —— 快机器上两边都是 16.6ms，怎么都不会误判。
      只在"这台设备还没测过"时跑一次，结论存 hub.perf，之后直接沿用。 */
   function abTest() {
-    if (!needAB || document.visibilityState !== 'visible' || frame) return;
-    if (!liquidOn) { lsSet(LS_PERF, 'high'); needAB = false; return; }   // 用户自己关了玻璃，不用测
+    if (!liquidOn || weakHints || document.visibilityState !== 'visible' || frame) return;
+    if (lsGet(LS_PERF, '') !== '') return;        // 这台设备已经有结论了，不重复测
     sampleFrames(700, function (off) {
       document.body.classList.add('liquid');
       requestAnimationFrame(function () { requestAnimationFrame(function () {
         sampleFrames(700, function (on) {
-          needAB = false;
           var bad = on.med > Math.max(20, off.med * 1.35);
           perfTier = bad ? 'low' : 'high';
           lsSet(LS_PERF, perfTier);
@@ -17996,23 +18433,24 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
       }); });
     });
   }
-  function scheduleAB() { setTimeout(abTest, 900); }
+  function maybeTest() { if (liquidOn) setTimeout(abTest, 900); }
 
   if (liquidBtn) {
     liquidBtn.addEventListener('click', function () {
       liquidOn = !liquidOn;
       lsSet(LS_LIQUID, liquidOn ? '1' : '0');
-      // 用户主动开：就别再拿自动降档压它
-      needAB = false;                                  // 用户手动定了，别再自动测
-      if (liquidOn && perfTier === 'low') { perfTier = 'high'; lsSet(LS_PERF, 'high'); }
+      // 开着与否只由用户决定；设备吃力由 paintLiquid 退化成 .lite，不替他关
       paintLiquid();
-      if (liquidOn) tapSfx(); else backSfx();
+      if (liquidOn) { tapSfx(); maybeTest(); } else { backSfx(); }
     });
   }
   paintLiquid();
-  // ⚠️ 有首次引导时**不要**在这里量：引导那一堆入场动画 + 靶子脉冲会把采样污染，
-  //    实测会把快机器误判成"设备较慢"。等引导走完再量（见 finishGuide）。
-  if (lsGet('hub.guideDone', '0') === '1') scheduleAB();
+  // 默认关着玻璃时**什么都不测**（没东西可测，也省掉一次采样）。
+  // 用户开着玻璃进来的（上次开过）才补一次实测；引导开着就等它走完再测。
+  if (liquidOn) {
+    if (lsGet('hub.guideDone', '0') === '1') maybeTest();
+    else setTimeout(maybeTest, 400);     // 引导会挡住画面，等引导结束由它再触发
+  }
 
   /* ================================================================
      抽屉菜单
@@ -18205,7 +18643,7 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     document.removeEventListener('keydown', gBlockKeys, true);
     lsSet(LS_GUIDE, '1');
     toast('🎯 随时点这里切换练习', 2600);
-    scheduleAB();           // 引导走完、画面静止了，这时候测才准
+    if (liquidOn) maybeTest();   // 引导走完、画面静止了，这时候测才准
   }
   function gNextStep() {
     if (gIdx < GUIDE.length - 1) { gIdx++; tapSfx(); gDraw(); return; }
