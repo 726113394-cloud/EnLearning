@@ -42,6 +42,13 @@ body.tool-open .menu-fab{opacity:.55}
 body.tool-open .menu-fab:hover,
 body.tool-open .menu-fab:focus-visible,
 body.tool-open .menu-fab.open{opacity:1}
+/* 抽屉打开时浮标退场：抽屉里已经有自己的 ✕ 了，两个圆圈同时压在标题上会打架。
+   抽屉关着时浮标照旧是唯一的入口，所以只在 body.panel-open 期间藏。
+   引导进行中浮标会被 .spot 强行点亮（带 !important），这里按更高优先级压回去，
+   免得「亮着的靶子」和抽屉里那个 ✕ 同时出现；指引气泡同理一起收掉。 */
+body.panel-open .menu-fab{opacity:0;pointer-events:none;transform:scale(.88)}
+body.panel-open .menu-fab.spot{opacity:0!important;pointer-events:none!important;animation:none!important}
+body.panel-open .guide-callout{opacity:0}
 .menu-fab .fab-ico{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   transition:opacity .26s ease,transform .34s cubic-bezier(.34,1.56,.64,1);
@@ -88,7 +95,7 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
 .panel{
   position:fixed;left:0;top:0;bottom:0;z-index:58;
   width:min(342px,87vw);
-  padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));
+  padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));
   background:linear-gradient(170deg,#ffffff 0%,#f8f3fe 100%);
   box-shadow:6px 0 34px rgba(60,40,110,.30);
   border-radius:0 26px 26px 0;
@@ -96,23 +103,98 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
   /* visibility 跟着一起切：收起后彻底移出可聚焦范围，不然 Tab 键还能钻进隐藏的菜单 */
   visibility:hidden;
   transition:transform .34s cubic-bezier(.22,1,.36,1),visibility 0s linear .34s;
-  display:flex;flex-direction:column;gap:8px;overflow-y:auto;
+  display:flex;flex-direction:column;gap:7px;overflow-y:auto;
+  /* 内容已压到装得下（见 .sbar / .mbar 的说明）。这里再把滚动条本身去掉：
+     极矮的窗口（横屏手机、小笔电）仍会溢出，那时也**不要那条竖条** ——
+     它压在抽屉的圆角边上很难看，也跟液态玻璃的观感冲突。
+     ⚠️ 只隐藏滚动条，滚轮和触摸滚动照旧可用。 */
+  scrollbar-width:none;-ms-overflow-style:none;
 }
+.panel::-webkit-scrollbar{width:0;height:0}
 .panel.on{
   transform:none;visibility:visible;
   transition:transform .34s cubic-bezier(.22,1,.36,1),visibility 0s;
 }
-.panel-title{
-  display:flex;align-items:center;gap:8px;margin:2px 4px 10px;
-  font-size:1.06rem;font-weight:800;color:#3b2460;letter-spacing:.3px;
+/* ===== 抽屉顶部：品牌卡 =====
+   这里原本是光秃秃一行标题，而左上角那个 fixed 浮标（打开时是 ✕）正好压在它左边，
+   标题前两个字被啃掉一截。现在整块做成一枚品牌卡，卡里自带 ✕；
+   浮标在抽屉打开时退场（见上面 .menu-fab 那段）。
+   ⚠️ 必须 flex:0 0 auto：overflow:hidden 会把 flex 项的自动最小高度变成 0，
+      抽屉内容一超高，这张卡就会被压扁。
+   ⚠️ 渐变的**浅端不能超过 #9260b8**：整卡都用白字，实测白字在 #a06bc8 上
+      对比度只有 3.86（正文要求 4.5），压到 #9260b8 是 4.58 —— 刚好过线。
+      副标题 / 作者名这类小字另加不透明度，邮箱用**深色**胶囊（白底胶囊会把
+      底色调亮，白字掉到 3.2）。 */
+.brand{
+  position:relative;flex:0 0 auto;margin:2px 0 4px;padding:10px;
+  border-radius:16px;overflow:hidden;color:#fff;
+  background:linear-gradient(135deg,#6d3f92 0%,#9260b8 100%);
+  box-shadow:0 6px 18px rgba(80,60,140,.24);
 }
-.panel-title .pt-ico{font-size:1.3rem}
-.panel-sec{margin:12px 6px 4px;font-size:.72rem;font-weight:700;color:#8a7aa8;letter-spacing:.6px}
+/* 星光：一次画好的静态色斑，不动、不吃帧 */
+.brand::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 76% 14%,rgba(255,255,255,.46) 0 1.6px,transparent 2.1px),
+    radial-gradient(circle at 91% 48%,rgba(255,255,255,.30) 0 1.2px,transparent 1.8px),
+    radial-gradient(circle at 63% 84%,rgba(255,255,255,.26) 0 1.4px,transparent 2px),
+    radial-gradient(circle at 22% 93%,rgba(255,255,255,.22) 0 1.2px,transparent 1.8px);
+}
+.brand-row{position:relative;display:flex;align-items:center;gap:10px}
+.brand-badge{
+  flex:0 0 auto;width:38px;height:38px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.24);
+}
+.brand-txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
+.brand-name{
+  font-size:1rem;font-weight:800;letter-spacing:.3px;line-height:1.28;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.brand-sub{
+  font-size:.72rem;font-weight:600;letter-spacing:.2px;
+  /* ⚠️ 别调低于 .94：实测 .88 时它在真实像素上只有 4.46（正文要求 4.5），
+     .94 是 4.84 —— 这行字只有 11.5px，没有"大字"的豁免额度 */
+  color:rgba(255,255,255,.94);
+}
+.brand-x{
+  flex:0 0 auto;width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:inherit;font-size:.9rem;font-weight:700;line-height:1;
+  color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  background:rgba(45,27,66,.26);border:1px solid rgba(255,255,255,.30);
+  transition:background .18s,transform .18s;
+}
+.brand-x:hover{background:rgba(45,27,66,.44)}
+.brand-x:active{transform:scale(.9)}
+/* 作者行 */
+.brand-au{
+  position:relative;display:flex;align-items:center;gap:7px;
+  margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.22);
+}
+.brand-au .au-k{
+  flex:0 0 auto;font-size:.64rem;font-weight:800;letter-spacing:.5px;
+  padding:2px 6px;border-radius:20px;color:#fff;
+  background:rgba(45,27,66,.34);
+}
+.brand-au .au-txt{min-width:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.brand-au .au-nm{font-size:.74rem;font-weight:700;color:#fff}
+.brand-au .au-mail{
+  font-size:.68rem;font-weight:600;color:#fff;text-decoration:none;
+  padding:2px 8px;border-radius:20px;white-space:nowrap;
+  background:rgba(45,27,66,.34);border:1px solid rgba(255,255,255,.26);
+  transition:background .18s;
+}
+.brand-au .au-mail:hover{background:rgba(45,27,66,.52)}
+/* 信封图标用 CSS 生成，不写进 HTML —— 免得混进链接的可读名称 */
+.brand-au .au-mail::before{content:"✉ ";opacity:.85}
+.panel-sec{margin:10px 6px 3px;font-size:.72rem;font-weight:700;color:#8a7aa8;letter-spacing:.6px}
 
 /* 菜单项：逐个错峰滑入 */
 .pitem{
   display:flex;align-items:center;gap:11px;
-  min-height:52px;padding:0 14px;border-radius:16px;
+  min-height:48px;padding:0 14px;border-radius:16px;
   border:2px solid transparent;background:rgba(124,74,158,.07);
   font-family:inherit;font-size:.98rem;font-weight:700;color:#3b2460;
   cursor:pointer;text-align:left;width:100%;
@@ -131,30 +213,36 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
 @keyframes pIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
 .panel.on .anim-in{animation:pIn .36s cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--i,0) * 42ms)}
 
-/* ===== 控制卡片（按钮音效 / 背景音乐） ===== */
-.card-box{
-  margin-top:6px;padding:12px;border-radius:18px;
-  background:rgba(124,74,158,.07);border:1px solid rgba(140,110,200,.20);
-  display:flex;flex-direction:column;gap:10px;
-}
-.card-box:first-of-type{margin-top:auto}
-.crow{display:flex;align-items:center;gap:11px}
-.cbtn{
-  width:48px;height:48px;border-radius:14px;border:0;cursor:pointer;font-family:inherit;
-  background:linear-gradient(135deg,#7c4a9e,#a06bc8);color:#fff;font-size:1.2rem;
-  display:flex;align-items:center;justify-content:center;flex:0 0 auto;
-  transition:transform .18s cubic-bezier(.34,1.56,.64,1),background .22s,filter .22s;
+/* ===== 站台设置：一行三个开关 + 一行音乐控制 =====
+   原来这里是三张两栏卡片（74+74+172 = 335px），加上 6 个条目后抽屉内容
+   高达 952px —— **在 1440x950 的桌面上都超出 2px**，随便一缩窗口就出滚动条。
+   现在压成 56 + 44 = 100px（实测内容降到 ~630px，比 640 高的小屏也装得下）。
+   ⚠️ 每个开关 56px 高、⏮⏭ 44px 高：技能里"工具条开关/小控件高 ≥44px"是硬规矩，
+      省高度只能省结构（三行变两行），不能省尺寸。 */
+.sec-set{margin-top:auto}
+.sbar{display:flex;gap:8px}
+.sbtn{
+  flex:1 1 0;min-width:0;min-height:56px;padding:6px 4px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  border-radius:14px;cursor:pointer;font-family:inherit;text-align:center;
+  background:rgba(124,74,158,.07);border:1px solid rgba(140,110,200,.20);color:#3b2460;
+  transition:transform .16s,background .2s,border-color .2s;
   -webkit-tap-highlight-color:transparent;
 }
-.cbtn:active{transform:scale(.92)}
-.cbtn.off{background:rgba(122,106,160,.22);color:#5b3b8c;filter:none}
-.cbtn .cico{transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
-.cbtn.off .cico{transform:scale(.88) rotate(-14deg)}
-.ctxt{flex:1 1 auto;min-width:0}
-.ctitle{display:block;font-size:.9rem;font-weight:800;color:#3b2460}
-.chint{display:block;font-size:.73rem;color:#7a6a9a;line-height:1.35;margin-top:1px}
-/* 切歌行：上一首 / 当前曲名 / 下一首 */
-.mtrack{display:flex;align-items:center;gap:8px}
+.sbtn:not(.off){background:rgba(124,74,158,.14);border-color:rgba(140,110,200,.44)}
+.sbtn:active{transform:scale(.96)}
+/* 图标徽章：开着是品牌紫，关掉是灰 —— 颜色本身就是状态，别只靠那两个字 */
+.sbtn .cico{
+  width:23px;height:23px;border-radius:8px;font-size:.8rem;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#7c4a9e,#a06bc8);color:#fff;
+  transition:background .22s,transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.sbtn.off .cico{background:rgba(122,106,160,.24);color:#5b3b8c;transform:scale(.92)}
+.sbtn .slb{font-size:.76rem;font-weight:800;line-height:1.15}
+.sbtn .chint{font-size:.66rem;font-weight:700;line-height:1.15;color:#6b5a8a;margin:0}
+/* 音乐控制行：⏮ 曲名 ⏭ + 音量条，一行放完 */
+.mbar{display:flex;align-items:center;gap:7px;padding:0 2px}
 .mnav{
   width:44px;height:44px;flex:0 0 auto;border-radius:12px;cursor:pointer;
   font-family:inherit;font-size:1rem;line-height:1;
@@ -165,29 +253,61 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
 .mnav:hover{background:rgba(124,74,158,.18)}
 .mnav:active{transform:scale(.93)}
 .mname{
-  flex:1 1 auto;min-width:0;font-size:.78rem;font-weight:700;color:#6b5a8a;
-  text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  flex:0 1 auto;min-width:0;font-size:.74rem;font-weight:700;color:#6b5a8a;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-/* 音量条 */
-.mvol{display:flex;align-items:center;gap:9px;padding-left:2px}
-.mvol input[type=range]{
-  flex:1 1 auto;height:30px;accent-color:#a06bc8;cursor:pointer;background:transparent;
+.mbar input[type=range]{
+  flex:1 1 40px;min-width:40px;height:26px;accent-color:#a06bc8;cursor:pointer;
+  background:transparent;
 }
-.mvol .vlab{font-size:.73rem;font-weight:700;color:#7a6a9a;min-width:40px;text-align:right}
-/* 播放中的跳动小条 —— 用 scaleY 而不是 height：
-   height 动画每帧都要重新布局，transform 走合成层，几乎免费 */
-.bars{display:flex;align-items:flex-end;gap:2px;height:15px;flex:0 0 auto}
-.bars i{
-  display:block;width:3px;border-radius:2px;background:currentColor;opacity:.6;
-  height:15px;transform:scaleY(.3);transform-origin:50% 100%;
+.mbar .vlab{
+  flex:0 0 auto;font-size:.68rem;font-weight:700;color:#6b5a8a;
+  min-width:30px;text-align:right;
 }
-@media (prefers-reduced-motion: no-preference){
-  .cbtn:not(.off) .bars i{animation:eq .92s ease-in-out infinite}
-  .cbtn:not(.off) .bars i:nth-child(2){animation-delay:.16s}
-  .cbtn:not(.off) .bars i:nth-child(3){animation-delay:.32s}
-  .cbtn:not(.off) .bars i:nth-child(4){animation-delay:.48s}
+/* 极矮的窗口（小手机 640 高、横屏手机）再收一档间距，尽量让它根本不需要滚。
+   滚动条本身已经藏掉了（见 .panel），这里是第二道保险。
+   ⚠️ 只收间距和图标尺寸，**不把 .pitem 压到 48 以下** ——
+      技能里"选项卡 ≥48px、工具条开关 ≥44px"是给触屏定的硬规矩。 */
+@media (max-height:680px){
+  .panel{padding:11px 13px calc(11px + env(safe-area-inset-bottom,0px));gap:5px}
+  .brand{padding:8px;margin-bottom:2px}
+  .brand-badge{width:34px;height:34px;border-radius:11px;font-size:1.06rem}
+  .brand-au{margin-top:6px;padding-top:6px}
+  .panel-sec{margin:7px 6px 2px}
+  .sbtn{min-height:50px}
+  .sbtn .cico{width:20px;height:20px;font-size:.72rem;border-radius:7px}
+  /* ⚠️ 这里千万别顺手把 .mnav / .pitem 压小：技能里"选项卡 ≥48px、
+     工具条小控件 ≥44px"是给触屏定的，省高度只能省间距和图标，不能省尺寸。
+     （我第一版把 .mnav 写成 40px，被 verify_hub_fit.js 当场抓出来了。）
+     高度就靠 .pitem 的 min-height:48 顶住，间距从 padding/gap 里省。 */
 }
-@keyframes eq{0%,100%{transform:scaleY(.28)}50%{transform:scaleY(1)}}
+
+/* 横屏手机 / 极矮窗口：抽屉铺满全屏，条目改**三列**。
+   竖着一列排 6 个条目在 390 高的屏幕上永远装不下（实测超出 215px）；
+   铺满后横向有空间，三列刚好两行装完（844 宽时每格 281px，够）。
+   ⚠️ 两条都是踩过的坑：
+      grid-auto-rows:max-content —— 不加的话 .brand 会被压扁
+      （它带 overflow:hidden，在 grid 里自动最小高度同样会变成 0，实测被压到 31px）；
+      横向用 grid 也是为了让"条目两列/三列"跟满宽的行共存，
+      flex 做不到只让一部分孩子换列。 */
+@media (max-height:480px){
+  .panel{
+    width:100vw;border-radius:0;
+    padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));
+    display:grid;grid-template-columns:repeat(3,1fr);gap:5px 8px;
+    grid-auto-rows:max-content;align-content:start;
+  }
+  .panel > .brand,.panel > .panel-sec,.panel > .sbar,.panel > .mbar{grid-column:1 / -1}
+  .sec-set{margin-top:4px}
+  .brand-au{margin-top:6px;padding-top:6px}
+  /* 铺满后这两条别跟着拉得太宽，右边留白比拉长好看 */
+  .sbar{max-width:520px}
+  .mbar{max-width:620px}
+}
+
+/* 这里原先有个 @keyframes eq，给抽屉里那个跳动小条用的；
+   抽屉的设置区压成一行后那个小条去掉了（浮标旁边的 .fab-eq 仍有自己的 eqBar，
+   所以"音乐在放"这个提示没丢），keyframes 一并删掉，别留死代码 */
 
 /* ===== 切换提示（小药丸，会自己淡掉） ===== */
 .toast{
@@ -211,7 +331,7 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
 @media (prefers-reduced-motion: reduce){
   .view.in,.view.out{animation:none}
   .tool-frame.pending{opacity:1}
-  .menu-fab,.menu-fab .fab-ico,.panel,.scrim,.toast,.cbtn,.pitem,.cbtn .cico{transition:none!important;animation:none!important}
+  .menu-fab,.menu-fab .fab-ico,.panel,.scrim,.toast,.sbtn,.sbtn .cico,.pitem,.mnav{transition:none!important;animation:none!important}
   .panel.on .anim-in{animation:none!important}
 }
 
@@ -346,12 +466,40 @@ body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
   .menu-fab.spot{animation:none!important;box-shadow:0 0 0 4px rgba(255,214,0,.85)}
   /* 玻璃开关的渐变也一并去掉（系统要求减弱动效时，任何过渡都不该有） */
   body,.card,.resume button,.foot-hint,.panel,.guide-card,.menu-fab,
+  .brand-x,.brand-au .au-mail,
   body::before,body::after,
   .card::before,.guide-card::before,.foot-hint::before{transition:none!important}
 }
 
 /* ============================================================
-   目录页 Liquid Glass 皮肤（可开关，默认开）
+   开启液态玻璃前的警示弹窗
+   复用引导的 .guide-mask / .guide-card / .guide-btn，只补这段自己的排布。
+   ⚠️ 只在"要打开"时弹，关掉不弹 —— 关掉是安全方向，没必要拦。
+   ============================================================ */
+.gw-card{width:min(430px,100%)}
+.gw-ico{font-size:2.3rem;line-height:1;margin-bottom:8px}
+.gw-h{margin:0 0 10px;font-size:1.1rem;font-weight:800;line-height:1.4;color:#2d1b42}
+.gw-p{margin:0 0 9px;font-size:.875rem;line-height:1.7;color:#5b4a7a}
+.gw-p b{color:#7c4a9e}
+/* 低配提示：底色 + 边框跟正文分开，别只靠字色深浅（色弱也看得出来） */
+.gw-weak{
+  padding:9px 11px;border-radius:12px;font-weight:600;color:#7a4a12;
+  background:rgba(255,176,60,.14);border:1px solid rgba(214,132,0,.30);
+}
+/* 收尾那行是次要信息：用 #6b5a8a（对白底 6.08），别用 .panel-sec 那个
+   #8a7aa8 —— 那个只有 3.87，13px 的字不达标 */
+.gw-fine{font-size:.82rem;color:#6b5a8a}
+.gw-foot{display:flex;gap:9px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+@media (max-width:420px){
+  .gw-foot{flex-direction:column-reverse}
+  .gw-foot .guide-btn{width:100%}
+}
+@media (prefers-reduced-motion: reduce){
+  .gw-card{animation:none!important}
+}
+
+/* ============================================================
+   目录页 Liquid Glass 皮肤（可开关，默认关）
    做法跟 skill 里那条结论一致：**模糊只给浮层/卡片**，不给根容器；
    用两个只动 transform 的色斑给玻璃提供可折射的内容（走合成层，几乎免费）。
    弱设备上由 [data-perf="low"] 自动关掉（见下）。
@@ -534,7 +682,23 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="scrim" id="scrim"></div>
   <aside class="panel" id="panel" aria-hidden="true">
-    <div class="panel-title anim-in" style="--i:0"><span class="pt-ico">🚀</span><span>来自太空的英语站台</span></div>
+    <div class="brand anim-in" style="--i:0">
+      <div class="brand-row">
+        <span class="brand-badge" aria-hidden="true">🚀</span>
+        <span class="brand-txt">
+          <span class="brand-name">来自太空的英语站台</span>
+          <span class="brand-sub">小学英语练习 · 5 个工具</span>
+        </span>
+        <button class="brand-x" id="panelClose" type="button" aria-label="收起菜单">✕</button>
+      </div>
+      <div class="brand-au">
+        <span class="au-k">作者</span>
+        <span class="au-txt">
+          <span class="au-nm">来自太空的小头脑</span>
+          <a class="au-mail" href="mailto:lztkdxtn@qq.com">lztkdxtn@qq.com</a>
+        </span>
+      </div>
+    </div>
     <div class="panel-sec anim-in" style="--i:0">切换练习</div>
       <button class="pitem anim-in" style="--i:0"><span class="pico">🏠</span><span class="plb">目录</span><span class="pgo">›</span></button>
       <button class="pitem anim-in" style="--i:1" data-tool="xxl"><span class="pico">🌈</span><span class="plb">中英消消乐</span><span class="pgo">›</span></button>
@@ -542,33 +706,18 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
       <button class="pitem anim-in" style="--i:3" data-tool="listen"><span class="pico">🎧</span><span class="plb">听力练习场</span><span class="pgo">›</span></button>
       <button class="pitem anim-in" style="--i:4" data-tool="read"><span class="pico">📖</span><span class="plb">英语认读系统</span><span class="pgo">›</span></button>
       <button class="pitem anim-in" style="--i:5" data-tool="shout"><span class="pico">🎤</span><span class="plb">单词喊麦王</span><span class="pgo">›</span></button>
-    <div class="panel-sec anim-in" style="--i:6">站台设置</div>
-    <div class="card-box anim-in" style="--i:7">
-      <div class="crow">
-        <button class="cbtn" id="soundBtn"><span class="cico">🔊</span></button>
-        <div class="ctxt"><span class="ctitle">按钮音效</span>
-        <span class="chint" id="soundHint">已开启 · 点左边的按钮关闭</span></div>
-      </div>
+    <div class="panel-sec anim-in sec-set" style="--i:6">站台设置</div>
+    <div class="sbar anim-in" style="--i:7">
+      <button class="sbtn" id="soundBtn" type="button"><span class="cico">🔊</span><span class="slb">音效</span><span class="chint" id="soundHint">已开启</span></button>
+      <button class="sbtn" id="liquidBtn" type="button"><span class="cico">💧</span><span class="slb">玻璃</span><span class="chint" id="liquidHint">已关闭</span></button>
+      <button class="sbtn" id="musicBtn" type="button"><span class="cico">🎵</span><span class="slb">音乐</span><span class="chint" id="musicHint">播放中</span></button>
     </div>
-    <div class="card-box anim-in" style="--i:8">
-      <div class="crow">
-        <button class="cbtn" id="liquidBtn"><span class="cico">💧</span></button>
-        <div class="ctxt"><span class="ctitle">液态玻璃</span>
-        <span class="chint" id="liquidHint">已开启 · 设备性能：良好</span></div>
-      </div>
-    </div>
-    <div class="card-box anim-in" style="--i:9">
-      <div class="crow">
-        <button class="cbtn" id="musicBtn"><span class="cico">🎵</span><span class="bars"><i></i><i></i><i></i><i></i></span></button>
-        <div class="ctxt"><span class="ctitle">背景音乐</span>
-        <span class="chint" id="musicHint">播放中 · 点左边的按钮停止</span></div>
-      </div>
-      <div class="mtrack">
-        <button class="mnav" id="musicPrev" type="button" aria-label="上一首">⏮</button>
-        <span class="mname" id="musicName">—</span>
-        <button class="mnav" id="musicNext" type="button" aria-label="下一首">⏭</button>
-      </div>
-      <div class="mvol"><input type="range" id="musicVol" min="0" max="100" step="1" value="5" aria-label="音乐音量"><span class="vlab" id="volLab">5%</span></div>
+    <div class="mbar anim-in" style="--i:8">
+      <button class="mnav" id="musicPrev" type="button" aria-label="上一首">⏮</button>
+      <span class="mname" id="musicName">—</span>
+      <button class="mnav" id="musicNext" type="button" aria-label="下一首">⏭</button>
+      <input type="range" id="musicVol" min="0" max="100" step="1" value="5" aria-label="音乐音量">
+      <span class="vlab" id="volLab">5%</span>
     </div>
   </aside>
   <!-- 首次使用引导：必须一步步走完才能关（没有关闭按钮） -->
@@ -588,6 +737,21 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
     </div>
   </div>
   <div class="guide-callout" id="guideCallout">👈 就是它</div>
+
+  <!-- 开启液态玻璃前的警示：玻璃要一直占显卡，配置不高的设备可能卡 -->
+  <div class="guide-mask" id="glassWarn">
+    <div class="guide-card gw-card" role="dialog" aria-modal="true" aria-labelledby="gwH">
+      <div class="gw-ico" aria-hidden="true">💧</div>
+      <h3 class="gw-h" id="gwH">开启液态玻璃？</h3>
+      <p class="gw-p">画面会好看一些（毛玻璃、卡片高光、指针倾斜），但它要<b>一直占用显卡</b>。配置不高的电脑、一体机可能明显变卡，尤其是同时投屏或开着视频的时候。</p>
+      <p class="gw-p gw-weak" id="gwWeak" hidden>⚠️ 这台设备看起来配置不高，开启后卡顿的可能性更大。</p>
+      <p class="gw-p gw-fine">同时会把各练习的「高级渲染」一起打开。卡了随时回来点 💧 关掉，不影响任何练习进度。</p>
+      <div class="gw-foot">
+        <button class="guide-btn" id="gwCancel" type="button">先不开</button>
+        <button class="guide-btn primary" id="gwOk" type="button">我知道了，开启</button>
+      </div>
+    </div>
+  </div>
 
   <main id="stage">
     <section id="home" class="view">
@@ -18307,7 +18471,10 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     musicBtn.querySelector('.cico').textContent = playing ? '🎵' : '🔇';
     musicBtn.title = playing ? '音乐播放中，点击停止' : '音乐已停止，点击继续播放';
     musicBtn.setAttribute('aria-label', playing ? '停止背景音乐' : '继续播放背景音乐');
-    musicHint.textContent = playing ? '播放中 · 点左边的按钮停止' : '已停止 · 点左边的按钮继续播放';
+    // 只留状态词：完整句子在 title / aria-label 里。站台设置压成一行三个
+    // 小开关后，这块宽度只够放两三个字（原来那句"· 点左边的按钮停止"是给
+    // 两栏大卡片写的，现在整块就是按钮，点哪儿都一样）
+    musicHint.textContent = playing ? '播放中' : '已停止';
     // 靶子旁边的小波浪：只在真的在播时显示
     document.body.classList.toggle('music-on', playing);
   }
@@ -18384,6 +18551,44 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   }
 
   /* ================================================================
+     要"听得清"的工具：进去自动停背景音乐，离开再恢复
+     ----------------------------------------------------------------
+     听力练习场整节课都在放录音，5% 的背景音乐也会盖住单词尾音和整句语调。
+     ⚠️ 临时静音只改内存里的 musicOff，**绝不写 localStorage**：
+        老师只是去听力练习场转一圈，回来不该连消消乐都没音乐了 ——
+        那不是他的选择，是我们替他改的偏好。
+     离开时从存档里读回**他真正的偏好**，所以"在工具里自己按过音乐按钮"
+     这个动作不会被误解（那个动作会写存档）。
+     ================================================================ */
+  var QUIET_TOOLS = ["listen"];
+  var quietKey = null;          // 当前正被临时静音的工具
+  var quietResume = false;      // 静音之前音乐是不是在放
+
+  function enterQuiet(key) {
+    if (quietKey) return false;                  // 已经在静音态里，别覆盖
+    quietKey = key;
+    quietResume = !!(bgm && !bgm.paused && !bgm.ended);
+    musicOff = true;                             // 同时挡住 armGestureStart 的"补播"
+    if (bgm && !bgm.paused) { try { bgm.pause(); } catch (e) {} }
+    paintMusic();
+    return quietResume;                          // 真的停了才值得跟老师说一句
+  }
+  function leaveQuiet() {
+    if (!quietKey) return;
+    quietKey = null;
+    var resume = quietResume;
+    quietResume = false;
+    musicOff = lsGet(LS_MUSIC, '0') === '1';     // 读回老师自己的偏好
+    if (resume && !musicOff) startMusic();
+    paintMusic();
+  }
+  function applyQuiet(key) {
+    if (QUIET_TOOLS.indexOf(key) >= 0) return enterQuiet(key);
+    leaveQuiet();
+    return false;
+  }
+
+  /* ================================================================
      按钮音效开关
      ================================================================ */
   var soundBtn = document.getElementById('soundBtn');
@@ -18391,10 +18596,10 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     if (!soundBtn) return;
     soundBtn.classList.toggle('off', soundOff);
     soundBtn.querySelector('.cico').textContent = soundOff ? '🔇' : '🔊';
-    soundBtn.title = soundOff ? '按钮音效已关' : '按钮音效已开';
+    soundBtn.title = soundOff ? '按钮音效已关，点击打开' : '按钮音效已开，点击关闭';
     soundBtn.setAttribute('aria-label', soundOff ? '打开按钮音效' : '关闭按钮音效');
     var h = document.getElementById('soundHint');
-    if (h) h.textContent = soundOff ? '已关闭 · 点左边的按钮打开' : '已开启 · 点左边的按钮关闭';
+    if (h) h.textContent = soundOff ? '已关闭' : '已开启';
   }
   if (soundBtn) {
     soundBtn.addEventListener('click', function () {
@@ -18459,7 +18664,7 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     }
     if (liquidHint) {
       // 刻意不提性能的事：降档是后台默默发生的，界面只反映"开/关"本身
-      liquidHint.textContent = on ? '已开启 · 点左边的按钮关闭' : '已关闭 · 点左边的按钮开启';
+      liquidHint.textContent = on ? '已开启' : '已关闭';
     }
   }
 
@@ -18496,16 +18701,124 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   }
   function maybeTest() { if (liquidOn) setTimeout(abTest, 900); }
 
-  if (liquidBtn) {
-    liquidBtn.addEventListener('click', function () {
-      liquidOn = !liquidOn;
-      lsSet(LS_LIQUID, liquidOn ? '1' : '0');
-      // 开着与否只由用户决定；设备吃力由 paintLiquid 退化成 .lite，不替他关
-      paintLiquid();
-      if (liquidOn) { tapSfx(); maybeTest(); } else { backSfx(); }
+  /* ================================================================
+     画质联动：站台的「液态玻璃」= 总开关，一并驱动各工具自己的「高级渲染」
+     ----------------------------------------------------------------
+     机制：**点工具自己那个开关按钮**，而不是替它改类名。各工具的画质状态都
+     存在自己的闭包里（句型建筑师的 state.highEnd、消消乐的 app.glass-mode…），
+     只有走它自己的点击处理，状态类 / 按钮外观 / 持久化三者才会一致；
+     语义上也正好等于"老师在工具里自己点了一下"。
+     实测（probe_hotlink.js）：srcdoc iframe 的 location.protocol 是 about:，
+     但 contentDocument 可访问（同源继承），4 个按钮都能点动且可逆；
+     父页与 iframe 的 localStorage 也是同一份。
+     ⚠️ "写键 + 重载 iframe" 也能生效，但会把工具整个重载一遍 ——
+        正做着的练习进度就没了。所以用点按钮这条路。
+     ⚠️ 单词喊麦王根本没有高级渲染开关（backdrop-filter 是写死的），
+        表里没有它，联动会跳过 —— 这是事实，别给它造一个。
+     ================================================================ */
+  var QUALITY = {"xxl": {"sel": "#glassToggle", "cls": "active", "key": "glassMode", "on": "1", "off": "0"}, "pattern": {"sel": "#glassToggle", "cls": "on", "key": "patternBuilder.glassEnabled", "on": "1", "off": "0"}, "listen": {"sel": "#glassToggleBtn", "aria": "aria-pressed", "key": "listen.glassEnabled", "on": "true", "off": "false"}, "read": {"sel": "#advancedToggleHeader", "cls": "active"}};
+
+  function qualityKeys(on) {
+    Object.keys(QUALITY).forEach(function (k) {
+      var q = QUALITY[k];
+      // 认读系统没有独立画质键（状态打包在 readingSystem.v1 那个 JSON 里，
+      // 为它做 JSON 手术不划算）—— 它没有 key，靠进工具后点按钮回正
+      if (!q.key) return;
+      try { localStorage.setItem(q.key, on ? q.on : q.off); } catch (e) {}
     });
   }
+
+  function isQualityOn(btn, q) {
+    return q.aria ? btn.getAttribute(q.aria) === 'true' : btn.classList.contains(q.cls);
+  }
+
+  /* 让某个工具的高级渲染对齐总开关。已经是目标状态就**不点** ——
+     多余的一次点击会让工具白重渲染一遍（句型建筑师还会响一声）。 */
+  function syncQualityIn(doc, key) {
+    var q = QUALITY[key];
+    if (!q) return 'no-config';
+    if (!doc) return 'no-doc';
+    var btn = null;
+    try { btn = doc.querySelector(q.sel); } catch (e) { return 'no-doc'; }
+    if (!btn) return 'no-btn';
+    if (isQualityOn(btn, q) === liquidOn) return 'already';
+    btn.click();
+    return 'clicked';
+  }
+
+  /* ----------------------------------------------------------------
+     开玻璃前的警示
+     打开是"有风险"的方向，先拦一下；关掉不拦（那是安全方向）。
+     ⚠️ 每开一次弹一次，不做"只提醒一次" —— 玻璃是偶尔开的东西，
+        而卡顿的代价是全班等一节课；真嫌烦就去掉这个判断。
+     ---------------------------------------------------------------- */
+  var glassWarn = document.getElementById('glassWarn');
+  var gwWeak = document.getElementById('gwWeak');
+  var gwOk = document.getElementById('gwOk');
+  var gwCancel = document.getElementById('gwCancel');
+  var gwShown = false;
+
+  function paintGlassWarn(show) {
+    gwShown = show;
+    if (!glassWarn) return;
+    // 低配那句只在真的测到弱设备时出现（与画质档同一套线索：核心数/内存/减少动效）
+    if (gwWeak) gwWeak.hidden = !weakHints;
+    glassWarn.classList.toggle('show', show);
+    var target = show ? gwCancel : liquidBtn;      // 焦点默认落在"先不开"上
+    if (target) setTimeout(function () { try { target.focus(); } catch (e) {} }, 60);
+  }
+
+  function setLiquid(on) {
+    liquidOn = on;
+    lsSet(LS_LIQUID, on ? '1' : '0');
+    paintLiquid();
+    qualityKeys(liquidOn);                     // 写各工具的画质键：下次进工具直接就是对的
+    if (frame) syncQualityIn(frame.contentDocument, current);   // 开着的那个工具立刻跟着变
+    if (on) {
+      // ⚠️ 工具开着时先别测：A/B 量的是"有没有玻璃"的帧间隔，工具里的高级渲染
+      //    一起跑会把这个差值污染掉，可能把好机器误判成 low（然后永久降档）。
+      //    等回到目录页（没有工具）再测，见 goHome。
+      if (!current) maybeTest();
+    }
+  }
+
+  if (liquidBtn) {
+    liquidBtn.addEventListener('click', function () {
+      if (!liquidOn) { tapSfx(); paintGlassWarn(true); return; }   // 先警示，确认了才开
+      backSfx();
+      setLiquid(false);
+    });
+  }
+  if (gwOk) gwOk.addEventListener('click', function () {
+    paintGlassWarn(false);
+    setLiquid(true);
+    tapSfx();
+  });
+  if (gwCancel) gwCancel.addEventListener('click', function () {
+    backSfx();
+    paintGlassWarn(false);
+  });
+  if (glassWarn) {
+    // 点遮罩 = "先不开"（确认框的常规约定，也避免点空了没反应）
+    glassWarn.addEventListener('click', function (e) {
+      if (e.target === glassWarn) { backSfx(); paintGlassWarn(false); }
+    });
+    // ⚠️ 必须用**捕获**并在命中时截断传播：
+    //    抽屉自己也有一个 Esc 处理（关抽屉），跟这个都在 document 上。
+    //    不截断的话一个 Esc 会同时干两件事 —— 弹窗关了、抽屉也关了，
+    //    老师再想点 💧 就得先重新打开抽屉。
+    document.addEventListener('keydown', function (e) {
+      if (!gwShown || (e.key !== 'Escape' && e.key !== 'Esc')) return;
+      e.stopPropagation();
+      backSfx();
+      paintGlassWarn(false);
+    }, true);
+  }
+
   paintLiquid();
+  // 启动就把各工具的画质键对齐总开关 —— "关着玻璃"也照写，
+  // 这样"没开玻璃"才是个确定的状态，不会因为上次在工具里单独点过而漏。
+  qualityKeys(liquidOn);
   // 默认关着玻璃时**什么都不测**（没东西可测，也省掉一次采样）。
   // 用户开着玻璃进来的（上次开过）才补一次实测；引导开着就等它走完再测。
   if (liquidOn) {
@@ -18516,6 +18829,7 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   /* ================================================================
      抽屉菜单
      ================================================================ */
+  var panelClose = document.getElementById('panelClose');
   var menuOpen = false;
   function setMenu(open) {
     menuOpen = open;
@@ -18524,9 +18838,14 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     scrim.classList.toggle('on', open);
     panel.classList.toggle('on', open);
     panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+    // 抽屉打开时浮标要退场（品牌卡里已经有自己的 ✕），样式挂在这个类上
+    document.body.classList.toggle('panel-open', open);
+    // 用卡里的 ✕ 收起时，焦点还留在抽屉内部；还给浮标，键盘用户才不会掉到 body 上
+    if (!open && panel.contains(document.activeElement)) menuBtn.focus();
     if (open) openSfx();
   }
   menuBtn.addEventListener('click', function () { setMenu(!menuOpen); });
+  if (panelClose) panelClose.addEventListener('click', function () { setMenu(false); });
   scrim.addEventListener('click', function () { setMenu(false); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menuOpen) setMenu(false); });
 
@@ -18578,6 +18897,11 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     if (!tpl) return;
 
     hideHome();
+    // 该工具要"听得清"就先停背景音乐（离开时 leaveQuiet 会恢复）
+    var quieted = applyQuiet(key);
+    // 进工具前先把它的画质键再对齐一次：老师可能在工具里单独点过那个开关
+    // （工具会自己写键），那次点击不该盖过站台的总开关。
+    qualityKeys(liquidOn);
     var el = document.createElement('iframe');
     el.className = 'tool-frame view' + (REDUCED ? '' : ' pending');
     el.setAttribute('title', nameOf(key));
@@ -18589,6 +18913,17 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
       '<scr' + 'ipt>window.__REAL_PROTOCOL__=' + JSON.stringify(REAL_PROTOCOL) + ';<\/scr' + 'ipt>' +
       tpl.innerHTML;
     stage.appendChild(el);
+    // 工具载入后让它的高级渲染对齐总开关。
+    // 先写键能覆盖大部分工具（它们启动时自己会读）；但句型建筑师在低配机上
+    // 会**拒绝**自动恢复高级渲染，认读系统更是把状态存在 JSON 里 ——
+    // 这两种只能靠点它自己的按钮回正，所以这一步不能省。
+    var qTries = 0;
+    var qSync = function () {
+      var r = syncQualityIn(el.contentDocument, key);
+      if ((r === 'no-btn' || r === 'no-doc') && qTries++ < 4) setTimeout(qSync, 400);
+    };
+    el.addEventListener('load', qSync);
+    setTimeout(qSync, 700);                  // 兜底：load 没触发也不能漏掉
     if (!REDUCED) {
       var shown = false;
       var put = function () {
@@ -18605,17 +18940,22 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     markItems(key);
     lsSet(LS_TOOL, key);
     setMenu(false);
-    toast('🎯 ' + nameOf(key), 1900);
+    // 顺手说一句为什么音乐没了 —— 否则老师会以为音乐坏了
+    toast('🎯 ' + nameOf(key) + (quieted ? ' · 已暂停背景音乐' : ''), quieted ? 2600 : 1900);
   }
 
   function goHome() {
     if (!frame && home.style.display !== 'none') { setMenu(false); return; }
     if (frame) { fadeOut(frame); frame = null; }
     current = null;
+    leaveQuiet();                       // 离开"要听录音"的工具，把音乐还回去
     markItems(null);
     showHome();
     setMenu(false);
     toast('🏠 目录', 1400);
+    // 回到目录页（画面上没有工具）才是量玻璃帧率的好时机；开玻璃时若正开着
+    // 工具就跳过没测，在这里补上
+    if (liquidOn) maybeTest();
   }
 
   toolItems.forEach(function (b) {
