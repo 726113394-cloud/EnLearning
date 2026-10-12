@@ -13,11 +13,10 @@
 html,body{margin:0;padding:0;height:100%}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
-  /* 目录底色 = **两个舒缓色**的渐变：雾松青淡 #dff1ed → 雾霭蓝淡 #e6ecfa。
-     只用两个色标（别塞第三个）：老师明确要"两个颜色搭配做渐变"，
-     中间的过渡交给浏览器插值，比手工加一个中间色更干净。 */
-  background:linear-gradient(160deg,#dff1ed 0%,#e6ecfa 100%);
-  color:#1b3a40;height:100dvh;overflow:hidden;
+  /* 目录底色 = **蓝 → 粉 → 黄 → 白** 四色渐变（老师点名的）。
+     四个色都够浅，深色正文压得住；这也是**不开玻璃时**默认看到的样子。 */
+  background:linear-gradient(160deg,#cfe4fb 0%,#fbd9e8 38%,#fdf1cc 68%,#ffffff 100%);
+  color:#182a44;height:100dvh;overflow:hidden;
 }
 
 /* ===== 舞台：铺满整屏，不留顶栏底栏 ===== */
@@ -30,15 +29,15 @@ body{
   position:fixed;left:12px;top:12px;z-index:60;
   width:48px;height:48px;border-radius:50%;
   border:1.5px solid rgba(255,255,255,.55);
-  background:linear-gradient(135deg,#2f7d76,#4d6cb0);
+  background:linear-gradient(135deg,#2f5d9e,#b0457e);
   color:#fff;cursor:pointer;font-family:inherit;
-  box-shadow:0 4px 16px rgba(44,100,120,.38);
+  box-shadow:0 4px 16px rgba(44,84,140,.38);
   opacity:.8;transition:opacity .22s ease,transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s;
   -webkit-tap-highlight-color:transparent;
 }
 .menu-fab:hover,.menu-fab:focus-visible{opacity:1;transform:scale(1.07)}
 .menu-fab:active{transform:scale(.93)}
-.menu-fab.open{opacity:1;box-shadow:0 6px 22px rgba(44,100,120,.5)}
+.menu-fab.open{opacity:1;box-shadow:0 6px 22px rgba(44,84,140,.5)}
 /* 工具页占满整屏，浮标会压住各工具自己的标题；让它淡一点，底下内容透得出来。
    回到目录页就恢复清晰（那边顶部留了 74px 空位，压不到东西）。 */
 body.tool-open .menu-fab{opacity:.55}
@@ -76,19 +75,19 @@ body.panel-open .guide-callout{opacity:0}
   transform:translateY(-50%) translateX(-7px) scale(.9);
   display:flex;align-items:flex-end;gap:2px;height:16px;
   padding:4px 7px;border-radius:20px;pointer-events:none;
-  background:rgba(20,52,54,.84);
-  box-shadow:0 3px 12px rgba(18,46,48,.32);
+  background:rgba(20,40,66,.84);
+  box-shadow:0 3px 12px rgba(18,36,58,.32);
   opacity:0;transition:opacity .3s ease,transform .34s cubic-bezier(.22,1,.36,1);
 }
 body.music-on .fab-eq{opacity:1;transform:translateY(-50%)}
 /* ⚠️ 抽屉打开时必须把这条小药丸收掉：它挂在浮标右边（left:100% + 7px），
    而浮标现在正好落在品牌卡的左上角 —— 那条深色药丸会盖住标题的第一个字。
    用户报的"挡住"有一半是这个：肉眼看像"来"字被啃了一块。放大 3 倍才看出来，
-   因为它是深色半透明（rgba(20,52,54,.84)）压在紫底上，颜色很接近。
+   因为它是深色半透明（rgba(20,40,66,.84)）压在紫底上，颜色很接近。
    抽屉里那个"音乐"开关本来就会显示"播放中"，信息没丢。 */
 body.panel-open .fab-eq{opacity:0}
 .fab-eq i{
-  display:block;width:3px;border-radius:2px;background:#9adad2;
+  display:block;width:3px;border-radius:2px;background:#9fc4ec;
   height:16px;transform:scaleY(.28);transform-origin:50% 100%;
 }
 @media (prefers-reduced-motion: no-preference){
@@ -104,7 +103,7 @@ body.panel-open .fab-eq{opacity:0}
 
 /* ===== 遮罩 ===== */
 .scrim{
-  position:fixed;inset:0;z-index:55;background:rgba(15,42,44,.44);
+  position:fixed;inset:0;z-index:55;background:rgba(15,32,54,.44);
   opacity:0;pointer-events:none;
   transition:opacity .28s ease,backdrop-filter .28s ease,-webkit-backdrop-filter .28s ease;
 }
@@ -121,8 +120,8 @@ body.liquid.lite .scrim{backdrop-filter:none;-webkit-backdrop-filter:none}
   position:fixed;left:0;top:0;bottom:0;z-index:58;
   width:min(342px,87vw);
   padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));
-  background:linear-gradient(170deg,#ffffff 0%,#f3fbfa 100%);
-  box-shadow:6px 0 34px rgba(30,70,86,.30);
+  background:linear-gradient(170deg,#ffffff 0%,#fbfdff 100%);
+  box-shadow:6px 0 34px rgba(30,60,100,.30);
   border-radius:0 26px 26px 0;
   transform:translateX(-103%);
   /* visibility 跟着一起切：收起后彻底移出可聚焦范围，不然 Tab 键还能钻进隐藏的菜单。
@@ -149,15 +148,16 @@ body.liquid.lite .scrim{backdrop-filter:none;-webkit-backdrop-filter:none}
    浮标在抽屉打开时退场（见上面 .menu-fab 那段）。
    ⚠️ 必须 flex:0 0 auto：overflow:hidden 会把 flex 项的自动最小高度变成 0，
       抽屉内容一超高，这张卡就会被压扁。
-   ⚠️ 渐变的**浅端不能超过 #44618f**：整卡都用白字，实测白字在 #4d6cb0 上
-      对比度只有 3.86（正文要求 4.5），压到 #44618f 是 4.58 —— 刚好过线。
+   ⚠️ 渐变两端都要够深：整卡白字，实测白字在浅端 #b0457e 上是 5.26、
+      深端 #9c3f72 上是 6.23，都过正文 4.5 的线（换色前那版浅端只有 3.86，
+      所以当时写死了"浅端不能超过 #9c3f72"）。**换配色时这条要重新量。**
       副标题 / 作者名这类小字另加不透明度，邮箱用**深色**胶囊（白底胶囊会把
       底色调亮，白字掉到 3.2）。 */
 .brand{
   position:relative;flex:0 0 auto;margin:2px 0 4px;padding:10px;
   border-radius:16px;overflow:hidden;color:#fff;
-  background:linear-gradient(135deg,#2a6d67 0%,#44618f 100%);
-  box-shadow:0 6px 18px rgba(44,100,120,.24);
+  background:linear-gradient(135deg,#2a5390 0%,#9c3f72 100%);
+  box-shadow:0 6px 18px rgba(44,84,140,.24);
 }
 /* 星光：一次画好的静态色斑，不动、不吃帧 */
 .brand::before{
@@ -197,34 +197,34 @@ body.liquid.lite .scrim{backdrop-filter:none;-webkit-backdrop-filter:none}
 .brand-au .au-k{
   flex:0 0 auto;font-size:.64rem;font-weight:800;letter-spacing:.5px;
   padding:2px 6px;border-radius:20px;color:#fff;
-  background:rgba(20,52,54,.34);
+  background:rgba(20,40,66,.34);
 }
 .brand-au .au-txt{min-width:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .brand-au .au-nm{font-size:.74rem;font-weight:700;color:#fff}
 .brand-au .au-mail{
   font-size:.68rem;font-weight:600;color:#fff;text-decoration:none;
   padding:2px 8px;border-radius:20px;white-space:nowrap;
-  background:rgba(20,52,54,.34);border:1px solid rgba(255,255,255,.26);
+  background:rgba(20,40,66,.34);border:1px solid rgba(255,255,255,.26);
   transition:background .18s;
 }
-.brand-au .au-mail:hover{background:rgba(20,52,54,.52)}
+.brand-au .au-mail:hover{background:rgba(20,40,66,.52)}
 /* 信封图标用 CSS 生成，不写进 HTML —— 免得混进链接的可读名称 */
 .brand-au .au-mail::before{content:"✉ ";opacity:.85}
-.panel-sec{margin:10px 6px 3px;font-size:.72rem;font-weight:700;color:#5f858c;letter-spacing:.6px}
+.panel-sec{margin:10px 6px 3px;font-size:.72rem;font-weight:700;color:#5c7a9e;letter-spacing:.6px}
 
 /* 菜单项：逐个错峰滑入 */
 .pitem{
   display:flex;align-items:center;gap:11px;
   min-height:48px;padding:0 14px;border-radius:16px;
-  border:2px solid transparent;background:rgba(47,125,118,.07);
-  font-family:inherit;font-size:.98rem;font-weight:700;color:#22474a;
+  border:2px solid transparent;background:rgba(47,93,158,.07);
+  font-family:inherit;font-size:.98rem;font-weight:700;color:#1f3350;
   cursor:pointer;text-align:left;width:100%;
   transition:background .18s,border-color .18s,transform .16s;
 }
-.pitem:hover{background:rgba(47,125,118,.15)}
+.pitem:hover{background:rgba(47,93,158,.15)}
 .pitem:active{transform:scale(.985)}
 .pitem.on{
-  background:linear-gradient(135deg,#2f7d76,#4d6cb0);color:#fff;
+  background:linear-gradient(135deg,#2f5d9e,#b0457e);color:#fff;
   border-color:rgba(255,255,255,.45);
 }
 .pitem .pico{font-size:1.18rem;flex:0 0 auto;width:24px;text-align:center}
@@ -298,9 +298,9 @@ body.land .menu-fab{top:auto;bottom:12px}
   opacity:0;transition:opacity .35s ease;
   background:radial-gradient(circle,
     rgba(255,255,255,.52) 0%,
-    rgba(170,226,218,.30) 34%,
-    rgba(172,204,240,.14) 56%,
-    rgba(172,204,240,0) 72%);
+    rgba(176,210,244,.30) 34%,
+    rgba(248,196,222,.14) 56%,
+    rgba(248,196,222,0) 72%);
 }
 body.liquid:not(.tool-open) .poke{opacity:1}
 body.liquid.lite .poke{display:none}
@@ -319,13 +319,13 @@ body.liquid .foot-hint,
 body.liquid .panel,
 body.liquid .guide-card{
   /* 静态光效：顶边一道更亮的镜面 + 内部一圈柔和反光（不写 animation → 不逐帧重算） */
-  box-shadow:0 20px 46px rgba(24,60,62,.16),
+  box-shadow:0 20px 46px rgba(24,46,72,.16),
              inset 0 1.5px 0 rgba(255,255,255,.95),
              inset 0 -1px 0 rgba(255,255,255,.30),
              inset 0 20px 30px -26px rgba(255,255,255,.78);
 }
 
-/* ===== 站台设置：一行 5 个开关（音效 / 玻璃 / 音乐 / 全屏 / 横屏）+ 一行音乐控制 =====
+/* ===== 站台设置：一行四个开关 + 一行音乐控制 =====
    原来这里是三张两栏卡片（74+74+172 = 335px），加上 6 个条目后抽屉内容
    高达 952px —— **在 1440x950 的桌面上都超出 2px**，随便一缩窗口就出滚动条。
    现在压成 56 + 44 = 100px（实测内容降到 ~630px，比 640 高的小屏也装得下）。
@@ -337,43 +337,43 @@ body.liquid .guide-card{
   flex:1 1 0;min-width:0;min-height:56px;padding:6px 4px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
   border-radius:14px;cursor:pointer;font-family:inherit;text-align:center;
-  background:rgba(47,125,118,.07);border:1px solid rgba(77,108,176,.20);color:#22474a;
+  background:rgba(47,93,158,.07);border:1px solid rgba(176,69,126,.20);color:#1f3350;
   transition:transform .16s,background .2s,border-color .2s;
   -webkit-tap-highlight-color:transparent;
 }
-.sbtn:not(.off){background:rgba(47,125,118,.14);border-color:rgba(77,108,176,.44)}
+.sbtn:not(.off){background:rgba(47,93,158,.14);border-color:rgba(176,69,126,.44)}
 .sbtn:active{transform:scale(.96)}
 /* 图标徽章：开着是品牌紫，关掉是灰 —— 颜色本身就是状态，别只靠那两个字 */
 .sbtn .cico{
   width:23px;height:23px;border-radius:8px;font-size:.8rem;line-height:1;
   display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,#2f7d76,#4d6cb0);color:#fff;
+  background:linear-gradient(135deg,#2f5d9e,#b0457e);color:#fff;
   transition:background .22s,transform .3s cubic-bezier(.34,1.56,.64,1);
 }
-.sbtn.off .cico{background:rgba(70,118,124,.24);color:#28564f;transform:scale(.92)}
+.sbtn.off .cico{background:rgba(70,110,160,.24);color:#2a3f66;transform:scale(.92)}
 .sbtn .slb{font-size:.76rem;font-weight:800;line-height:1.15}
-.sbtn .chint{font-size:.66rem;font-weight:700;line-height:1.15;color:#41676d;margin:0}
+.sbtn .chint{font-size:.66rem;font-weight:700;line-height:1.15;color:#3d5a86;margin:0}
 /* 音乐控制行：⏮ 曲名 ⏭ + 音量条，一行放完 */
 .mbar{display:flex;align-items:center;gap:7px;padding:0 2px}
 .mnav{
   width:44px;height:44px;flex:0 0 auto;border-radius:12px;cursor:pointer;
   font-family:inherit;font-size:1rem;line-height:1;
-  background:rgba(47,125,118,.10);border:1.5px solid rgba(47,125,118,.22);color:#28564f;
+  background:rgba(47,93,158,.10);border:1.5px solid rgba(47,93,158,.22);color:#2a3f66;
   display:inline-flex;align-items:center;justify-content:center;
   transition:background .18s,transform .16s;
 }
-.mnav:hover{background:rgba(47,125,118,.18)}
+.mnav:hover{background:rgba(47,93,158,.18)}
 .mnav:active{transform:scale(.93)}
 .mname{
-  flex:0 1 auto;min-width:0;font-size:.74rem;font-weight:700;color:#41676d;
+  flex:0 1 auto;min-width:0;font-size:.74rem;font-weight:700;color:#3d5a86;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 .mbar input[type=range]{
-  flex:1 1 40px;min-width:40px;height:26px;accent-color:#4d6cb0;cursor:pointer;
+  flex:1 1 40px;min-width:40px;height:26px;accent-color:#b0457e;cursor:pointer;
   background:transparent;
 }
 .mbar .vlab{
-  flex:0 0 auto;font-size:.68rem;font-weight:700;color:#41676d;
+  flex:0 0 auto;font-size:.68rem;font-weight:700;color:#3d5a86;
   min-width:30px;text-align:right;
 }
 /* 极矮的窗口（小手机 640 高、横屏手机）再收一档间距，尽量让它根本不需要滚。
@@ -425,8 +425,8 @@ body.liquid .guide-card{
   position:fixed;left:70px;top:22px;z-index:57;
   padding:8px 15px;border-radius:30px;
   font-size:.84rem;font-weight:700;white-space:nowrap;
-  background:rgba(20,52,54,.9);color:#fff;
-  box-shadow:0 4px 16px rgba(18,46,48,.3);
+  background:rgba(20,40,66,.9);color:#fff;
+  box-shadow:0 4px 16px rgba(18,36,58,.3);
   opacity:0;transform:translateX(-10px);pointer-events:none;
   transition:opacity .26s ease,transform .26s cubic-bezier(.22,1,.36,1);
 }
@@ -448,7 +448,7 @@ body.liquid .guide-card{
 
 /* ===== 目录页 ===== */
 .lead{margin:0 0 4px;font-size:1.25rem;font-weight:800;text-align:center}
-.sublead{margin:0 0 20px;text-align:center;color:#41676d;font-size:.92rem}
+.sublead{margin:0 0 20px;text-align:center;color:#3d5a86;font-size:.92rem}
 .cards{
   display:grid;gap:14px;max-width:1080px;margin:0 auto;
   grid-template-columns:repeat(auto-fit,minmax(238px,1fr));
@@ -456,27 +456,27 @@ body.liquid .guide-card{
 .card{
   display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;
   min-height:186px;padding:20px 16px;border-radius:26px;cursor:pointer;font-family:inherit;
-  background:rgba(255,255,255,.82);border:2px solid rgba(77,108,176,.22);
-  box-shadow:0 6px 22px rgba(44,100,120,.10);transition:transform .18s,box-shadow .18s,border-color .18s;
+  background:rgba(255,255,255,.82);border:2px solid rgba(176,69,126,.22);
+  box-shadow:0 6px 22px rgba(44,84,140,.10);transition:transform .18s,box-shadow .18s,border-color .18s;
 }
-.card:hover{transform:translateY(-4px);border-color:#4d6cb0;box-shadow:0 12px 30px rgba(47,125,118,.20)}
+.card:hover{transform:translateY(-4px);border-color:#b0457e;box-shadow:0 12px 30px rgba(47,93,158,.20)}
 .card .ico{font-size:2.6rem;line-height:1}
 .card .txt{display:flex;flex-direction:column;gap:4px;flex:1 1 auto;justify-content:center;align-items:center}
-.card .nm{font-size:1.12rem;font-weight:800;color:#22474a}
-.card .ds{font-size:.86rem;color:#41676d;line-height:1.5}
+.card .nm{font-size:1.12rem;font-weight:800;color:#1f3350}
+.card .ds{font-size:.86rem;color:#3d5a86;line-height:1.5}
 .card .go{
   margin-top:6px;padding:11px 22px;border-radius:40px;font-size:.92rem;font-weight:800;color:#fff;
-  background:linear-gradient(135deg,#2f7d76,#4d6cb0);min-height:44px;display:inline-flex;align-items:center;
+  background:linear-gradient(135deg,#2f5d9e,#b0457e);min-height:44px;display:inline-flex;align-items:center;
 }
 .resume{margin:0 auto 18px;max-width:1080px;display:none}
 .resume.on{display:block}
 .resume button{
   width:100%;min-height:52px;border-radius:20px;font-family:inherit;font-size:.98rem;font-weight:700;
-  border:2px dashed rgba(77,108,176,.45);background:rgba(255,255,255,.6);color:#28564f;cursor:pointer;
+  border:2px dashed rgba(176,69,126,.45);background:rgba(255,255,255,.6);color:#2a3f66;cursor:pointer;
 }
 .foot-hint{
   max-width:1080px;margin:22px auto 0;padding:12px 16px;border-radius:16px;font-size:.84rem;
-  color:#41676d;background:rgba(255,255,255,.6);border:1px solid rgba(77,108,176,.18);line-height:1.6;
+  color:#3d5a86;background:rgba(255,255,255,.6);border:1px solid rgba(176,69,126,.18);line-height:1.6;
 }
 
 /* ============================================================
@@ -497,7 +497,7 @@ body.liquid .guide-card{
   .card .nm{font-size:1rem}
   .card .ds{font-size:.78rem;line-height:1.4}
   .card .go{display:none}
-  .card::after{content:'›';font-size:1.6rem;color:#4d6cb0;flex:0 0 auto;line-height:1}
+  .card::after{content:'›';font-size:1.6rem;color:#b0457e;flex:0 0 auto;line-height:1}
   .foot-hint{margin-top:16px;font-size:.78rem;padding:10px 12px}
 }
 @media (max-width:380px){
@@ -511,7 +511,7 @@ body.liquid .guide-card{
    卡片不能压住它。
    ============================================================ */
 .guide-mask{
-  position:fixed;inset:0;z-index:120;background:rgba(12,36,38,.64);
+  position:fixed;inset:0;z-index:120;background:rgba(12,28,48,.64);
   display:none;align-items:center;justify-content:center;
   padding:88px 18px calc(24px + env(safe-area-inset-bottom,0px));
 }
@@ -522,32 +522,32 @@ body.liquid.lite .guide-mask{backdrop-filter:none;-webkit-backdrop-filter:none}
 @keyframes gFade{from{opacity:0}to{opacity:1}}
 .guide-card{
   width:min(462px,100%);max-height:100%;overflow-y:auto;
-  background:linear-gradient(170deg,#ffffff 0%,#f3f9fc 100%);
-  border-radius:24px;padding:22px;color:#1b3a40;
-  box-shadow:0 26px 70px rgba(14,38,40,.5);
+  background:linear-gradient(170deg,#ffffff 0%,#fbf9fd 100%);
+  border-radius:24px;padding:22px;color:#182a44;
+  box-shadow:0 26px 70px rgba(14,30,50,.5);
   animation:gUp .34s cubic-bezier(.22,1,.36,1) both;
 }
 @keyframes gUp{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
-.guide-step{font-size:.71rem;font-weight:800;color:#5f858c;letter-spacing:.7px}
+.guide-step{font-size:.71rem;font-weight:800;color:#5c7a9e;letter-spacing:.7px}
 .guide-body{min-height:136px;margin-top:6px}
 .guide-body.anim{animation:gStep .3s cubic-bezier(.22,1,.36,1) both}
 @keyframes gStep{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
 .guide-ico{font-size:2.6rem;line-height:1;margin-bottom:8px}
 .guide-h{margin:0 0 8px;font-size:1.16rem;font-weight:800;line-height:1.35}
-.guide-p{margin:0;font-size:.9rem;line-height:1.7;color:#3b656d}
-.guide-p b{color:#2f7d76}
+.guide-p{margin:0;font-size:.9rem;line-height:1.7;color:#35507a}
+.guide-p b{color:#2f5d9e}
 .guide-foot{display:flex;align-items:center;gap:9px;margin-top:18px}
 .guide-dots{display:flex;gap:6px;flex:1 1 auto;align-items:center}
-.guide-dots i{width:8px;height:8px;border-radius:50%;background:rgba(47,125,118,.22);transition:all .28s cubic-bezier(.22,1,.36,1)}
-.guide-dots i.on{width:22px;border-radius:5px;background:linear-gradient(135deg,#2f7d76,#4d6cb0)}
+.guide-dots i{width:8px;height:8px;border-radius:50%;background:rgba(47,93,158,.22);transition:all .28s cubic-bezier(.22,1,.36,1)}
+.guide-dots i.on{width:22px;border-radius:5px;background:linear-gradient(135deg,#2f5d9e,#b0457e)}
 .guide-btn{
   min-height:46px;padding:0 20px;border-radius:40px;cursor:pointer;font-family:inherit;
-  font-size:.9rem;font-weight:800;border:1.5px solid rgba(47,125,118,.28);
-  background:#fff;color:#28564f;transition:all .18s;white-space:nowrap;
+  font-size:.9rem;font-weight:800;border:1.5px solid rgba(47,93,158,.28);
+  background:#fff;color:#2a3f66;transition:all .18s;white-space:nowrap;
 }
-.guide-btn:hover:not(:disabled){transform:translateY(-1px);border-color:#4d6cb0}
+.guide-btn:hover:not(:disabled){transform:translateY(-1px);border-color:#b0457e}
 .guide-btn:disabled{opacity:.32;cursor:not-allowed}
-.guide-btn.primary{background:linear-gradient(135deg,#2f7d76,#4d6cb0);border-color:transparent;color:#fff}
+.guide-btn.primary{background:linear-gradient(135deg,#2f5d9e,#b0457e);border-color:transparent;color:#fff}
 /* 引导进行中把靶子按钮点亮 —— 必须盖在遮罩(120)之上才看得见 */
 .menu-fab.spot{opacity:1!important;z-index:125}
 @media (prefers-reduced-motion: no-preference){
@@ -591,17 +591,17 @@ body.liquid.lite .guide-mask{backdrop-filter:none;-webkit-backdrop-filter:none}
    ============================================================ */
 .gw-card{width:min(430px,100%)}
 .gw-ico{font-size:2.3rem;line-height:1;margin-bottom:8px}
-.gw-h{margin:0 0 10px;font-size:1.1rem;font-weight:800;line-height:1.4;color:#1b3a40}
-.gw-p{margin:0 0 9px;font-size:.875rem;line-height:1.7;color:#3b656d}
-.gw-p b{color:#2f7d76}
+.gw-h{margin:0 0 10px;font-size:1.1rem;font-weight:800;line-height:1.4;color:#182a44}
+.gw-p{margin:0 0 9px;font-size:.875rem;line-height:1.7;color:#35507a}
+.gw-p b{color:#2f5d9e}
 /* 低配提示：底色 + 边框跟正文分开，别只靠字色深浅（色弱也看得出来） */
 .gw-weak{
   padding:9px 11px;border-radius:12px;font-weight:600;color:#7a4a12;
   background:rgba(255,176,60,.14);border:1px solid rgba(214,132,0,.30);
 }
-/* 收尾那行是次要信息：用 #41676d（对白底 6.08），别用 .panel-sec 那个
-   #5f858c —— 那个只有 3.87，13px 的字不达标 */
-.gw-fine{font-size:.82rem;color:#41676d}
+/* 收尾那行是次要信息：用 #3d5a86（对白底 6.08），别用 .panel-sec 那个
+   #5c7a9e —— 那个只有 3.87，13px 的字不达标 */
+.gw-fine{font-size:.82rem;color:#3d5a86}
 .gw-foot{display:flex;gap:9px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
 @media (max-width:420px){
   .gw-foot{flex-direction:column-reverse}
@@ -660,13 +660,13 @@ body{transition:background .45s cubic-bezier(.4,0,.2,1)}
              -webkit-backdrop-filter .42s cubic-bezier(.4,0,.2,1);
 }
 
-body.liquid{background:linear-gradient(158deg,#d3ece8 0%,#dfe6f8 100%)}
-/* ↑ 开了玻璃时底色用同样两个色、略深一档，好让上面漂移的两团色斑更显 */
+body.liquid{background:linear-gradient(158deg,#c2dcfa 0%,#f8cfe2 38%,#fbe9bd 68%,#ffffff 100%)}
+/* ↑ 开了玻璃时同一套四色、略深一档，好让上面漂移的两团色斑更显 */
 /* 色斑：常驻但不可见，靠 opacity 淡入淡出（visibility 保证关着时完全不光栅化） */
 /* ===== 玻璃效果下的「动态渐变」：两团色斑在底色上缓慢漂移 =====
-   这两团**就是**老师要的动态渐变，别再另加一层全屏渐变 —— 早先加过一层全屏极光，
-   跟它俩干的是同一件事，纯属多付一份代价（已撤掉）。
-   一团雾松青、一团雾霭蓝，正好是那两个舒缓色。
+   这两团**就是**老师要的动态渐变，别再另加一层全屏渐变 ——
+   加过一层，跟它俩干的是同一件事，纯属多付一份代价（已撤掉）。
+   一团蓝、一团粉，跟目录底那四色同族。
    ⚠️ 不要 filter:blur()：它们一直在动，给**移动图层**加滤镜 = 每帧重算一次模糊
       （.poke 那边踩过同一个坑）。柔边交给径向渐变自己（0% → 70% 才淡出，够软）。
    ⚠️ 关键帧只留 translate3d，**不要 scale** —— 缩放会强制重新栅格化整个图层，
@@ -685,11 +685,11 @@ body.liquid::after{
 }
 body::before{
   width:74vmax;height:74vmax;left:-22vmax;top:-26vmax;
-  background:radial-gradient(circle at 46% 46%,rgba(47,125,118,.60),rgba(47,125,118,0) 70%);
+  background:radial-gradient(circle at 46% 46%,rgba(96,140,220,.58),rgba(96,140,220,0) 70%);
 }
 body::after{
   width:68vmax;height:68vmax;right:-20vmax;bottom:-22vmax;
-  background:radial-gradient(circle at 54% 54%,rgba(77,108,176,.52),rgba(77,108,176,0) 70%);
+  background:radial-gradient(circle at 54% 54%,rgba(214,110,170,.50),rgba(214,110,170,0) 70%);
 }
 @media (prefers-reduced-motion: no-preference){
   body.liquid::before{animation:blobA 26s ease-in-out infinite alternate}
@@ -724,7 +724,7 @@ body.liquid .panel,
 body.liquid .guide-card{
   background:linear-gradient(150deg,rgba(255,255,255,.62),rgba(255,255,255,.34));
   border-color:rgba(255,255,255,.72);
-  box-shadow:0 20px 46px rgba(24,60,62,.16),
+  box-shadow:0 20px 46px rgba(24,46,72,.16),
              inset 0 1px 0 rgba(255,255,255,.92),
              inset 0 -1px 0 rgba(255,255,255,.30);
   backdrop-filter:blur(28px) saturate(1.9) brightness(1.06);
@@ -746,13 +746,13 @@ body.liquid .guide-card::before,
 body.liquid .foot-hint::before{opacity:1}
 body.liquid .card:hover{
   border-color:rgba(255,255,255,.92);
-  box-shadow:0 26px 56px rgba(24,60,62,.22),
+  box-shadow:0 26px 56px rgba(24,46,72,.22),
              inset 0 1px 0 rgba(255,255,255,.95),
              inset 0 -1px 0 rgba(255,255,255,.32);
 }
 body.liquid .menu-fab{
   background:linear-gradient(150deg,rgba(255,255,255,.36),rgba(255,255,255,.10)),
-             linear-gradient(135deg,#2f7d76,#4d6cb0);
+             linear-gradient(135deg,#2f5d9e,#b0457e);
   backdrop-filter:blur(18px) saturate(1.7);
   -webkit-backdrop-filter:blur(18px) saturate(1.7);
   border-color:rgba(255,255,255,.7);
