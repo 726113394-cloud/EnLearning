@@ -238,7 +238,13 @@ body.panel-open .fab-eq{opacity:0}
   animation-delay:calc(var(--i,0) * 46ms);
 }
 
-/* ===== 站台设置：一行三个开关 + 一行音乐控制 =====
+/* ⚠️ 必须写这条：[hidden] 是 UA 样式里的 display:none，而**作者样式一律优先于 UA 样式**
+   （跟特异性无关），所以 .sbtn{display:flex} 会把 hidden 属性顶掉 ——
+   全屏开关在不支持的浏览器（iPhone Safari）上要藏掉，就靠这条。
+   同一个坑也适用于别的 element+hidden 组合。 */
+[hidden]{display:none!important}
+
+/* ===== 站台设置：一行四个开关 + 一行音乐控制 =====
    原来这里是三张两栏卡片（74+74+172 = 335px），加上 6 个条目后抽屉内容
    高达 952px —— **在 1440x950 的桌面上都超出 2px**，随便一缩窗口就出滚动条。
    现在压成 56 + 44 = 100px（实测内容降到 ~630px，比 640 高的小屏也装得下）。
@@ -733,6 +739,7 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
       <button class="sbtn" id="soundBtn" type="button"><span class="cico">🔊</span><span class="slb">音效</span><span class="chint" id="soundHint">已开启</span></button>
       <button class="sbtn" id="liquidBtn" type="button"><span class="cico">💧</span><span class="slb">玻璃</span><span class="chint" id="liquidHint">已关闭</span></button>
       <button class="sbtn" id="musicBtn" type="button"><span class="cico">🎵</span><span class="slb">音乐</span><span class="chint" id="musicHint">播放中</span></button>
+      <button class="sbtn" id="fsBtn" type="button"><span class="cico">⛶</span><span class="slb">全屏</span><span class="chint" id="fsHint">未开启</span></button>
     </div>
     <div class="mbar anim-in" style="--i:8">
       <button class="mnav" id="musicPrev" type="button" aria-label="上一首">⏮</button>
@@ -18631,6 +18638,59 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
       if (!soundOff) beep([880, 1174], 0.055, 0.13);
     });
     paintSound();
+  }
+
+  /* ================================================================
+     全屏（投影/投屏上课用）
+     ⚠️ 状态按**真实的全屏状态**画（fullscreenchange 事件），不按"我点过没有"——
+        浏览器可以用 Esc 或 F11 自己退出，那之后按钮必须跟着变回"未开启"，
+        否则老师点一下会变成"反向操作"，最迷惑。
+     ⚠️ iPhone 上的 Safari 不支持给任意元素全屏（只能给 video），
+        fullscreenEnabled 为假时**直接把这个开关藏掉**：留一个点了没反应的按钮，
+        比没有这个按钮更糟。所以这里不写死"一定有 webkit 前缀就能用"。
+     ================================================================ */
+  var fsBtn = document.getElementById('fsBtn');
+  var fsHint = document.getElementById('fsHint');
+  function fsEl() {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+  }
+  function fsSupported() {
+    return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+  }
+  function paintFs() {
+    if (!fsBtn) return;
+    var on = !!fsEl();
+    fsBtn.classList.toggle('off', !on);
+    // 图标不换：全屏的"关"不是"被挡住"（那是音效/玻璃用 🔇/🚫 的理由），
+    // 状态交给徽章颜色 + 下面那行字，别硬造一个看不懂的符号
+    fsBtn.title = on ? '退出全屏' : '全屏显示';
+    fsBtn.setAttribute('aria-label', fsBtn.title);
+    if (fsHint) fsHint.textContent = on ? '已全屏' : '未开启';
+  }
+  if (fsBtn) {
+    if (!fsSupported()) {
+      fsBtn.hidden = true;
+    } else {
+      fsBtn.addEventListener('click', function () {
+        if (fsEl()) {
+          var p = document.exitFullscreen ? document.exitFullscreen()
+                                           : (document.webkitExitFullscreen ? document.webkitExitFullscreen() : null);
+          if (p && p.catch) p.catch(function () {});
+          backSfx();
+        } else {
+          // 全屏的是整个站台（documentElement），不是某个工具 ——
+          // 五 个工具是 iframe，跟着一起放大，不用各自处理
+          var el = document.documentElement;
+          var r = el.requestFullscreen ? el.requestFullscreen()
+                                       : (el.webkitRequestFullscreen ? el.webkitRequestFullscreen() : null);
+          if (r && r.catch) r.catch(function () { toast('浏览器不允许全屏', 2200); });
+          tapSfx();
+        }
+      });
+      document.addEventListener('fullscreenchange', paintFs);
+      document.addEventListener('webkitfullscreenchange', paintFs);
+      paintFs();
+    }
   }
 
   /* ================================================================
