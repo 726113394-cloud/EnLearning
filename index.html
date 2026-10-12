@@ -325,7 +325,7 @@ body.liquid .guide-card{
              inset 0 20px 30px -26px rgba(255,255,255,.78);
 }
 
-/* ===== 站台设置：一行四个开关 + 一行音乐控制 =====
+/* ===== 站台设置：一行 5 个开关（音效 / 玻璃 / 音乐 / 全屏 / 横屏）+ 一行音乐控制 =====
    原来这里是三张两栏卡片（74+74+172 = 335px），加上 6 个条目后抽屉内容
    高达 952px —— **在 1440x950 的桌面上都超出 2px**，随便一缩窗口就出滚动条。
    现在压成 56 + 44 = 100px（实测内容降到 ~630px，比 640 高的小屏也装得下）。
@@ -19223,8 +19223,8 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     musicBtn.querySelector('.cico').textContent = playing ? '🎵' : '🔇';
     musicBtn.title = playing ? '音乐播放中，点击停止' : '音乐已停止，点击继续播放';
     musicBtn.setAttribute('aria-label', playing ? '停止背景音乐' : '继续播放背景音乐');
-    // 只留状态词：完整句子在 title / aria-label 里。站台设置压成一行三个
-    // 小开关后，这块宽度只够放两三个字（原来那句"· 点左边的按钮停止"是给
+    // 只留状态词：完整句子在 title / aria-label 里。站台设置压成一行 5 个小开关后，
+    // 这块宽度只够放两三个字（原来那句"· 点左边的按钮停止"是给
     // 两栏大卡片写的，现在整块就是按钮，点哪儿都一样）
     musicHint.textContent = playing ? '播放中' : '已停止';
     // 靶子旁边的小波浪：只在真的在播时显示
