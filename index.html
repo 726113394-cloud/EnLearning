@@ -4541,8 +4541,12 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
 
 <script>
 (function () {
+    // ⚠️ 这个键名是"看过没"的标记。重做教学时要**升版本**（这次从 xxl.tutorialShown
+    //    升到 _v2），否则已经看过旧版的人永远看不到新动画（只会走 ❓ 按钮）。
+    // ⚠️ 也要改这里，不能只改生成出来的工具文件：splice.py 是**整块替换**教学脚本的，
+    //    改了工具文件而不改本模板，下一次重拼接就会把改动覆盖回去（踩过一次）。
     var KEY = 'xxl.tutorialShown_v2';
-    // 旧键（看过旧版教学的人）留着没用，顺手清掉，不影响新键的判断
+    // 旧键清了，免得一直占着（不影响上面的判断）
     try { localStorage.removeItem('xxl.tutorialShown'); } catch (e) {}
     var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     var byId = function (id) { return document.getElementById(id); };
@@ -4627,7 +4631,6 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
     }
 
     /* ---------- 演示：真的去操作界面 ---------- */
-    var themedOnce = false, splitOnce = false;
 
     // 选单元：真打开二级选择器 → 真勾两个单元 → 取消（不动学生原来的选择）
     async function demoUnits() {
@@ -4719,47 +4722,68 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
         spotOn([byId('remainCount')], 10);
     }
 
-    // 主题 / 分栏：真点，各只做一次
+    // 换主题 / 分栏：进入这一步时**真真切切走一次往返**，之后循环只让按钮呼吸。
+    // ⚠️ 老师报过："消消乐教程之后会自动调黑夜模式，这个不对"。
+    //    第一版只点一次 → 停在这步时画面一直是黑的；
+    //    第二版改成每轮循环都往返 → 实测 9 秒里主题闪了 **7 次**，那是闪屏，更糟。
+    //    现在：每次进入这一步走一次 亮→暗→亮（学生看得见真的换了），
+    //    之后循环只打脉冲。既"真操作"、又不闪、也不留副作用。
+    var themeDemoed = false;
     async function demoThemeSplit() {
         var s = byId('splitLayoutBtn');
-        if (s && !splitOnce && app.isPlaying && !app.splitMode) {
-            markTap(s); await sleep(420); s.click(); splitOnce = true; await sleep(720);
-        }
         var t = byId('themeToggle');
-        if (t && !themedOnce) {
-            markTap(t); await sleep(400); t.click(); themedOnce = true; await sleep(560);
+        if (!themeDemoed) {
+            themeDemoed = true;
+            if (s && app.isPlaying && !app.splitMode) {
+                markTap(s); await sleep(340);
+                s.click(); await sleep(880);      // 真的分栏：卡片真的左右分开
+                s.click(); await sleep(660);      // 再合回来
+            }
+            if (t) {
+                markTap(t); await sleep(340);
+                t.click(); await sleep(700);      // 真的切到深色 —— 学生看得见
+                t.click(); await sleep(560);      // 立刻切回原来的浅色
+            }
         }
-        spotOn([byId('themeToggle'), byId('splitLayoutBtn')], 8);
+        spotOn([t, s], 8);
+        markTap(t); markTap(s);                   // 循环时：两个按钮呼吸提示
+        await sleep(950);
         clearTaps();
     }
 
-    /* ---------- 七步（文案沿用老师原来的写法） ---------- */
+    /* ---------- 七步（文案沿用老师原来的写法） ----------
+       每一步都给 loopMs：老师明确要求"教学要循环演示"。各步的 run 都得是**可循环**的：
+       · 第 1 步每轮真的重开一次选择器（可循环）
+       · 第 2/7 步的动作有守卫（已经开局 / 已经换过主题就不再动），循环时只打脉冲
+       · 第 3/5 步只有第一轮真点卡片（避免把这一局打通），之后循环只打脉冲
+       · 第 4 步的倒计时本来就在真跑；第 6 步每轮刷新真实轮次数据
+       */
     var STEPS = [
-        { ico: '✏️', h: '先挑要练的单元', sel: '#pickUnitBtn',
+        { ico: '✏️', h: '先挑要练的单元', sel: '#pickUnitBtn', loopMs: 4200,
           p: '点「📚 年级 / 单元」这些小卡片挑这一轮练什么。<b>可以一次勾好几个单元</b>，卡片里还有「本册全选」一键全勾。至少选 5 个词才能开始。',
           run: function () { return demoUnits(); } },
 
-        { ico: '🚀', h: '点开始，卡片散开', sel: '#startBtn',
+        { ico: '🚀', h: '点开始，卡片散开', sel: '#startBtn', loopMs: 2400,
           p: '点「🚀 开始」，英文卡和中文卡会<b>随机散布</b>到棋盘上 —— 散布放不下时会自动改成规整网格，不会互相盖住。',
           run: function () { return demoStart(); } },
 
         { ico: '👉', h: '点两张，配成一对', loopMs: 2800,
-          p: '先点一张卡（它会亮起来），再点它对应的另一张。配上了就<b>一起消失并加分</b>。下面演示的就是真卡片自己配对。',
+          p: '先点一张卡（它会亮起来），再点它对应的另一张。配上了就<b>一起消失并加分</b>。下面演示的就是真卡片自己在配对。',
           run: function (n) { return demoPair(true, n === 0); } },
 
-        { ico: '⏱️', h: '每配成一对就重新给满', sel: '#timerDisplay',
-          p: '每配一对有几秒钟（设置栏里可改，默认 10 秒）。<b>每配成一对就重新给满</b>；时间到还没配上会扣 2 分。左上角这个数字就是它。',
+        { ico: '⏱️', h: '每配成一对就重新给满', sel: '#timerDisplay', loopMs: 2200,
+          p: '每配一对有几秒钟（设置栏里可改，默认 10 秒）。<b>每配成一对就重新给满</b>；时间到还没配上会扣 2 分。左上角这个数字就是它，是真的在走。',
           run: function () { spotOn([byId('timerDisplay')], 10); } },
 
         { ico: '⚠️', h: '配错会红闪并扣分', loopMs: 3000,
           p: '配错的一组会红闪、抖一下，同时<b>扣 3 分</b>。别乱点，看准了再点第二张。',
           run: function (n) { return demoPair(false, n === 0); } },
 
-        { ico: '🔁', h: '词多会自动分轮', sel: '#remainCount',
+        { ico: '🔁', h: '词多会自动分轮', sel: '#remainCount', loopMs: 3400,
           p: '一屏放不下时<b>不会硬塞</b>，而是分成几轮；这一轮消完自动接下一轮。',
           run: function () { return roundCaption(); } },
 
-        { ico: '🎨', h: '换主题，还能分栏', sel: '#themeToggle',
+        { ico: '🎨', h: '换主题，还能分栏', sel: '#themeToggle', loopMs: 2600,
           p: '浅色 / 深色 / 玻璃三种主题随便换。「📐 分栏」能把中文和英文左右分开 —— 屏幕太窄时它自己会禁用。',
           run: function () { return demoThemeSplit(); } }
     ];
@@ -4775,10 +4799,13 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
 
     function runStep() {
         var st = STEPS[idx];
-        var n = 0;
+        var n = 0, busy = false;
         var fire = function () {
             if (!running || STEPS[idx] !== st) return;
+            if (busy) return;   // 上一次还没演完就别叠着起（否则循环会把选择器开两次）
+            busy = true;
             Promise.resolve(st.run(n)).catch(function () {}).then(function () {
+                busy = false;
                 // 演示过程中聚光灯可能临时指向别处（比如选择器面板）。
                 // 演示一做完就把它**收回这一步的锚点**，否则会停在临时位置
                 // 甚至停在一个已经被关掉的浮层原来的地方。
@@ -4787,6 +4814,8 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
             n++;
         };
         fire();
+        // 循环演示：老师要的是"一直演给学生看"，不是点一下动一次。
+        // reduced-motion 下不循环（那正是"减少动效"的意思）。
         if (st.loopMs && !reduced) {
             timers.push(setInterval(function () { fire(); }, st.loopMs));
         }
@@ -4798,6 +4827,7 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
         var st = STEPS[idx];
         stopLoops();
         clearTaps();
+        themeDemoed = false;   // 每次进入这一步，允许再真实演示一次（并且走回原样）
         byId('tutIco').textContent = st.ico;
         byId('tutH').textContent = st.h;
         byId('tutP').innerHTML = st.p;
@@ -4827,8 +4857,6 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
             split: !!app.splitMode,
             timer: tInput ? tInput.value : null
         };
-        themedOnce = false;
-        splitOnce = false;
         // 演示期间给足倒计时，免得演到一半超时扣分（收尾会还原）
         if (app.timerSeconds < 30) {
             app.timerSeconds = 60;
@@ -7818,6 +7846,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupBigCardGlow() {
         document.addEventListener('pointermove', (e) => {
             if (!state.highEnd) return;
+            if (isDragging) return;      // 拖动中别做每帧 getBoundingClientRect（强制回流）
             glowPointer = { x: e.clientX, y: e.clientY };
             if (glowRaf !== null) return;
             glowRaf = requestAnimationFrame(() => {
@@ -8105,11 +8134,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // ================================================================
     //  11. 拖动
     // ================================================================
-    function getInsertBeforeId(clientX, draggingId) {
+    // ⚠️ 必须同时看 X 和 Y。以前只看 X：真实句子在手机上会折成好几行，
+    //    手指还在第 2 行，却会算出第 1 行的落点 → 目标反复翻 → 每次都全量重建答题区。
+    // ⚠️ 判"同一行"用 offsetTop，**不能用 getBoundingClientRect().top**：
+    //    拖动时卡片带 transform:scale，rect 会被改掉（本技能在别的工具踩过这个坑）。
+    function getInsertBeforeId(clientX, clientY, draggingId) {
         const tokens = [...answerZone.querySelectorAll('.token[data-id]')];
+        let rowTop = null;
+        if (clientY != null) {
+            let near = null, best = Infinity;
+            for (const el of tokens) {
+                const r = el.getBoundingClientRect();
+                const d = Math.abs(r.top + r.height / 2 - clientY);
+                if (d < best) { best = d; near = el; }
+            }
+            if (near) rowTop = near.offsetTop;
+        }
         for (const el of tokens) {
             const id = parseInt(el.dataset.id);
             if (id === draggingId) continue;
+            if (rowTop !== null && el.offsetTop !== rowTop) continue;   // 只看手指所在那一行
             const rect = el.getBoundingClientRect();
             if (clientX < rect.left + rect.width / 2) return id;
         }
@@ -8145,13 +8189,51 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!dragState) return;
         dragState.ghost.style.left = (pointerX - dragState.offsetX) + 'px';
         dragState.ghost.style.top = (pointerY - dragState.offsetY) + 'px';
-        const beforeId = getInsertBeforeId(pointerX, dragState.itemId);
+        const beforeId = getInsertBeforeId(pointerX, pointerY, dragState.itemId);
         if (beforeId !== dragState.targetBeforeId) {
             dragState.targetBeforeId = beforeId;
             reorderItems(dragState.itemId, beforeId);
             Sound.drop();
-            renderAnswerZone();
+            syncAnswerOrder();      // ← 只挪节点，绝不在这里全量重建（见下面的说明）
         }
+    }
+    // 拖动中的"弹性挤开"：只把被拖那张的节点挪到新位置，其余卡片用 FLIP 补一段动画。
+    // ⚠️⚠️ 这里**不能**调 renderAnswerZone()：它 answerZone.innerHTML = '' 会把
+    //     **正在拖的那张卡**也销毁重建 —— 触摸指针的隐式捕获就在那张卡上，
+    //     元素被销毁后指针流会断（pointerup 收不到），拖动永远结束不了；
+    //     而且一次拖动里会重建七八次（实测 7 次），纯粹白烧性能。
+    const DRAG_REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function syncAnswerOrder() {
+        const draggedEl = answerZone.querySelector(`.token[data-id="${dragState.itemId}"]`);
+        if (!draggedEl) { renderAnswerZone(); return; }
+        const tokens = [...answerZone.querySelectorAll('.token[data-id]')];
+        const before = new Map(tokens.map(el => [el, el.getBoundingClientRect()]));
+        const refEl = dragState.targetBeforeId == null
+            ? null
+            : answerZone.querySelector(`.token[data-id="${dragState.targetBeforeId}"]`);
+        if (refEl) answerZone.insertBefore(draggedEl, refEl);
+        else answerZone.appendChild(draggedEl);
+        // 重新编号 + 首词首字母大写（和 renderAnswerZone 的规则一致）
+        [...answerZone.querySelectorAll('.token[data-id]')].forEach((el, i) => {
+            const o = el.querySelector('.order');
+            if (o) o.textContent = i + 1;
+            if (el === draggedEl) return;
+            const item = state.answerItems.find(it => it.id === parseInt(el.dataset.id));
+            const node = el.firstChild;
+            if (item && node && node.nodeType === 3) {
+                node.nodeValue = i === 0 ? toFirstPositionForm(item.word) : toDisplayForm(item.word);
+            }
+        });
+        // FLIP：只给"没被拖的那几张"补动画（被拖的那张由 ghost 顶着）
+        if (DRAG_REDUCED) return;
+        tokens.forEach(el => {
+            if (el === draggedEl) return;
+            const a = before.get(el), b = el.getBoundingClientRect();
+            const dx = a.left - b.left, dy = a.top - b.top;
+            if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+            el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }],
+                       { duration: 240, easing: 'cubic-bezier(.22,1,.36,1)' });
+        });
     }
     function endRealDrag(clientX, clientY) {
         if (!dragState) return;
@@ -8199,9 +8281,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.removeEventListener('pointermove', onMove);
                 document.removeEventListener('pointerup', onEnd);
                 document.removeEventListener('pointercancel', onEnd);
-                if (didDrag) endRealDrag(ev.clientX, ev.clientY);
-                else removeFromAnswer(itemId);
-                isDragging = false;
+                // ⚠️⚠️ 收尾必须在 finally 里。以前 `isDragging = false` 写在
+                //    endRealDrag() **之后**：中间任何异常（Sound / 渲染 / 数据越界）
+                //    都会让它永远停在 true，而本函数开头的守卫
+                //    `if (state.isAnswered || dragState || isDragging) return;`
+                //    会把之后**所有**拖动都挡掉 —— 卡片再也拖不动，只能刷新页面，
+                //    刷新就丢练习进度。这就是老师报的"卡住卡片"。
+                try {
+                    if (didDrag) endRealDrag(ev.clientX, ev.clientY);
+                    else removeFromAnswer(itemId);
+                } finally {
+                    isDragging = false;
+                    const stuck = !!dragState;                // 走到这里还留着 = 上面抛过异常
+                    if (dragState) {
+                        try { dragState.ghost.remove(); } catch (e) {}
+                        dragState = null;
+                    }
+                    // 正常路径 endRealDrag() 自己会 render，这里只补异常路径那一次
+                    if (stuck) { try { renderAnswerZone(); } catch (e) {} }
+                }
             };
             document.addEventListener('pointermove', onMove);
             document.addEventListener('pointerup', onEnd);
