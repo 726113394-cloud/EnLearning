@@ -102,10 +102,16 @@ body.panel-open .fab-eq{opacity:0}
 /* ===== 遮罩 ===== */
 .scrim{
   position:fixed;inset:0;z-index:55;background:rgba(34,20,56,.44);
-  opacity:0;pointer-events:none;transition:opacity .28s ease;
-  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;
+  transition:opacity .28s ease,backdrop-filter .28s ease,-webkit-backdrop-filter .28s ease;
 }
 .scrim.on{opacity:1;pointer-events:auto}
+/* ⚠️ 遮罩的模糊**只在开了液态玻璃时才有**。它是铺满整个视口的层，
+   给它一层 backdrop-filter 等于「每次拉开抽屉都要把整页重算一遍模糊」——
+   实测这是拉开抽屉时最大的一笔开销，而遮罩本身靠 rgba 压暗已经够了。
+   低配档（.lite）干脆不给模糊，跟 .menu-fab 在 .lite 下的处理一致。 */
+body.liquid .scrim{backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+body.liquid.lite .scrim{backdrop-filter:none;-webkit-backdrop-filter:none}
 
 /* ===== 抽屉菜单 ===== */
 .panel{
@@ -243,6 +249,78 @@ body.panel-open .fab-eq{opacity:0}
    全屏开关在不支持的浏览器（iPhone Safari）上要藏掉，就靠这条。
    同一个坑也适用于别的 element+hidden 组合。 */
 [hidden]{display:none!important}
+
+/* ===== 手机专用：横屏开关 + 把练习区转 90° =====
+   ⚠️ 开关本身是 .sbar 里的第 5 个 .sbtn（不单开一行：单开一行多 44px 高，
+      会把小屏手机的抽屉撑出预算）。宽屏时把它藏掉 —— 宽屏幕不需要转。
+   ⚠️⚠️ 下面这段说明**必须用注释符号包住**：上一版这里注释开头被误删、结尾留着，
+      于是说明文字变成非法 CSS，浏览器一路吞到能对齐为止 —— 把紧跟其后的
+      `body.land #stage` 规则整个吃掉了（表现是"点了横屏开关但页面不转"）。
+      后来又栽了第二次：注释**正文里写了注释符号本身**（想写"用它包住"），
+      那个结束符号提前把注释关掉了，同样吞掉下一条规则。
+      ⚠️ 所以：**注释正文里绝不能出现注释的结束符号**。
+      build_hub.py 里现在有一道逐字符扫描的硬检查，这类错误不会再出厂。 */
+/*
+   手机浏览器**没有**能强制转屏的 API（screen.orientation.lock 只在全屏下、
+   且部分浏览器才支持），所以只能自己把内容转过来：
+   把 #stage（目录页 + 工具 iframe）整体 rotate(90deg)，站台自己的控件
+   （浮标 / 抽屉 / 引导 / 警示）都留在 #stage 外面，因此始终是正着的。
+   转完之后 iframe 的 CSS 视口正好变成"宽=100vh、高=100vw"，工具自己的
+   响应式布局就会按横屏来排 —— 这才是目的：句子有更宽的地方排。
+   ⚠️ rotate + translateY(-100%) 是标准写法：原点在左上角，
+      rotate(90deg) 把 (x,y) 映到 (-y,x)，再 translateY(-100%) 才落回 [0,vw]×[0,vh]。
+*/
+
+body.land #stage{
+  position:fixed;left:0;top:0;
+  width:100vh;height:100vw;
+  transform:rotate(90deg) translateY(-100%);
+  transform-origin:0 0;
+}
+/* 转过来之后浮标要避开被转到左边的那条（旋转后 #stage 的左边缘其实在下方）——
+   保持原位即可：它仍在视口左上角，不会压住内容的中部 */
+body.land .menu-fab{top:auto;bottom:12px}
+
+/* ===== 液态玻璃的两处光效 =====
+   ① 跟随鼠标的发光点（.poke）：一个固定尺寸的柔光斑，每帧只写一次 transform。
+      ⚠️ 不要给它 filter:blur() —— 每帧模糊一个移动图层就是每帧重算一次模糊，
+         而柔和的径向渐变本身就够软，不需要滤镜。也不要 mix-blend-mode：
+         那会强制整页做一次混合合成，代价比省下的那点观感大得多。
+   ② 玻璃面的高光缓慢扫过：复用 `.card::before`（本来就有那层镜面高光），
+      只给它加一段 transform 动画。全走合成层，不触发布局。
+   ⚠️ 两者都只在**开了玻璃**时出现；低配档（.lite）、触屏、减少动效里全部关掉。 */
+.poke{
+  position:fixed;left:0;top:0;width:460px;height:460px;margin:-230px 0 0 -230px;
+  border-radius:50%;pointer-events:none;z-index:5;
+  opacity:0;transition:opacity .35s ease;
+  background:radial-gradient(circle,
+    rgba(255,255,255,.52) 0%,
+    rgba(212,196,255,.30) 34%,
+    rgba(198,226,255,.14) 56%,
+    rgba(198,226,255,0) 72%);
+}
+body.liquid:not(.tool-open) .poke{opacity:1}
+body.liquid.lite .poke{display:none}
+@media (pointer:coarse){ .poke{display:none} }
+@media (prefers-reduced-motion:reduce){ .poke{display:none} }
+
+/* ⚠️⚠️ 这里原本想给玻璃面加一段"高光缓慢扫过"的动画（复用 .card::before）。
+   实测**不能上**：中位帧间隔从 16.6ms 涨到 36ms（2.17 倍，60fps → 28fps）。
+   原因是高光在**带 backdrop-filter 的卡片里**动，每一帧都逼着 backdrop 把背景
+   重算一遍 —— 正是技能里"backdrop-filter 任何重绘都会重算"那条坑。
+   改成**静态**光效（下面的 inset 镜面）：静止的东西不会逐帧重绘，代价为 0。
+   以后想再加动态光效，必须先在真机上量帧间隔，别凭"transform 走合成层所以便宜"想当然。 */
+body.liquid .card,
+body.liquid .resume button,
+body.liquid .foot-hint,
+body.liquid .panel,
+body.liquid .guide-card{
+  /* 静态光效：顶边一道更亮的镜面 + 内部一圈柔和反光（不写 animation → 不逐帧重算） */
+  box-shadow:0 20px 46px rgba(52,34,96,.16),
+             inset 0 1.5px 0 rgba(255,255,255,.95),
+             inset 0 -1px 0 rgba(255,255,255,.30),
+             inset 0 20px 30px -26px rgba(255,255,255,.78);
+}
 
 /* ===== 站台设置：一行四个开关 + 一行音乐控制 =====
    原来这里是三张两栏卡片（74+74+172 = 335px），加上 6 个条目后抽屉内容
@@ -433,8 +511,10 @@ body.panel-open .fab-eq{opacity:0}
   position:fixed;inset:0;z-index:120;background:rgba(28,16,48,.64);
   display:none;align-items:center;justify-content:center;
   padding:88px 18px calc(24px + env(safe-area-inset-bottom,0px));
-  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
 }
+/* ⚠️ 同 .scrim：引导/警示遮罩也铺满视口，模糊默认关掉，只在开了液态玻璃时才有 */
+body.liquid .guide-mask{backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+body.liquid.lite .guide-mask{backdrop-filter:none;-webkit-backdrop-filter:none}
 .guide-mask.show{display:flex;animation:gFade .26s ease both}
 @keyframes gFade{from{opacity:0}to{opacity:1}}
 .guide-card{
@@ -700,6 +780,9 @@ body[data-perf="low"] .scrim,
 body[data-perf="low"] .toast,
 body[data-perf="low"] .guide-callout,
 body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
+
+/* 宽屏（>900px）不显示"横屏"开关：桌面屏幕本来就是横的，转了反而怪 */
+@media (min-width:901px){ #landBtn{display:none} }
 </style>
 </head>
 <body>
@@ -711,6 +794,7 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
   </button>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="scrim" id="scrim"></div>
+  <div class="poke" id="poke" aria-hidden="true"></div>
   <aside class="panel" id="panel" aria-hidden="true">
     <div class="brand anim-in" style="--i:0">
       <div class="brand-row">
@@ -740,6 +824,7 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
       <button class="sbtn" id="liquidBtn" type="button"><span class="cico">💧</span><span class="slb">玻璃</span><span class="chint" id="liquidHint">已关闭</span></button>
       <button class="sbtn" id="musicBtn" type="button"><span class="cico">🎵</span><span class="slb">音乐</span><span class="chint" id="musicHint">播放中</span></button>
       <button class="sbtn" id="fsBtn" type="button"><span class="cico">⛶</span><span class="slb">全屏</span><span class="chint" id="fsHint">未开启</span></button>
+      <button class="sbtn off" id="landBtn" type="button"><span class="cico">🔄</span><span class="slb">横屏</span><span class="chint" id="landLabel">竖屏</span></button>
     </div>
     <div class="mbar anim-in" style="--i:8">
       <button class="mnav" id="musicPrev" type="button" aria-label="上一首">⏮</button>
@@ -18975,6 +19060,73 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   }
 
   /* ================================================================
+     横屏（手机专用）
+     手机浏览器没有能强制转屏的 API（screen.orientation.lock 只在全屏下、
+     且部分浏览器支持），所以是把 #stage 自己转 90° —— 工具 iframe 跟着转，
+     站台自己的控件（浮标/抽屉/引导）留在外面，始终正着。
+     ⚠️ 只改内存 + localStorage 里一个开关，不动任何工具的代码。
+     ================================================================ */
+  var LS_LAND = 'hub.land';
+  var landBtn = document.getElementById('landBtn');
+  var landLabel = document.getElementById('landLabel');
+  function paintLand() {
+    var on = document.body.classList.contains('land');
+    if (landLabel) landLabel.textContent = on ? '横屏中' : '竖屏';
+    if (landBtn) {
+      landBtn.classList.toggle('off', !on);     // 跟其它开关一样：关=灰、开=品牌紫
+      landBtn.title = on ? '转回竖屏' : '把练习区转 90°，横过来用';
+      landBtn.setAttribute('aria-label', landBtn.title);
+    }
+  }
+  function setLand(on) {
+    document.body.classList.toggle('land', on);
+    lsSet(LS_LAND, on ? '1' : '0');
+    paintLand();
+    // 转完要让工具重排一次（iframe 的视口尺寸变了，卡片位置得重算）
+    if (frame) {
+      try {
+        frame.contentWindow.dispatchEvent(new Event('resize'));
+      } catch (e) {}
+    }
+  }
+  if (landBtn) {
+    landBtn.addEventListener('click', function () {
+      var on = !document.body.classList.contains('land');
+      setLand(on);
+      if (on) tapSfx(); else backSfx();
+      toast(on ? '🔄 已横过来（再点一次转回去）' : '🔄 已转回竖屏', 2200);
+    });
+  }
+  paintLand();
+  // 上次选过横屏就沿用（只在窄屏有意义，宽屏那边按钮本身是藏着的）
+  if (lsGet(LS_LAND, '0') === '1') setLand(true);
+
+  /* ================================================================
+     跟随鼠标的发光点（只在开了玻璃、鼠标设备、非低配、非工具页时出现）
+     ⚠️ 只做"每帧写一次 transform"：不读任何 getBoundingClientRect（那是强制回流），
+        也不加 filter/blend —— 这两个都会把整页重算一遍，正是这个族踩过的坑。
+     ================================================================ */
+  var poke = document.getElementById('poke');
+  if (poke) {
+    var pokeX = 0, pokeY = 0, pokeRaf = null;
+    var pokeOn = function () {
+      return document.body.classList.contains('liquid') &&
+             !document.body.classList.contains('lite') &&
+             !document.body.classList.contains('tool-open') &&
+             hoverCapable && !REDUCED;
+    };
+    document.addEventListener('pointermove', function (e) {
+      if (!pokeOn()) return;
+      pokeX = e.clientX; pokeY = e.clientY;
+      if (pokeRaf !== null) return;
+      pokeRaf = requestAnimationFrame(function () {
+        pokeRaf = null;
+        poke.style.transform = 'translate3d(' + pokeX + 'px,' + pokeY + 'px,0)';
+      });
+    }, { passive: true });
+  }
+
+  /* ================================================================
      画质档位：设备线索 + 实测帧间隔，任一不行就降档
      目录页的液态玻璃跟着这根档位走，也可以手动开关
      ================================================================ */
@@ -18986,15 +19138,23 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   var reducedMotion = !!(mqReduce && mqReduce.matches);
   var cores = navigator.hardwareConcurrency || 0;
   var mem = navigator.deviceMemory || 0;
-  var weakHints = (cores > 0 && cores <= 4) || (mem > 0 && mem <= 4) || reducedMotion;
+  /* ⚠️⚠️ 静态线索**不能按 "≤4 核 / ≤4G" 判弱机**，这条踩过：
+     · iOS Safari 在 iPhone 上**恒报 4 核**（iPhone 16 Pro 也是 4）；
+     · Chrome 的 deviceMemory 封顶 8，不少中端机报 4。
+     结果老师的小米 13 和 iPhone 16 Pro 全被判成"低配"：抽屉动画被砍、
+     玻璃退成 .lite，开玻璃时还弹"这台设备看起来配置不高" ✗✗
+     现在静态线索只留**真的小**的那一档（≤2 核 / ≤2G），判断主力交给实测 A/B。
+     宁可让一台弱机先跑一次再降档，也不要让好机器一上来就被判死。 */
+  var weakHints = (cores > 0 && cores <= 2) || (mem > 0 && mem <= 2) || reducedMotion;
 
   // 默认**关**：液态玻璃是可选的皮肤，任何情况下都不自动打开
   var liquidOn = lsGet(LS_LIQUID, '0') === '1';
   var verdict = lsGet(LS_PERF, '');
-  // 默认 high：只有"设备线索弱"或"实测结论是吃力"才降。
+  // 默认 high：只有"系统要求减少动效"或"实测结论是吃力"才降。
   // ⚠️ 别把"还没测过"当成 low —— 玻璃默认关、A/B 根本不跑，
   //    那样会让好机器也永久失去抽屉错峰/引导入场这些动画。
-  var perfTier = weakHints ? 'low' : (verdict === 'low' ? 'low' : 'high');
+  // ⚠️ 也别拿静态线索（核心数/内存）来降档：iOS 恒报 4 核，见上面的说明。
+  var perfTier = reducedMotion ? 'low' : (verdict === 'low' ? 'low' : 'high');
 
   var liquidBtn = document.getElementById('liquidBtn');
   var liquidHint = document.getElementById('liquidHint');
@@ -19064,7 +19224,11 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
           if (!liquidOn) { paintLiquid(); return; }
           var bad = on.med > Math.max(20, off.med * 1.35);
           perfTier = bad ? 'low' : 'high';
-          lsSet(LS_PERF, perfTier);
+          // ⚠️ 只把 'high' 长期存下来。'low' 是一次采样的结论，很容易被噪声带偏
+          //    （页面还在忙、别的标签页在抢 CPU），而它一旦存死，这台机器就**永久**
+          //    失去动画、玻璃永久退成 lite —— 老师的两台旗舰就是这么被误伤的。
+          //    'low' 只在本次会话生效，下次进来重新量一次（只在开着玻璃时才量，很便宜）。
+          lsSet(LS_PERF, perfTier === 'high' ? 'high' : '');
           paintLiquid();      // 静默降档：不弹提示，用户不会被打扰
         });
       }); });
