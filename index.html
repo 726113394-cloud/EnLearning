@@ -9214,9 +9214,12 @@ document.addEventListener('DOMContentLoaded', function() {
     //    Chrome 的 deviceMemory 封顶 8、不少中端机报 4 —— 按 ≤4 判会把老师的旗舰机一起
     //    判成低配，动画被砍、高级渲染也不恢复（站台那边吃过同一次亏，见 SKILL 记录）。
     //    静态线索只留真小的档（≤2 核 / ≤2G）；系统开了「减少动效」照旧尊重。
+    // ⚠️⚠️ 「减少动效」**不算低配**（同一次教训）：它是用户的动效偏好，
+    //    Windows 关掉「动画效果」、开省电模式都会命中，跟机器强弱无关。
+    //    它已经在管动画了（CSS 的 @media (prefers-reduced-motion)），
+    //    不该再拦着"高级渲染"不恢复 —— 那是静态毛玻璃，跟动不动没关系。
     const LOW_SPEC = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2)
-        || (navigator.deviceMemory && navigator.deviceMemory <= 2)
-        || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        || (navigator.deviceMemory && navigator.deviceMemory <= 2);
 
     if (!LOW_SPEC && lsGet(LS_GLASS) === '1') {
         state.highEnd = true;
@@ -12615,7 +12618,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         // 减弱动效就不放礼花了；低配设备把粒子上限砍一半
         const FW_REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const FW_LOWPOWER = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+        // ⚠️ 阈值别用 4：4 核机器很常见（Chrome 的 deviceMemory 还封顶 8），
+        //    按 ≤4 判会把正常机器一起算成低配。只留真小的 ≤2 档。
+        const FW_LOWPOWER = (navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2;
         const FW_MAX = FW_REDUCED ? 0 : (FW_LOWPOWER ? 160 : 320);
         let fwParticles = [];
         let fwAnimId = null;
@@ -14264,10 +14269,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // 低配设备（核心少 / 内存小 / 系统要求减弱动效）自动换更轻的渲染方案，
         // 免得毛玻璃和礼花把整台电脑拖住。
         (function detectPerfTier() {
-            const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            // ⚠️⚠️ 这里以前是 `reduce || cores <= 4 || mem <= 4`，两处都错：
+            //    · 「减少动效」是**用户的偏好**，不是机器差（老师的高配电脑就是这么被判低的）；
+            //    · ≤4 这档太松（4 核很常见，deviceMemory 还封顶 8）。
+            //    现在只看真小的硬件档；动效偏好交给 CSS，不参与判档。
             const cores = navigator.hardwareConcurrency || 8;
             const mem = navigator.deviceMemory || 8;
-            if (reduce || cores <= 4 || mem <= 4) {
+            if (cores <= 2 || mem <= 2) {
                 document.documentElement.dataset.perf = 'low';
             }
         })();
@@ -20078,7 +20086,16 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
      玻璃退成 .lite，开玻璃时还弹"这台设备看起来配置不高" ✗✗
      现在静态线索只留**真的小**的那一档（≤2 核 / ≤2G），判断主力交给实测 A/B。
      宁可让一台弱机先跑一次再降档，也不要让好机器一上来就被判死。 */
-  var weakHints = (cores > 0 && cores <= 2) || (mem > 0 && mem <= 2) || reducedMotion;
+  var weakHardware = (cores > 0 && cores <= 2) || (mem > 0 && mem <= 2);
+  /* ⚠️⚠️ `prefers-reduced-motion` **不是**低配线索（这轮又踩了一次，老师直接问
+     "为什么我的高配置电脑被识别成低端设备"）：
+     Windows 的「动画效果」关掉、开了省电模式、某些企业策略都会让它命中，
+     跟机器强不强毫无关系。它只该干一件事：**关动画**（CSS 那边已经在做）。
+     所以这里把它从"低配线索"里拿掉，也**不再用它降画质档**。
+     另外把检测到的实际值挂到 window 上，方便排查（也写进玻璃那句提示里）。 */
+  var perfProbe = { cores: cores, mem: mem, reducedMotion: reducedMotion,
+                    weakHardware: weakHardware, gapOn: null, gapOff: null, judged: null };
+  try { window.__hubPerfProbe = perfProbe; } catch (e) {}
 
   // 默认**关**：液态玻璃是可选的皮肤，任何情况下都不自动打开
   var liquidOn = lsGet(LS_LIQUID, '0') === '1';
@@ -20087,7 +20104,8 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   // ⚠️ 别把"还没测过"当成 low —— 玻璃默认关、A/B 根本不跑，
   //    那样会让好机器也永久失去抽屉错峰/引导入场这些动画。
   // ⚠️ 也别拿静态线索（核心数/内存）来降档：iOS 恒报 4 核，见上面的说明。
-  var perfTier = reducedMotion ? 'low' : (verdict === 'low' ? 'low' : 'high');
+  // ⚠️ 只有**实测结论**才降档。系统要求减少动效 ≠ 机器差 → 不降。
+  var perfTier = (verdict === 'low') ? 'low' : 'high';
 
   var liquidBtn = document.getElementById('liquidBtn');
   var liquidHint = document.getElementById('liquidHint');
@@ -20141,7 +20159,8 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
      比相对值就稳了 —— 快机器上两边都是 16.6ms，怎么都不会误判。
      只在"这台设备还没测过"时跑一次，结论存 hub.perf，之后直接沿用。 */
   function abTest() {
-    if (!liquidOn || weakHints || document.visibilityState !== 'visible' || frame) return;
+    // ⚠️ 别拿静态线索跳过测量：测量本身就是判据（弱机测出来自然吃力）
+    if (!liquidOn || document.visibilityState !== 'visible' || frame) return;
     if (lsGet(LS_PERF, '') !== '') return;        // 这台设备已经有结论了，不重复测
     sampleFrames(700, function (off) {
       // ⚠️⚠️ 这 700ms 里老师可能已经把玻璃关掉了。那就**别再点亮去测**，
@@ -20157,6 +20176,11 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
           if (!liquidOn) { paintLiquid(); return; }
           var bad = on.med > Math.max(20, off.med * 1.35);
           perfTier = bad ? 'low' : 'high';
+          // 把实测值留下：既要能排查，也要能写进"为什么给你降档"那句话里
+          perfProbe.gapOn = Math.round(on.med * 10) / 10;
+          perfProbe.gapOff = Math.round(off.med * 10) / 10;
+          perfProbe.judged = perfTier;
+          try { document.body.dataset.perfGap = perfProbe.gapOn + '/' + perfProbe.gapOff; } catch (e) {}
           // ⚠️ 只把 'high' 长期存下来。'low' 是一次采样的结论，很容易被噪声带偏
           //    （页面还在忙、别的标签页在抢 CPU），而它一旦存死，这台机器就**永久**
           //    失去动画、玻璃永久退成 lite —— 老师的两台旗舰就是这么被误伤的。
@@ -20229,8 +20253,26 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   function paintGlassWarn(show) {
     gwShown = show;
     if (!glassWarn) return;
-    // 低配那句只在真的测到弱设备时出现（与画质档同一套线索：核心数/内存/减少动效）
-    if (gwWeak) gwWeak.hidden = !weakHints;
+    /* ★ 这句话要**说清检测到了什么**。老师问过"为什么我的高配电脑被识别成低端设备"——
+       只写一句"配置不高"，既回答不了、也让他没法自己判断，还会把"他自己关了动画效果"
+       误报成"你的电脑不行"。所以逐条列出：硬件线索 / 动效偏好 / 实测数字，各写各的。 */
+    if (gwWeak) {
+      var lines = [];
+      if (weakHardware) {
+        lines.push('⚠️ 检测到 ' + (cores || '?') + ' 核 / ' +
+          (mem ? mem + ' GB 内存' : '内存未知') + '：这台设备配置不高，开启后卡顿的可能性更大。');
+      }
+      if (reducedMotion) {
+        lines.push('ℹ️ 你的系统开了「减少动效」，所以站台动画会关掉。这是你的偏好设置，' +
+          '<b>不是设备问题</b>，也不影响玻璃画质。');
+      }
+      if (perfTier === 'low' && perfProbe.gapOn != null) {
+        lines.push('📊 实测：开玻璃后帧间隔 ' + perfProbe.gapOn + ' ms（关玻璃时 ' +
+          perfProbe.gapOff + ' ms），所以先给你用轻量玻璃；下次进来会重新测一遍。');
+      }
+      gwWeak.innerHTML = lines.join('<br>');
+      gwWeak.hidden = lines.length === 0;
+    }
     glassWarn.classList.toggle('show', show);
     var target = show ? gwCancel : liquidBtn;      // 焦点默认落在"先不开"上
     if (target) setTimeout(function () { try { target.focus(); } catch (e) {} }, 60);
