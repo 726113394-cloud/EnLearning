@@ -20100,6 +20100,12 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   // 默认**关**：液态玻璃是可选的皮肤，任何情况下都不自动打开
   var liquidOn = lsGet(LS_LIQUID, '0') === '1';
   var verdict = lsGet(LS_PERF, '');
+  /* ⚠️⚠️ 旧版本把实测结论 'low' 也**存进 localStorage** 过（后来改成只存 high）。
+     老师机器上要是留着那条历史记录，就会**永远**被降成轻量玻璃 ——
+     这也可能正是他问的「为什么我的高配电脑被判低端」的另一半原因。
+     现在 'low' 在设计里已经没有「持久」的含义（一次采样容易被噪声带走，下次要重量），
+     所以看到就清掉、当场重新实测。 */
+  if (verdict === 'low') { lsSet(LS_PERF, ''); verdict = ''; }
   // 默认 high：只有"系统要求减少动效"或"实测结论是吃力"才降。
   // ⚠️ 别把"还没测过"当成 low —— 玻璃默认关、A/B 根本不跑，
   //    那样会让好机器也永久失去抽屉错峰/引导入场这些动画。
