@@ -111,9 +111,8 @@ body.panel-open .fab-eq{opacity:0}
 /* ⚠️ 遮罩的模糊**只在开了液态玻璃时才有**。它是铺满整个视口的层，
    给它一层 backdrop-filter 等于「每次拉开抽屉都要把整页重算一遍模糊」——
    实测这是拉开抽屉时最大的一笔开销，而遮罩本身靠 rgba 压暗已经够了。
-   低配档（.lite）干脆不给模糊，跟 .menu-fab 在 .lite 下的处理一致。 */
+   玻璃不看档位 —— 老师要求「开玻璃就是最高画质、不给降低」。 */
 body.liquid .scrim{backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
-body.liquid.lite .scrim{backdrop-filter:none;-webkit-backdrop-filter:none}
 
 /* ===== 抽屉菜单 ===== */
 .panel{
@@ -291,7 +290,7 @@ body.land .menu-fab{top:auto;bottom:12px}
          那会强制整页做一次混合合成，代价比省下的那点观感大得多。
    ② 玻璃面的高光缓慢扫过：复用 `.card::before`（本来就有那层镜面高光），
       只给它加一段 transform 动画。全走合成层，不触发布局。
-   ⚠️ 两者都只在**开了玻璃**时出现；低配档（.lite）、触屏、减少动效里全部关掉。 */
+   ⚠️ 两者都只在**开了玻璃**时出现；触屏、减少动效里关掉（减少动效只管动画，不算画质档）。 */
 .poke{
   position:fixed;left:0;top:0;width:460px;height:460px;margin:-230px 0 0 -230px;
   border-radius:50%;pointer-events:none;z-index:5;
@@ -303,7 +302,6 @@ body.land .menu-fab{top:auto;bottom:12px}
     rgba(248,196,222,0) 72%);
 }
 body.liquid:not(.tool-open) .poke{opacity:1}
-body.liquid.lite .poke{display:none}
 @media (pointer:coarse){ .poke{display:none} }
 @media (prefers-reduced-motion:reduce){ .poke{display:none} }
 
@@ -517,7 +515,6 @@ body.liquid .guide-card{
 }
 /* ⚠️ 同 .scrim：引导/警示遮罩也铺满视口，模糊默认关掉，只在开了液态玻璃时才有 */
 body.liquid .guide-mask{backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
-body.liquid.lite .guide-mask{backdrop-filter:none;-webkit-backdrop-filter:none}
 .guide-mask.show{display:flex;animation:gFade .26s ease both}
 @keyframes gFade{from{opacity:0}to{opacity:1}}
 .guide-card{
@@ -694,10 +691,8 @@ body::after{
 @media (prefers-reduced-motion: no-preference){
   body.liquid::before{animation:blobA 26s ease-in-out infinite alternate}
   body.liquid::after{animation:blobB 31s ease-in-out infinite alternate}
-  /* 低配档（实测判吃力时挂的 .lite）：玻璃照旧"静"着显示，但别让它在底下漂 ——
-     动的色斑会让玻璃卡片的 backdrop-filter 每帧重采背景重算模糊，正是最花钱的那种组合。 */
-  body.liquid.lite::before,
-  body.liquid.lite::after{animation:none}
+  /* （原来这里有一条「低配档不漂移」的规则。老师要求不给降档，所以 .lite 已废除。） */
+  
   @keyframes blobA{from{transform:translate3d(0,0,0)}to{transform:translate3d(11vmax,8vmax,0)}}
   @keyframes blobB{from{transform:translate3d(0,0,0)}to{transform:translate3d(-10vmax,-7vmax,0)}}
 }
@@ -762,27 +757,12 @@ body.liquid .menu-fab{
    轻量玻璃：用户主动开了玻璃、但设备吃力时用它
    —— 降的是效果成本，**不是替他关掉**（自动关掉同样是越权）
    ============================================================ */
-body.liquid.lite .card,
-body.liquid.lite .resume button,
-body.liquid.lite .foot-hint,
-body.liquid.lite .panel,
-body.liquid.lite .guide-card{
-  backdrop-filter:blur(11px) saturate(1.35);
-  -webkit-backdrop-filter:blur(11px) saturate(1.35);
-}
 /* 轻量档也走淡出（用 opacity 而不是 display:none，否则这一档切换会"啪"地跳） */
-body.liquid.lite::before,
-body.liquid.lite::after{opacity:0}
-body.liquid.lite .card::before,
-body.liquid.lite .guide-card::before,
-body.liquid.lite .foot-hint::before{opacity:0}
-body.liquid.lite .menu-fab{
-  backdrop-filter:none;
-  -webkit-backdrop-filter:none;
-}
+
+
 
 /* ============================================================
-   低画质档：动的只是**装饰性动画**（模糊由 .lite 那一档管）
+   玻璃全档一致：动的只是**装饰性动画**（不再有画质档位之分）
    视图切换的淡入淡出保留 —— 只是一个元素的 opacity，去掉反而生硬
    ============================================================ */
 body[data-perf="low"] .menu-fab,
@@ -9218,10 +9198,12 @@ document.addEventListener('DOMContentLoaded', function() {
     //    Windows 关掉「动画效果」、开省电模式都会命中，跟机器强弱无关。
     //    它已经在管动画了（CSS 的 @media (prefers-reduced-motion)），
     //    不该再拦着"高级渲染"不恢复 —— 那是静态毛玻璃，跟动不动没关系。
-    const LOW_SPEC = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2)
-        || (navigator.deviceMemory && navigator.deviceMemory <= 2);
+        // ★★ 老师定调：「开启玻璃效果直接把画质全部拉满不给降低」——
+    //    所以这里**不再有任何低配门槛**：上次开着高级渲染，这次进来就直接恢复，
+    //    不看核心数 / 内存 / 动效偏好。（减少动效仍然只管动画，不影响画质。）
 
-    if (!LOW_SPEC && lsGet(LS_GLASS) === '1') {
+
+    if (lsGet(LS_GLASS) === '1') {
         state.highEnd = true;
         appEl.classList.add('high-end');
         glassToggle.classList.add('on');
@@ -11499,30 +11481,8 @@ document.addEventListener('DOMContentLoaded', function() {
             animation: ripple 0.3s ease;
         }
 
-        /* ===== 低配档位 / 系统减弱动效 =====
-           低配设备或系统开了「减弱动态效果」时，毛玻璃和装饰性动画都让步，
-           功能反馈（对错配色、状态文字、提示）一律保留。 */
-        [data-perf="low"][data-glass="enabled"] .app-container {
-            background: rgba(255, 255, 255, 0.30);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-        [data-perf="low"] .option-card,
-        [data-perf="low"] .audio-btn,
-        [data-perf="low"] .action-btn,
-        [data-perf="low"] .btn-unit-select,
-        [data-perf="low"] .info-actions .history-btn {
-            transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
-        }
-        [data-perf="low"] .option-card:hover:not(.disabled),
-        [data-perf="low"] .option-card.selected,
-        [data-perf="low"] .audio-btn.primary:hover:not(:disabled),
-        [data-perf="low"] .audio-btn.secondary:hover:not(:disabled),
-        [data-perf="low"] .action-btn.reset:hover,
-        [data-perf="low"] .btn-unit-select:hover,
-        [data-perf="low"] .info-actions .history-btn:hover {
-            transform: none;
-        }
+        /* （这里原来是"低配档"那一整段：把毛玻璃从完整档剥成 blur(12px)、
+           并砍掉所有过渡。老师要求"开玻璃就是最高画质、不给降低"，所以整段删掉。） */
 
         @media (prefers-reduced-motion: reduce) {
             .mode-panel.active,
@@ -14265,20 +14225,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // ================================================================
         //  16. 设备性能档位
-        // ================================================================
-        // 低配设备（核心少 / 内存小 / 系统要求减弱动效）自动换更轻的渲染方案，
-        // 免得毛玻璃和礼花把整台电脑拖住。
-        (function detectPerfTier() {
-            // ⚠️⚠️ 这里以前是 `reduce || cores <= 4 || mem <= 4`，两处都错：
-            //    · 「减少动效」是**用户的偏好**，不是机器差（老师的高配电脑就是这么被判低的）；
-            //    · ≤4 这档太松（4 核很常见，deviceMemory 还封顶 8）。
-            //    现在只看真小的硬件档；动效偏好交给 CSS，不参与判档。
-            const cores = navigator.hardwareConcurrency || 8;
-            const mem = navigator.deviceMemory || 8;
-            if (cores <= 2 || mem <= 2) {
-                document.documentElement.dataset.perf = 'low';
-            }
-        })();
+        // ★★ 老师定调：「开启玻璃效果直接把画质全部拉满不给降低」。
+        //    原来这里会按核心数/内存/减少动效给 <html> 挂 data-perf="low"，
+        //    而那条 CSS 会把毛玻璃剥成 12px 并砍掉所有过渡 —— 整段删掉，不再降档。
 
         console.log('🎧 听力练习场已启动！');
         console.log('👥 多人模式：玩家卡片在下方，抢答按钮为 A/B/C');
@@ -20052,7 +20001,6 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     var pokeX = 0, pokeY = 0, pokeRaf = null;
     var pokeOn = function () {
       return document.body.classList.contains('liquid') &&
-             !document.body.classList.contains('lite') &&
              !document.body.classList.contains('tool-open') &&
              hoverCapable && !REDUCED;
     };
@@ -20099,19 +20047,12 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
 
   // 默认**关**：液态玻璃是可选的皮肤，任何情况下都不自动打开
   var liquidOn = lsGet(LS_LIQUID, '0') === '1';
-  var verdict = lsGet(LS_PERF, '');
-  /* ⚠️⚠️ 旧版本把实测结论 'low' 也**存进 localStorage** 过（后来改成只存 high）。
-     老师机器上要是留着那条历史记录，就会**永远**被降成轻量玻璃 ——
-     这也可能正是他问的「为什么我的高配电脑被判低端」的另一半原因。
-     现在 'low' 在设计里已经没有「持久」的含义（一次采样容易被噪声带走，下次要重量），
-     所以看到就清掉、当场重新实测。 */
-  if (verdict === 'low') { lsSet(LS_PERF, ''); verdict = ''; }
-  // 默认 high：只有"系统要求减少动效"或"实测结论是吃力"才降。
-  // ⚠️ 别把"还没测过"当成 low —— 玻璃默认关、A/B 根本不跑，
-  //    那样会让好机器也永久失去抽屉错峰/引导入场这些动画。
-  // ⚠️ 也别拿静态线索（核心数/内存）来降档：iOS 恒报 4 核，见上面的说明。
-  // ⚠️ 只有**实测结论**才降档。系统要求减少动效 ≠ 机器差 → 不降。
-  var perfTier = (verdict === 'low') ? 'low' : 'high';
+  /* ★★ 老师定调：「开启玻璃效果直接把画质全部拉满不给降低」。
+     所以这里**没有画质档了** —— 玻璃开着就是完整档（28px 模糊 + 内高光 + 跟随鼠标的光点）。
+     原来那套"实测吃力就静默退成轻量玻璃"整段删掉（A/B 采样、档位变量、.lite 类全没了）。
+     ⚠️ 仍然尊重 `prefers-reduced-motion`，但那是**动效偏好**：只关动画，跟画质无关。
+     顺手把历史遗留的 hub.perf 清掉（旧版本存过 'low'，本来就会永久降档）。 */
+  try { localStorage.removeItem('hub.perf'); } catch (e) {}
 
   var liquidBtn = document.getElementById('liquidBtn');
   var liquidHint = document.getElementById('liquidHint');
@@ -20119,13 +20060,12 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   var lgTimer = null;
   function paintLiquid() {
     var on = liquidOn;                       // 开着与否只由用户决定，别人不许替他改
-    var lite = on && perfTier === 'low';     // 设备吃力 → 退化成轻量玻璃，而不是关掉
     var wasOn = document.body.classList.contains('liquid');
     var apply = function () {
       document.body.classList.toggle('liquid', on);
-      document.body.classList.toggle('lite', lite);
+      document.body.classList.remove('lite');   // 老存档里可能还留着这个类
     };
-    document.body.dataset.perf = perfTier;
+    document.body.dataset.perf = 'full';   // 只有这一档了（老师要求不给降）
     if (REDUCED || on === wasOn) {
       document.body.classList.remove('lg-anim');
       apply();
@@ -20148,56 +20088,9 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     }
   }
 
-  function sampleFrames(ms, cb) {
-    var f = [], last = performance.now(), t0 = last, n = 0;
-    (function tick() {
-      var now = performance.now();
-      f.push(now - last); last = now; n++;
-      if (now - t0 < ms && n < 70) { requestAnimationFrame(tick); return; }
-      var g = f.slice(4).sort(function (a, b) { return a - b; });
-      cb({ med: g[Math.floor(g.length * 0.5)] || 16.7, p95: g[Math.floor(g.length * 0.95)] || 16.7 });
-    })();
-  }
-
-  /* A/B 实测：同一台机器上比「没玻璃」和「有玻璃」的帧间隔。
-     为什么不比绝对阈值：浏览器里测绝对帧率太容易被别的东西带偏
-     （实测同一台机器一次判 high、一次判 low，纯属噪声）。
-     比相对值就稳了 —— 快机器上两边都是 16.6ms，怎么都不会误判。
-     只在"这台设备还没测过"时跑一次，结论存 hub.perf，之后直接沿用。 */
-  function abTest() {
-    // ⚠️ 别拿静态线索跳过测量：测量本身就是判据（弱机测出来自然吃力）
-    if (!liquidOn || document.visibilityState !== 'visible' || frame) return;
-    if (lsGet(LS_PERF, '') !== '') return;        // 这台设备已经有结论了，不重复测
-    sampleFrames(700, function (off) {
-      // ⚠️⚠️ 这 700ms 里老师可能已经把玻璃关掉了。那就**别再点亮去测**，
-      //    否则他会看到"明明关掉了，画面又亮了一下"—— 而且类要拖到测完
-      //    才被 paintLiquid() 摘掉，中间那一段是实打实的开着。
-      //    （verify_quality.js 的 B 段逮到过：关玻璃那一击正好落在采样窗口里，
-      //      读出来 shown=false + liquid=true —— 没弹窗，但玻璃亮着。）
-      if (!liquidOn) return;
-      document.body.classList.add('liquid');
-      requestAnimationFrame(function () { requestAnimationFrame(function () {
-        sampleFrames(700, function (on) {
-          // 测到一半被关掉：既不写结论（结论会污染下次的降档判断），也别留着类
-          if (!liquidOn) { paintLiquid(); return; }
-          var bad = on.med > Math.max(20, off.med * 1.35);
-          perfTier = bad ? 'low' : 'high';
-          // 把实测值留下：既要能排查，也要能写进"为什么给你降档"那句话里
-          perfProbe.gapOn = Math.round(on.med * 10) / 10;
-          perfProbe.gapOff = Math.round(off.med * 10) / 10;
-          perfProbe.judged = perfTier;
-          try { document.body.dataset.perfGap = perfProbe.gapOn + '/' + perfProbe.gapOff; } catch (e) {}
-          // ⚠️ 只把 'high' 长期存下来。'low' 是一次采样的结论，很容易被噪声带偏
-          //    （页面还在忙、别的标签页在抢 CPU），而它一旦存死，这台机器就**永久**
-          //    失去动画、玻璃永久退成 lite —— 老师的两台旗舰就是这么被误伤的。
-          //    'low' 只在本次会话生效，下次进来重新量一次（只在开着玻璃时才量，很便宜）。
-          lsSet(LS_PERF, perfTier === 'high' ? 'high' : '');
-          paintLiquid();      // 静默降档：不弹提示，用户不会被打扰
-        });
-      }); });
-    });
-  }
-  function maybeTest() { if (liquidOn) setTimeout(abTest, 900); }
+  /* （原来这里是 A/B 实测：比「没玻璃/有玻璃」的帧间隔，吃力就静默降成 .lite。
+     老师明确要求"开玻璃就是最高画质、不给降低"，所以整套删掉了。
+     少了它也就少了"一次采样被噪声带走"这类误判的来源。） */
 
   /* ================================================================
      画质联动：站台的「液态玻璃」= 总开关，一并驱动各工具自己的「高级渲染」
@@ -20272,10 +20165,6 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
         lines.push('ℹ️ 你的系统开了「减少动效」，所以站台动画会关掉。这是你的偏好设置，' +
           '<b>不是设备问题</b>，也不影响玻璃画质。');
       }
-      if (perfTier === 'low' && perfProbe.gapOn != null) {
-        lines.push('📊 实测：开玻璃后帧间隔 ' + perfProbe.gapOn + ' ms（关玻璃时 ' +
-          perfProbe.gapOff + ' ms），所以先给你用轻量玻璃；下次进来会重新测一遍。');
-      }
       gwWeak.innerHTML = lines.join('<br>');
       gwWeak.hidden = lines.length === 0;
     }
@@ -20294,7 +20183,6 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
       // ⚠️ 工具开着时先别测：A/B 量的是"有没有玻璃"的帧间隔，工具里的高级渲染
       //    一起跑会把这个差值污染掉，可能把好机器误判成 low（然后永久降档）。
       //    等回到目录页（没有工具）再测，见 goHome。
-      if (!current) maybeTest();
     }
   }
 
@@ -20336,11 +20224,6 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
   // 这样"没开玻璃"才是个确定的状态，不会因为上次在工具里单独点过而漏。
   qualityKeys(liquidOn);
   // 默认关着玻璃时**什么都不测**（没东西可测，也省掉一次采样）。
-  // 用户开着玻璃进来的（上次开过）才补一次实测；引导开着就等它走完再测。
-  if (liquidOn) {
-    if (lsGet('hub.guideDone', '0') === '1') maybeTest();
-    else setTimeout(maybeTest, 400);     // 引导会挡住画面，等引导结束由它再触发
-  }
 
   /* ================================================================
      抽屉菜单
@@ -20514,7 +20397,6 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     toast('🏠 目录', 1400);
     // 回到目录页（画面上没有工具）才是量玻璃帧率的好时机；开玻璃时若正开着
     // 工具就跳过没测，在这里补上
-    if (liquidOn) maybeTest();
   }
 
   toolItems.forEach(function (b) {
@@ -20614,7 +20496,6 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     document.removeEventListener('keydown', gBlockKeys, true);
     lsSet(LS_GUIDE, '1');
     toast('🎯 随时点这里切换练习', 2600);
-    if (liquidOn) maybeTest();   // 引导走完、画面静止了，这时候测才准
   }
   function gNextStep() {
     if (gIdx < GUIDE.length - 1) { gIdx++; tapSfx(); gDraw(); return; }
