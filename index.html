@@ -379,10 +379,13 @@ body.liquid .guide-card{
    ⚠️ 只收间距和图标尺寸，**不把 .pitem 压到 48 以下** ——
       技能里"选项卡 ≥48px、工具条开关 ≥44px"是给触屏定的硬规矩。 */
 @media (max-height:680px){
-  .panel{padding:11px 13px calc(11px + env(safe-area-inset-bottom,0px));gap:5px}
-  .brand{padding:8px;margin-bottom:2px}
-  .brand-au{margin-top:6px;padding-top:6px}
-  .panel-sec{margin:7px 6px 2px}
+  /* ★ 2026-10：站台加了第 6 个工具（单词匹配练习）后，360×640 那种小屏差 15px 装不下。
+     高度只能从**间距**里省 —— .pitem ≥48px、开关 ≥44px 是触屏的硬规矩，不许压尺寸。
+     这一块只在 max-height:680px 生效，桌面/大屏一个像素都不动。 */
+  .panel{padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));gap:4px}
+  .brand{padding:7px;margin-bottom:2px}
+  .brand-au{margin-top:5px;padding-top:5px}
+  .panel-sec{margin:5px 6px 1px}
   .sbtn{min-height:50px}
   .sbtn .cico{width:20px;height:20px;font-size:.72rem;border-radius:7px}
   /* ⚠️ 这里千万别顺手把 .mnav / .pitem 压小：技能里"选项卡 ≥48px、
@@ -411,6 +414,11 @@ body.liquid .guide-card{
   .brand-au{margin-top:6px;padding-top:6px}
   /* 铺满后这两条别跟着拉得太宽，右边留白比拉长好看 */
   .sbar{max-width:520px}
+  /* ★ 条目从 5 个变 6 个（加了单词匹配练习）后，「目录 + 6」= 7 个，
+     3 列要排 3 行、在 390 高的横屏手机上超出 47px。够宽就改 4 列，两行装完。 */
+  @media (min-width:700px){
+    .panel{grid-template-columns:repeat(4,1fr)}
+  }
   .mbar{max-width:620px}
 }
 
@@ -796,7 +804,7 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
       <div class="brand-row">
         <span class="brand-txt">
           <span class="brand-name">来自太空的英语站台</span>
-          <span class="brand-sub">小学英语练习 · 5 个工具</span>
+          <span class="brand-sub">小学英语练习 · 6 个工具</span>
         </span>
       </div>
       <div class="brand-au">
@@ -814,15 +822,16 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
       <button class="pitem anim-in" style="--i:3" data-tool="listen"><span class="pico">🎧</span><span class="plb">听力练习场</span><span class="pgo">›</span></button>
       <button class="pitem anim-in" style="--i:4" data-tool="read"><span class="pico">📖</span><span class="plb">英语认读系统</span><span class="pgo">›</span></button>
       <button class="pitem anim-in" style="--i:5" data-tool="shout"><span class="pico">🎤</span><span class="plb">单词喊麦王</span><span class="pgo">›</span></button>
-    <div class="panel-sec anim-in sec-set" style="--i:6">站台设置</div>
-    <div class="sbar anim-in" style="--i:7">
+      <button class="pitem anim-in" style="--i:6" data-tool="match"><span class="pico">🔗</span><span class="plb">单词匹配练习</span><span class="pgo">›</span></button>
+    <div class="panel-sec anim-in sec-set" style="--i:7">站台设置</div>
+    <div class="sbar anim-in" style="--i:8">
       <button class="sbtn" id="soundBtn" type="button"><span class="cico">🔊</span><span class="slb">音效</span><span class="chint" id="soundHint">已开启</span></button>
       <button class="sbtn" id="liquidBtn" type="button"><span class="cico">💧</span><span class="slb">玻璃</span><span class="chint" id="liquidHint">已关闭</span></button>
       <button class="sbtn" id="musicBtn" type="button"><span class="cico">🎵</span><span class="slb">音乐</span><span class="chint" id="musicHint">播放中</span></button>
       <button class="sbtn" id="fsBtn" type="button"><span class="cico">⛶</span><span class="slb">全屏</span><span class="chint" id="fsHint">未开启</span></button>
       <button class="sbtn off" id="landBtn" type="button"><span class="cico">🔄</span><span class="slb">横屏</span><span class="chint" id="landLabel">竖屏</span></button>
     </div>
-    <div class="mbar anim-in" style="--i:8">
+    <div class="mbar anim-in" style="--i:9">
       <button class="mnav" id="musicPrev" type="button" aria-label="上一首">⏮</button>
       <span class="mname" id="musicName">—</span>
       <button class="mnav" id="musicNext" type="button" aria-label="下一首">⏭</button>
@@ -897,6 +906,12 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
         <span class="ico">🎤</span>
         <span class="txt"><span class="nm">单词喊麦王</span>
         <span class="ds">跟着节奏喊单词，全年级词表（单元用按钮选）</span></span>
+        <span class="go">开始练习 →</span>
+      </button>
+      <button class="card" data-tool="match">
+        <span class="ico">🔗</span>
+        <span class="txt"><span class="nm">单词匹配练习</span>
+        <span class="ds">看中文选英文（或反过来），练词义辨认；还能开多人 PK</span></span>
         <span class="go">开始练习 →</span>
       </button>
       </div>
@@ -19626,6 +19641,2520 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     </script>
 </body>
 </html></template>
+<template id="tpl-match"><!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>全年级 · 单词匹配练习</title>
+    <style>
+        /* ----- 基础样式 (默认：简洁、轻量) ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #e0e7ff, #f0f4ff);
+        }
+        .app-container {
+            max-width: 1400px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 48px;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .selector-panel {
+            background: #f2f6fc;
+            padding: 18px 28px;
+            color: #1a2e4a;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-weight: 600;
+        }
+        .control-group label {
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+            opacity: 0.6;
+            text-transform: uppercase;
+        }
+        select, .bold-toggle, .mode-btn, .pk-btn, .sound-toggle, .select-words-btn, .glass-toggle {
+            background: #ffffff;
+            border: 1px solid #d0d9e8;
+            padding: 8px 18px;
+            min-height: 44px;   /* 学生用平板点，按钮不能矮 */
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            font-family: inherit;
+            cursor: pointer;
+            color: #1a2e4a;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        select:hover, .bold-toggle:hover, .mode-btn:hover, .pk-btn:hover, .sound-toggle:hover, .select-words-btn:hover, .glass-toggle:hover {
+            transform: translateY(-1px);
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .bold-toggle.active {
+            background: #fee9d4;
+            border-color: #fdd7b5;
+        }
+        .mode-switch {
+            display: flex;
+            gap: 8px;
+            background: rgba(0,0,0,0.02);
+            padding: 4px 10px;
+            border-radius: 50px;
+            align-items: center;
+        }
+        .mode-btn {
+            background: #e9edf4;
+            border-color: transparent;
+        }
+        .mode-btn.active {
+            background: #4f83f5;
+            border-color: #4f83f5;
+            color: white;
+            box-shadow: 0 2px 8px rgba(79,131,245,0.2);
+        }
+        .pk-btn {
+            background: #fee9d4;
+            border-color: #fdd7b5;
+        }
+        .badge {
+            background: #fef0d5;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #1a2e4a;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .sound-toggle, .select-words-btn, .glass-toggle {
+            background: #e9edf4;
+        }
+        .glass-toggle.active {
+            background: #dbeafe;
+            border-color: #93c5fd;
+        }
+        .stats-bar {
+            background: #f8fafc;
+            padding: 12px 28px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+        }
+        .score-box, .counter-box {
+            background: #ffffff;
+            padding: 4px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #1a2e4a;
+            border: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+        }
+        .question-card {
+            padding: 30px 25px 25px;
+            text-align: center;
+        }
+        .question-text {
+            background: #fdf6ed;
+            border-radius: 60px;
+            padding: 28px 16px;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a2e4a;
+            margin-bottom: 30px;
+            border: 1px solid #e8e0d8;
+            word-break: break-word;
+        }
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .option {
+            background: #ffffff;
+            border: 1px solid #dce3ed;
+            border-radius: 60px;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            cursor: pointer;
+            color: #1a2e4a;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+        }
+        /* 悬停缩一下会让人误以为已经点到了，改成抬起来 */
+        .option:hover:not(.disabled) {
+            transform: translateY(-2px);
+            background: #f5f9ff;
+            border-color: #4f83f5;
+            box-shadow: 0 6px 18px rgba(79, 131, 245, 0.14);
+        }
+        .option:active:not(.disabled) { transform: scale(0.98); }
+        .opt-letter {
+            background: #eef2f7;
+            width: 48px;
+            height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 60px;
+            color: #1a2e4a;
+            font-weight: 700;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+            border: 1px solid #dce3ed;
+        }
+        .feedback {
+            background: #f8f4ee;
+            border-radius: 60px;
+            padding: 14px 20px;
+            margin: 15px 0 10px;
+            font-weight: 500;
+            text-align: center;
+            border: 1px solid #e8e0d8;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .buttons-area {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .next-btn, .reset-btn {
+            width: 85%;
+            margin: 0 auto;
+            display: block;
+            border: none;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .next-btn {
+            background: linear-gradient(145deg, #ff8c42, #f97316);
+            box-shadow: 0 4px 12px rgba(249,115,22,0.25);
+        }
+        .next-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(249,115,22,0.3); }
+        .next-btn:active { transform: scale(0.94); }
+        .reset-btn {
+            background: #e2e8f0;
+            color: #1a2e4a;
+            border: 1px solid #cbd5e1;
+        }
+        .reset-btn:hover { background: #d0d8e4; transform: translateY(-2px); }
+        .reset-btn:active { transform: scale(0.94); }
+
+        /* PK 模式 */
+        .pk-mode .pk-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px 25px;
+            background: #f8fafc;
+        }
+        .pk-player {
+            flex: 1 1 280px;
+            min-width: 260px;
+            background: #ffffff;
+            border-radius: 48px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            text-align: center;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .pk-player.correct-flash { background: #e2f3e8 !important; }
+        .pk-player.wrong-flash { background: #fde8e5 !important; }
+        .remove-player {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: #f4d4cc;
+            color: #1a2e4a;
+            border: 1px solid #e2c8c0;
+            border-radius: 30px;
+            width: 28px;
+            height: 28px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .remove-player:hover { background: #e6b8ae; transform: scale(1.05); }
+        .pk-player h3 {
+            background: #f8eddf;
+            display: inline-block;
+            padding: 6px 24px;
+            border-radius: 40px;
+            color: #1a2e4a;
+            margin-bottom: 15px;
+            border: 1px solid #e2d6c8;
+        }
+        .pk-score {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1a2e4a;
+            margin: 10px 0;
+        }
+        .pk-question {
+            background: #fdf6ed;
+            border-radius: 40px;
+            padding: 18px 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 15px 0;
+            min-height: 100px;
+            border: 1px solid #e8e0d8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .question-pop { animation: popIn 0.2s cubic-bezier(0.34,1.2,0.64,1); }
+        @keyframes popIn { 0% { transform: scale(0.95); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+        .pk-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 15px 0;
+        }
+        .pk-option {
+            background: #ffffff;
+            border: 1px solid #dce3ed;
+            border-radius: 60px;
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .pk-option:hover { background: #f5f9ff; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(79, 131, 245, 0.12); }
+        .pk-option:active { transform: scale(0.98); }
+        .pk-timer {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: #f4f0ea;
+            display: inline-block;
+            padding: 5px 20px;
+            border-radius: 60px;
+            margin: 10px 0;
+            border: 1px solid #e0d8d0;
+        }
+        .pk-control {
+            margin-top: 15px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 12px 20px 20px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+        }
+        .pk-start-btn, .pk-reset-btn, .add-player-btn {
+            background: #fee9d4;
+            border: 1px solid #fdd7b5;
+            padding: 8px 20px;
+            min-height: 42px;
+            border-radius: 40px;
+            font-weight: 700;
+            color: #1a2e4a;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .pk-start-btn:hover, .pk-reset-btn:hover, .add-player-btn:hover {
+            background: #fddcbf;
+            transform: translateY(-2px);
+        }
+        .target-input {
+            width: 90px;
+            padding: 8px;
+            border-radius: 40px;
+            border: 1px solid #d0d9e8;
+            background: #ffffff;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a2e4a;
+        }
+        .target-label {
+            background: #f4f0ea;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #1a2e4a;
+            border: 1px solid #e0d8d0;
+        }
+        .rank-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        .rank-card {
+            background: #ffffff;
+            border-radius: 64px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+        .rank-card h2 { color: #1a2e4a; margin-bottom: 20px; }
+        .rank-list { text-align: left; margin: 20px 0; }
+        .rank-item { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 1.1rem; font-weight: 500; }
+        .rank-close {
+            background: #fee9d4;
+            border: 1px solid #fdd7b5;
+            padding: 10px 24px;
+            border-radius: 40px;
+            color: #1a2e4a;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .rank-close:hover { background: #fddcbf; }
+        .footer-note {
+            text-align: center;
+            font-size: 0.7rem;
+            padding: 12px;
+            background: #f8fafc;
+            color: #1a2e4a;
+            border-top: 1px solid #e2e8f0;
+        }
+        .firework-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            contain: layout paint style;   /* 独立成层，粒子重绘不牵连底下的毛玻璃 */
+        }
+        .word-select-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10001;
+        }
+        .word-select-card {
+            background: #ffffff;
+            border-radius: 56px;
+            padding: 30px;
+            max-width: 720px;
+            width: 92%;
+            max-height: 85vh;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+        }
+        .word-select-card h2 { color: #1a2e4a; margin-bottom: 12px; font-weight: 700; }
+        .word-select-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .word-select-actions button {
+            background: #f0f4fa;
+            border: 1px solid #d0d9e8;
+            padding: 6px 16px;
+            min-height: 40px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: #1a2e4a;
+            transition: 0.15s;
+        }
+        .word-select-actions button:hover { background: #e2e8f0; }
+        #selectedCount {
+            margin-left: auto;
+            font-weight: 600;
+            background: #f4f0ea;
+            padding: 4px 16px;
+            border-radius: 30px;
+        }
+        .word-checkbox-list {
+            overflow-y: auto;
+            flex: 1;
+            margin: 10px 0 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+            padding-right: 6px;
+            max-height: 50vh;
+        }
+        .word-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8fafc;
+            padding: 6px 12px;
+            border-radius: 30px;
+            border: 1px solid #e2e8f0;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .word-checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #f97316;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .word-checkbox-item .bold-tag {
+            background: #fee9d4;
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: auto;
+            white-space: nowrap;
+        }
+        .word-select-footer {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        .word-select-footer button {
+            background: #fee9d4;
+            border: 1px solid #fdd7b5;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-weight: 700;
+            color: #1a2e4a;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .word-select-footer button:hover { background: #fddcbf; transform: translateY(-1px); }
+        .word-select-footer button:last-child {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+        .word-select-footer button:last-child:hover { background: #d0d8e4; }
+
+        /* ----- 响应式 ----- */
+        @media (max-width: 800px) {
+            .pk-container { flex-direction: column; }
+            .question-text { font-size: 1.7rem; padding: 22px 14px; }
+            .opt-letter { width: 46px; height: 46px; font-size: 1.7rem; }
+            .selector-panel { flex-direction: column; align-items: stretch; gap: 12px; }
+            .control-group { width: 100%; }
+            /* 学生用平板/手机点，按钮要够大、字不能小 */
+            select, .bold-toggle, .mode-btn, .pk-btn, .sound-toggle, .select-words-btn, .glass-toggle {
+                width: 100%;
+                justify-content: center;
+                min-height: 46px;
+                font-size: 0.95rem;
+                padding: 10px 18px;
+            }
+            .mode-switch { justify-content: center; }
+            .option { padding: 16px 18px; font-size: 1.05rem; }
+            .next-btn, .reset-btn { width: 100%; min-height: 54px; font-size: 1.15rem; }
+            .pk-option { padding: 12px 14px; font-size: 1rem; }
+            .pk-start-btn, .pk-reset-btn, .add-player-btn { min-height: 44px; font-size: 0.95rem; }
+            .target-input { min-height: 44px; }
+            .word-select-actions button, .word-select-footer button { min-height: 44px; font-size: 0.9rem; }
+            .word-checkbox-item { padding: 10px 14px; font-size: 0.95rem; }
+            .word-checkbox-item input[type="checkbox"] { width: 22px; height: 22px; }
+            .word-checkbox-list { grid-template-columns: 1fr; }
+        }
+
+        /* ===== 高级渲染：液态玻璃风格 (开启时覆盖) =====
+           只保留「最外层容器」和「浮层卡片」两处 backdrop-filter。
+           原来是 15 处毛玻璃层层嵌套在容器的模糊之上，每帧都要把整页反复重新模糊，
+           低端机直接卡住。子元素改成「半透明 + 顶部高光 + 细描边」，
+           再用一层光晕渐变做出玻璃的立体感 —— 观感更像液态玻璃，开销降一个量级。 */
+        [data-glass="enabled"] {
+            --ok-bg: rgba(74, 190, 130, 0.30);
+            --ok-bd: rgba(170, 240, 200, 0.85);
+            --ok-fg: #0b2a18;
+            --bad-bg: rgba(240, 110, 100, 0.26);
+            --bad-bd: rgba(255, 175, 165, 0.85);
+            --bad-fg: #4a1210;
+            --fb-ok: rgba(74, 190, 130, 0.22);
+            --fb-bad: rgba(240, 110, 100, 0.20);
+        }
+        [data-glass="enabled"] body {
+            background:
+                radial-gradient(circle at 16% 18%, #eef4ff 0%, #dce8fc 18%, #c8dbf8 36%,
+                    #b1caf1 52%, #9ab9e8 68%, #85a9dd 82%, #6f93cc 100%);
+        }
+        /* 这一层刻意不加 backdrop-filter —— 实测（1400x1087 的卡片）：
+             空闲时 16.7ms，但只要页面任何地方重绘一次（礼花、PK 计时器每秒跳字、
+             状态文字刷新），带 backdrop-filter 的容器就要把背景重新模糊一遍，变成 40.7ms；
+             而模糊半径从 28px 降到 12px 几乎不影响（28->36.6ms），说明开销在「重算」这一步。
+           而这张卡的背景就是 body 上那层平滑渐变，模糊它视觉上几乎看不出差别
+           （开/关模糊截图对比几乎一致），所以改由自身的渐变 + 高光来表达玻璃质感。
+           真正需要模糊的是弹窗：它盖在真实内容上，而且只在打开时算一次。 */
+        [data-glass="enabled"] .app-container {
+            background:
+                radial-gradient(130% 90% at 10% -10%, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.10) 48%, rgba(255, 255, 255, 0) 72%),
+                linear-gradient(150deg, rgba(255, 255, 255, 0.44), rgba(255, 255, 255, 0.18) 58%, rgba(255, 255, 255, 0.32));
+            border: 1px solid rgba(255, 255, 255, 0.66);
+            box-shadow:
+                0 30px 70px rgba(12, 35, 70, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+        }
+        [data-glass="enabled"] .selector-panel {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0.08));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.40);
+        }
+        [data-glass="enabled"] select,
+        [data-glass="enabled"] .bold-toggle,
+        [data-glass="enabled"] .mode-btn,
+        [data-glass="enabled"] .pk-btn,
+        [data-glass="enabled"] .sound-toggle,
+        [data-glass="enabled"] .select-words-btn,
+        [data-glass="enabled"] .glass-toggle {
+            background: rgba(255, 255, 255, 0.26);
+            border: 1px solid rgba(255, 255, 255, 0.52);
+            color: #12294a;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 2px 8px rgba(12, 35, 70, 0.05);
+        }
+        [data-glass="enabled"] select:hover,
+        [data-glass="enabled"] .bold-toggle:hover,
+        [data-glass="enabled"] .mode-btn:hover,
+        [data-glass="enabled"] .pk-btn:hover,
+        [data-glass="enabled"] .sound-toggle:hover,
+        [data-glass="enabled"] .select-words-btn:hover,
+        [data-glass="enabled"] .glass-toggle:hover {
+            background: rgba(255, 255, 255, 0.52);
+            border-color: rgba(255, 255, 255, 0.85);
+        }
+        [data-glass="enabled"] .mode-btn.active {
+            background: linear-gradient(140deg, rgba(96, 145, 250, 0.85), rgba(58, 104, 220, 0.85));
+            border-color: rgba(255, 255, 255, 0.6);
+            color: #fff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 3px 12px rgba(30, 70, 160, 0.28);
+        }
+        [data-glass="enabled"] .bold-toggle.active {
+            background: linear-gradient(140deg, rgba(255, 196, 96, 0.72), rgba(245, 158, 40, 0.72));
+            border-color: rgba(255, 225, 170, 0.85);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 3px 12px rgba(180, 110, 20, 0.22);
+        }
+        [data-glass="enabled"] .glass-toggle.active {
+            background: linear-gradient(140deg, rgba(170, 210, 255, 0.72), rgba(120, 170, 245, 0.72));
+            border-color: rgba(220, 238, 255, 0.9);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 3px 12px rgba(30, 70, 160, 0.2);
+        }
+        [data-glass="enabled"] .stats-bar {
+            background: rgba(255, 255, 255, 0.14);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+        }
+        [data-glass="enabled"] .score-box,
+        [data-glass="enabled"] .counter-box {
+            background: rgba(255, 255, 255, 0.30);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            color: #12294a;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+        }
+        [data-glass="enabled"] .question-text {
+            background: linear-gradient(150deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.18));
+            border: 1px solid rgba(255, 255, 255, 0.60);
+            color: #0e2240;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 10px 26px rgba(12, 35, 70, 0.10);
+        }
+        [data-glass="enabled"] .option {
+            background: rgba(255, 255, 255, 0.26);
+            border: 1px solid rgba(255, 255, 255, 0.52);
+            color: #12294a;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 2px 10px rgba(12, 35, 70, 0.06);
+        }
+        [data-glass="enabled"] .option:hover:not(.disabled) {
+            background: rgba(255, 255, 255, 0.50);
+            border-color: rgba(150, 190, 255, 0.9);
+        }
+        [data-glass="enabled"] .opt-letter {
+            background: rgba(255, 255, 255, 0.34);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            color: #12294a;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+        [data-glass="enabled"] .feedback {
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            color: #12294a;
+        }
+        [data-glass="enabled"] .next-btn {
+            background: linear-gradient(145deg, rgba(255, 150, 80, 0.9), rgba(240, 105, 20, 0.9));
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 6px 18px rgba(200, 90, 10, 0.28);
+        }
+        [data-glass="enabled"] .reset-btn {
+            background: rgba(255, 255, 255, 0.24);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: #12294a;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        }
+        [data-glass="enabled"] .pk-mode .pk-container {
+            background: rgba(255, 255, 255, 0.10);
+        }
+        [data-glass="enabled"] .pk-player {
+            background: rgba(255, 255, 255, 0.24);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 4px 16px rgba(12, 35, 70, 0.07);
+        }
+        [data-glass="enabled"] .pk-player h3 {
+            background: linear-gradient(150deg, rgba(255, 205, 150, 0.45), rgba(255, 178, 102, 0.30));
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        [data-glass="enabled"] .pk-question {
+            background: rgba(255, 255, 255, 0.30);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            color: #0e2240;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+        }
+        [data-glass="enabled"] .pk-option {
+            background: rgba(255, 255, 255, 0.24);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: #12294a;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        }
+        [data-glass="enabled"] .pk-option:hover {
+            background: rgba(255, 255, 255, 0.48);
+            border-color: rgba(150, 190, 255, 0.9);
+        }
+        [data-glass="enabled"] .pk-timer {
+            background: rgba(255, 255, 255, 0.30);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            color: #12294a;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+        }
+        [data-glass="enabled"] .pk-timer.urgent {
+            background: rgba(255, 130, 110, 0.42);
+            border-color: rgba(255, 190, 180, 0.8);
+            color: #4a1210;
+        }
+        [data-glass="enabled"] .pk-control {
+            background: rgba(255, 255, 255, 0.12);
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        [data-glass="enabled"] .pk-start-btn,
+        [data-glass="enabled"] .pk-reset-btn,
+        [data-glass="enabled"] .add-player-btn {
+            background: linear-gradient(145deg, rgba(255, 205, 140, 0.7), rgba(255, 178, 102, 0.6));
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            color: #12294a;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+        [data-glass="enabled"] .pk-start-btn:hover,
+        [data-glass="enabled"] .pk-reset-btn:hover,
+        [data-glass="enabled"] .add-player-btn:hover {
+            background: linear-gradient(145deg, rgba(255, 215, 160, 0.85), rgba(255, 190, 120, 0.75));
+        }
+        [data-glass="enabled"] .target-input {
+            background: rgba(255, 255, 255, 0.34);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            color: #12294a;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+        [data-glass="enabled"] .target-label {
+            background: rgba(255, 255, 255, 0.26);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: #12294a;
+        }
+        /* 浮层：这两处保留真毛玻璃（在最上层，不和别的毛玻璃嵌套），半径收到 22px */
+        [data-glass="enabled"] .rank-card,
+        [data-glass="enabled"] .word-select-card {
+            background: linear-gradient(150deg, rgba(255, 255, 255, 0.50), rgba(255, 255, 255, 0.26));
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            color: #12294a;
+            box-shadow: 0 24px 60px rgba(12, 35, 70, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+        }
+        [data-glass="enabled"] .rank-item,
+        [data-glass="enabled"] .word-checkbox-item {
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #12294a;
+        }
+        [data-glass="enabled"] .footer-note {
+            background: rgba(255, 255, 255, 0.10);
+            border-top: 1px solid rgba(255, 255, 255, 0.28);
+            color: #16324f;
+        }
+        [data-glass="enabled"] .word-select-modal {
+            background: rgba(10, 30, 60, 0.32);
+        }
+        [data-glass="enabled"] .word-select-actions button,
+        [data-glass="enabled"] .word-select-footer button,
+        [data-glass="enabled"] .rank-close {
+            background: rgba(255, 255, 255, 0.26);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: #12294a;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+        [data-glass="enabled"] .word-select-actions button:hover,
+        [data-glass="enabled"] .word-select-footer button:hover,
+        [data-glass="enabled"] .rank-close:hover {
+            background: rgba(255, 255, 255, 0.45);
+        }
+        [data-glass="enabled"] #selectedCount {
+            background: rgba(255, 255, 255, 0.26);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: #12294a;
+        }
+        [data-glass="enabled"] .badge {
+            background: linear-gradient(145deg, rgba(255, 225, 175, 0.7), rgba(255, 205, 140, 0.55));
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            color: #3a2a10;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+        [data-glass="enabled"] .control-group label {
+            color: #22395c;
+            opacity: 0.75;
+        }
+
+        /* ===== 动效与答题反馈 =====
+           入场动效只在「新一题」时触发，答题反馈只改颜色和一次脉冲，不做持续动画。 */
+        :root {
+            --ok-bg: #c8e6d9;
+            --ok-bd: #2e7d32;
+            --ok-fg: #1b5e20;
+            --bad-bg: #fcd8d4;
+            --bad-bd: #c62828;
+            --bad-fg: #8e2020;
+            --fb-ok: #e2f3e8;
+            --fb-bad: #fde8e5;
+        }
+
+        @keyframes qIn {
+            from { opacity: 0; transform: translateY(-10px) scale(0.985); }
+            to { opacity: 1; transform: none; }
+        }
+        @keyframes optIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: none; }
+        }
+        @keyframes fbPop {
+            0% { transform: scale(0.97); }
+            55% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        @keyframes okPulse {
+            0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.40); }
+            100% { box-shadow: 0 0 0 16px rgba(46, 125, 50, 0); }
+        }
+        @keyframes badShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+        @keyframes cardPulse {
+            0% { transform: scale(1); }
+            45% { transform: scale(1.025); }
+            100% { transform: scale(1); }
+        }
+        @keyframes urgentPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.55; }
+        }
+
+        .question-text.q-in { animation: qIn 0.3s cubic-bezier(0.34, 1.2, 0.64, 1) both; }
+        .option.opt-in,
+        .pk-option.opt-in {
+            animation: optIn 0.32s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+            animation-delay: calc(var(--i, 0) * 70ms);
+        }
+        .feedback.fb-pop { animation: fbPop 0.32s ease; }
+
+        /* 答对/答错：颜色走变量，普通模式和高级渲染各有一套，不用 !important */
+        .option.is-correct,
+        .pk-option.is-correct {
+            background: var(--ok-bg);
+            border-color: var(--ok-bd);
+            color: var(--ok-fg);
+            animation: okPulse 0.6s ease;
+        }
+        .option.is-wrong,
+        .pk-option.is-wrong {
+            background: var(--bad-bg);
+            border-color: var(--bad-bd);
+            color: var(--bad-fg);
+            animation: badShake 0.45s ease;
+        }
+        .feedback.is-correct { background: var(--fb-ok); color: var(--ok-fg); }
+        .feedback.is-wrong { background: var(--fb-bad); color: var(--bad-fg); }
+
+        /* PK 的卡片闪一下就收，比直接换底色更有反馈感 */
+        .pk-player.correct-flash {
+            background: var(--ok-bg) !important;
+            border-color: var(--ok-bd) !important;
+            animation: cardPulse 0.45s ease;
+        }
+        .pk-player.wrong-flash {
+            background: var(--bad-bg) !important;
+            border-color: var(--bad-bd) !important;
+            animation: badShake 0.45s ease;
+        }
+        .pk-timer.urgent { animation: urgentPulse 0.8s ease-in-out infinite; }
+
+        /* 轻提示条 */
+        #matchToast {
+            position: fixed;
+            left: 50%;
+            bottom: 26px;
+            transform: translateX(-50%) translateY(10px);
+            max-width: 86vw;
+            background: rgba(16, 28, 48, 0.94);
+            color: #e8f0ff;
+            border: 1px solid rgba(140, 180, 240, 0.35);
+            border-radius: 16px;
+            padding: 12px 20px;
+            font-size: 0.9rem;
+            line-height: 1.55;
+            white-space: pre-line;
+            text-align: center;
+            z-index: 99999;
+            box-shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s ease, transform 0.22s ease;
+        }
+        #matchToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ===== 重置按钮：挪到顶栏右侧，离「下一题」越远越好 =====
+           原来它紧贴在「下一题」正下方、同宽同列，学生伸手点下一题时
+           很容易点到它，一下就把整轮分数清零。 */
+        .stats-bar .reset-btn {
+            width: auto;
+            margin: 0;
+            padding: 8px 16px;
+            min-height: 40px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: #eef2f7;
+            color: #4a5b73;
+            border: 1px solid #d5dde8;
+            border-radius: 40px;
+            box-shadow: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .stats-bar .reset-btn:hover { background: #e2e8f0; color: #2b3a52; transform: translateY(-1px); }
+        /* 第一次点击只是「上膛」，按钮变色并提示再点一次 */
+        .stats-bar .reset-btn.arming,
+        .pk-reset-btn.arming {
+            background: #ffe1d6 !important;
+            border-color: #f5a98c !important;
+            color: #a3401f !important;
+            /* 只闪两下就停，而且只动 box-shadow：
+               用 transform: scale + infinite 会一直改元素盒子，
+               既晃眼，也会让「等待元素稳定再点」的自动化验收点不准。 */
+            animation: armPulse 0.6s ease-in-out 2;
+        }
+        [data-glass="enabled"] .stats-bar .reset-btn {
+            background: rgba(255, 255, 255, 0.24);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: #12294a;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        }
+        [data-glass="enabled"] .stats-bar .reset-btn:hover { background: rgba(255, 255, 255, 0.42); }
+
+        /* PK 的重置也拉远一点，别挨着「开始新对局」 */
+        .pk-reset-btn { margin-left: auto; }
+        @media (min-width: 801px) {
+            .pk-reset-btn { padding-left: 20px; border-left: 1px solid rgba(0,0,0,0.08); border-radius: 0 40px 40px 0; }
+        }
+
+        @keyframes armPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 130, 90, 0.55); }
+            50% { box-shadow: 0 0 0 9px rgba(245, 130, 90, 0); }
+        }
+
+        /* ===== 动效升级 ===== */
+        /* 点哪儿从哪儿荡开一圈水波（触摸屏上反馈最"实"） */
+        .option,
+        .pk-option,
+        button { position: relative; overflow: hidden; }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--ripple, rgba(79, 131, 245, 0.28));
+            transform: scale(0);
+            opacity: 1;
+            pointer-events: none;
+            animation: rippleGo 0.55s ease-out forwards;
+        }
+        @keyframes rippleGo {
+            from { transform: scale(0); opacity: 1; }
+            to { transform: scale(1); opacity: 0; }
+        }
+        .next-btn { --ripple: rgba(255, 255, 255, 0.45); }
+        .pk-start-btn,
+        .pk-reset-btn,
+        .add-player-btn,
+        .select-words-btn,
+        .word-select-actions button,
+        .word-select-footer button { --ripple: rgba(255, 255, 255, 0.5); }
+        [data-glass="enabled"] { --ripple: rgba(255, 255, 255, 0.5); }
+
+        /* 光标扫过时一道高光斜着滑过去，玻璃感的关键一笔 */
+        .option::after,
+        .pk-option::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            opacity: 0;
+            background: linear-gradient(112deg,
+                rgba(255, 255, 255, 0) 32%,
+                rgba(255, 255, 255, 0.55) 46%,
+                rgba(255, 255, 255, 0.18) 54%,
+                rgba(255, 255, 255, 0) 68%);
+            background-size: 280% 100%;
+            background-position: 150% 0;
+            transition: background-position 0.7s ease, opacity 0.25s ease;
+        }
+        .option:hover:not(.disabled)::after,
+        .pk-option:hover::after {
+            opacity: 1;
+            background-position: -50% 0;
+        }
+        [data-glass="enabled"] .option::after,
+        [data-glass="enabled"] .pk-option::after {
+            background: linear-gradient(112deg,
+                rgba(255, 255, 255, 0) 30%,
+                rgba(255, 255, 255, 0.75) 46%,
+                rgba(255, 255, 255, 0.25) 55%,
+                rgba(255, 255, 255, 0) 70%);
+            background-size: 280% 100%;
+            background-position: 150% 0;
+        }
+
+        /* 得分飘字：+1 从分数旁边飘起来，比只跳个数字清楚 */
+        .score-box,
+        .pk-score { position: relative; }
+        .float-badge {
+            position: absolute;
+            right: 2px;
+            top: 40%;
+            font-weight: 800;
+            font-size: 1rem;
+            pointer-events: none;
+            animation: floatUp 0.85s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+        }
+        .float-badge.good { color: #2e9e5b; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7); }
+        .float-badge.bad { color: #d1493f; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7); }
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(4px) scale(0.8); }
+            25% { opacity: 1; transform: translateY(-4px) scale(1.12); }
+            100% { opacity: 0; transform: translateY(-28px) scale(1); }
+        }
+        .score-box.bump { animation: scoreBump 0.42s cubic-bezier(0.34, 1.4, 0.64, 1); }
+        @keyframes scoreBump {
+            0% { transform: scale(1); }
+            45% { transform: scale(1.09); }
+            100% { transform: scale(1); }
+        }
+
+        /* 开题时整张题卡轻轻浮一下 */
+        .question-card.q-lift { animation: cardLift 0.4s cubic-bezier(0.34, 1.15, 0.64, 1); }
+        @keyframes cardLift {
+            0% { transform: scale(0.992); }
+            55% { transform: scale(1.004); }
+            100% { transform: scale(1); }
+        }
+
+        /* 首屏：整张卡片淡入上浮 */
+        .app-container { animation: appIn 0.5s cubic-bezier(0.34, 1.1, 0.64, 1) both; }
+        @keyframes appIn {
+            from { opacity: 0; transform: translateY(16px) scale(0.992); }
+            to { opacity: 1; transform: none; }
+        }
+
+        /* PK 计时器底部一条进度条，随时间平滑缩短 */
+        .pk-timer { position: relative; }
+        .pk-timer::after {
+            content: '';
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 5px;
+            height: 3px;
+            border-radius: 3px;
+            background: currentColor;
+            opacity: 0.3;
+            transform-origin: left center;
+            transform: scaleX(var(--t, 1));
+            transition: transform 1s linear;
+        }
+
+        /* 高级渲染：背景里一团很慢的光在漂，玻璃才有"活"的感觉
+           （纯 transform 动画，走合成层，不会触发重绘/重算模糊） */
+        [data-glass="enabled"] body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background: radial-gradient(38% 34% at 28% 26%,
+                rgba(255, 255, 255, 0.60) 0%,
+                rgba(255, 255, 255, 0.20) 45%,
+                rgba(255, 255, 255, 0) 72%);
+            animation: drift 26s ease-in-out infinite alternate;
+        }
+        @keyframes drift {
+            from { transform: translate3d(-8%, -5%, 0) scale(1); }
+            to { transform: translate3d(9%, 7%, 0) scale(1.18); }
+        }
+
+        /* 选中/按下的即时反馈压在最后，别被 hover 抢走 */
+        .option:active:not(.disabled)::after,
+        .pk-option:active::after { opacity: 0.6; }
+
+        /* ===== 低配档位 / 系统减弱动效 ===== */
+        [data-perf="low"][data-glass="enabled"] .rank-card,
+        [data-perf="low"][data-glass="enabled"] .word-select-card {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        [data-perf="low"] .option:hover:not(.disabled),
+        [data-perf="low"] .pk-option:hover {
+            transform: none;
+        }
+        [data-perf="low"] .option,
+        [data-perf="low"] .next-btn,
+        [data-perf="low"] .reset-btn,
+        [data-perf="low"] .pk-option {
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+        [data-perf="low"] .option::after,
+        [data-perf="low"] .pk-option::after { display: none; }
+        [data-perf="low"][data-glass="enabled"] body::before { animation: none; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .question-text.q-in,
+            .option.opt-in,
+            .pk-option.opt-in,
+            .feedback.fb-pop,
+            .option.is-correct,
+            .option.is-wrong,
+            .pk-option.is-correct,
+            .pk-option.is-wrong,
+            .pk-player.correct-flash,
+            .pk-player.wrong-flash,
+            .pk-timer.urgent,
+            .question-pop,
+            .ripple,
+            .float-badge,
+            .score-box.bump,
+            .question-card.q-lift,
+            .app-container,
+            .stats-bar .reset-btn.arming,
+            .pk-reset-btn.arming {
+                animation: none !important;
+            }
+            [data-glass="enabled"] body::before { animation: none !important; }
+            .option,
+            .next-btn,
+            .reset-btn,
+            .pk-option,
+            .app-container,
+            .option::after,
+            .pk-option::after,
+            .pk-timer::after,
+            #matchToast {
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container" id="app">
+    <div class="selector-panel">
+        <div class="control-group"><label>🏫 教材</label><select id="publisherSelect"><option value="pep">人教版</option><option value="jieli">接力版</option></select></div>
+            <div class="control-group"><label>📚 年级</label><select id="gradeSelect"></select></div>
+        <div class="control-group"><label>📖 册别</label><select id="bookSelect"><option value="upper">上册</option><option value="lower">下册</option></select></div>
+        <div class="control-group"><label>📌 单元</label><select id="unitSelect"></select></div>
+        <div class="mode-switch"><span style="font-size:0.75rem; opacity:0.6;">🔄 模式：</span><button id="modeChi2EngBtn" class="mode-btn active">🇨🇳 中→英</button><button id="modeEng2ChiBtn" class="mode-btn">🇬🇧 英→中</button></div>
+        <button id="boldToggleBtn" class="bold-toggle">⭐ 仅粗体词: 关</button>
+        <button id="selectWordsBtn" class="select-words-btn">📝 选词</button>
+        <button id="pkModeBtn" class="pk-btn">🎮 多人PK模式</button>
+        <button id="soundToggleBtn" class="sound-toggle">🔊 音效开启</button>
+        <button id="glassToggleBtn" class="glass-toggle">💎 高级渲染</button>
+        <div class="badge" id="modeBadge">✨ 单词模式 · 单人 ✨</div>
+    </div>
+
+    <!-- 单人模式 -->
+    <div id="singleMode" class="single-mode">
+        <div class="stats-bar">
+            <span class="score-box">⭐ 得分: <span id="scoreValue">0</span></span>
+            <span class="counter-box">📊 已答: <span id="answeredCount">0</span> 题</span>
+            <button class="reset-btn" id="resetBtn" data-label="🔄 重来" title="分数清零并重新洗牌">🔄 重来</button>
+        </div>
+        <div class="question-card">
+            <div class="question-text" id="questionDisplay">loading...</div>
+            <div class="options-list" id="optionsArea"></div>
+            <div class="feedback" id="feedbackMsg">✨ 所有单词将不重复出现，一轮完成后重置 ✨</div>
+            <div class="buttons-area">
+                <button class="next-btn" id="nextBtn">➡ 下一题 / 继续挑战</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PK模式 -->
+    <div id="pkMode" class="pk-mode">
+        <div class="pk-container" id="pkContainer"></div>
+        <div class="pk-control">
+            <span class="target-label">🎯 目标分数:</span>
+            <input type="number" id="targetScoreInput" class="target-input" value="5" min="1" step="1">
+            <button id="addPlayerBtn" class="add-player-btn">➕ 添加玩家</button>
+            <button id="pkStartBtn" class="pk-start-btn">▶ 开始新对局</button>
+            <button id="pkResetBtn" class="pk-reset-btn" data-label="🔄 重来" title="所有玩家分数清零并重新洗牌">🔄 重来</button>
+        </div>
+        <div class="footer-note" style="background:transparent; border-top:none;">PK规则：每位玩家独立答题，限时10秒，答对+1分，答错-1分（最低0分）。每个玩家独立遍历所有单词，全部答完自动重置。</div>
+    </div>
+    <div class="footer-note">✅ 全年级（三~六年级）所有单元单词（含粗体）。开启“仅粗体词”后只考察粗体词汇。点击“选词”可自定义每个单元的单词列表。</div>
+</div>
+<canvas id="fireworkCanvas" class="firework-canvas"></canvas>
+
+<!-- 自定义选词模态框 -->
+<div id="wordSelectModal" class="word-select-modal">
+    <div class="word-select-card">
+        <h2>📝 选择单词（当前单元）</h2>
+        <div class="word-select-actions">
+            <button id="selectAllBtn">✅ 全选</button>
+            <button id="deselectAllBtn">❌ 全不选</button>
+            <button id="selectBoldBtn">⭐ 选择粗体词</button>
+            <span id="selectedCount">已选 0 个</span>
+        </div>
+        <div id="wordCheckboxList" class="word-checkbox-list"></div>
+        <div class="word-select-footer">
+            <button id="wordSelectConfirm">✅ 确认</button>
+            <button id="wordSelectCancel">❌ 取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ================================================================
+    //  音效系统
+    // ================================================================
+    class SoundFX {
+        constructor() { this.ctx = null; this.enabled = true; this.streak = 0; this.initOnDemand(); }
+        initOnDemand() { if (!this.ctx && window.AudioContext) this.ctx = new(window.AudioContext || window.webkitAudioContext)(); }
+        ensureCtx() { if (!this.ctx) this.initOnDemand(); return this.ctx; }
+        playTone(freq, duration, type = 'sine', volume = 0.25, delay = 0, force = false) {
+            if (!force && !this.enabled) return;
+            const ctx = this.ensureCtx(); if (!ctx) return;
+            if (ctx.state === 'suspended') ctx.resume();   // 切过标签页不唤醒就没声
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator(); const gain = ctx.createGain();
+            osc.type = type; osc.frequency.value = freq; gain.gain.value = volume;
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(now + delay);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + duration);
+            osc.stop(now + delay + duration);
+        }
+        playCorrect() { this.playTone(880, 0.12, 'sine', 0.28); this.playTone(1108.73, 0.18, 'sine', 0.22, 0.1); }
+        playWrong() {
+            this.playTone(1046.50, 0.08, 'square', 0.2);
+            this.playTone(1046.50, 0.08, 'square', 0.2, 0.1);
+        }
+        playNext() { this.playTone(1318.52, 0.08, 'square', 0.12); }
+        playReset() { this.playTone(659.25, 0.1, 'sine', 0.2); this.playTone(783.99, 0.1, 'sine', 0.2, 0.08); }
+        playModeSwitch() { this.playTone(523.25, 0.1, 'triangle', 0.18); this.playTone(659.25, 0.1, 'triangle', 0.18, 0.1); }
+        playToggleSound() { this.playTone(988, 0.06, 'sine', 0.2, 0, true); }
+        playCheer() { if (!this.enabled) return; const notes = [523.25, 659.25, 783.99, 1046.50]; notes.forEach((f, i) => this.playTone(f, 0.2, 'sine', 0.2, i*0.12)); setTimeout(()=>this.playTone(1318.52,0.3,'sine',0.18,0), notes.length*0.12); }
+        addStreak() { this.streak++; if (this.streak === 3) { this.playCheer(); this.streak = 0; } }
+        resetStreak() { this.streak = 0; }
+        toggle() { this.enabled = !this.enabled; return this.enabled; }
+    }
+    const sfx = new SoundFX();
+
+    // ================================================================
+    //  礼花特效
+    // ================================================================
+    // 整屏 fixed 的 canvas，每帧重绘会牵连底下的毛玻璃，所以要限粒子数、
+    // 按颜色预生成填充色（省掉每帧的 save/restore 和 globalAlpha 状态切换）、
+    // 原地回收粒子，并且只在真有粒子时才跑 rAF。
+    const canvas = document.getElementById('fireworkCanvas');
+    const ctx = canvas.getContext('2d');
+    const FW_COLORS = ['#ff4d4d', '#ffa64d', '#ffff4d', '#4dff4d', '#4d4dff', '#ff4dff', '#ff9e80'];
+    const FW_FILLS = FW_COLORS.map(hex => {
+        const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+        const arr = [];
+        for (let k = 1; k <= 8; k++) arr.push(`rgba(${r},${g},${b},${(k / 8).toFixed(3)})`);
+        return arr;
+    });
+    const FW_REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // ⚠️ 阈值别用 4（4 核机器很常见、Chrome 的 deviceMemory 还封顶 8），只留真小的 <=2
+    const FW_LOWPOWER = (navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2;
+    const FW_MAX = FW_REDUCED ? 0 : (FW_LOWPOWER ? 160 : 320);
+    let particles = [];
+    let animationId = null;
+    let resizeRaf = null;
+
+    function resizeCanvas() {
+        const w = window.innerWidth, h = window.innerHeight;
+        if (canvas.width === w && canvas.height === h) return;   // 改尺寸会清空画布，没变就别动
+        canvas.width = w;
+        canvas.height = h;
+    }
+    function scheduleResize() {
+        if (resizeRaf) return;
+        resizeRaf = requestAnimationFrame(() => { resizeRaf = null; resizeCanvas(); });
+    }
+    window.addEventListener('resize', scheduleResize, { passive: true });
+    window.addEventListener('orientationchange', scheduleResize, { passive: true });
+    resizeCanvas();
+
+    function createFirework(x, y) {
+        if (!FW_MAX) return;
+        const room = FW_MAX - particles.length;
+        if (room <= 0) return;
+        const n = Math.min(72, room);
+        for (let i = 0; i < n; i++) {
+            particles.push({
+                x: x, y: y,
+                ci: Math.floor(Math.random() * FW_COLORS.length),
+                size: Math.random() * 4 + 2,
+                speedX: (Math.random() - 0.5) * 6,
+                speedY: (Math.random() - 0.5) * 6 - 2,
+                gravity: 0.2,
+                alpha: 1,
+                decay: 0.02 + Math.random() * 0.02
+            });
+        }
+        if (!animationId) animationId = requestAnimationFrame(animateFireworks);
+    }
+
+    function animateFireworks() {
+        animationId = null;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        let n = 0;
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            p.speedY += p.gravity;
+            p.x += p.speedX;
+            p.y += p.speedY;
+            p.alpha -= p.decay;
+            if (p.alpha > 0) particles[n++] = p;     // 原地压缩，不产生垃圾
+        }
+        particles.length = n;
+        if (!n) return;
+
+        for (let i = 0; i < n; i++) {
+            const p = particles[i];
+            ctx.fillStyle = FW_FILLS[p.ci][Math.min(7, (p.alpha * 8) | 0)];
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, 6.2832);
+            ctx.fill();
+        }
+        animationId = requestAnimationFrame(animateFireworks);
+    }
+    function showFireworkForPlayer(playerIdx) {
+        const playerDiv = document.querySelector(`.pk-player[data-idx='${playerIdx}']`);
+        if (!playerDiv) return;
+        const rect = playerDiv.getBoundingClientRect();
+        if (!rect.width && !rect.height) return;   // 隐藏的元素，别在左上角炸一朵
+        createFirework(rect.left + rect.width/2, rect.top + rect.height/3);
+    }
+
+    // ================================================================
+    //  全年级词库（三~六年级，上下册）
+    //  数据源自 PEP 教材，包含粗体标记
+    // ================================================================
+    const wordBank = {
+        3: {
+            upper: {
+                "Unit 1": [
+                    { word: "name", meaning: "名字", bold: false }, { word: "nice", meaning: "美好的", bold: false }, { word: "ear", meaning: "耳朵", bold: true }, { word: "hand", meaning: "手", bold: true }, { word: "eye", meaning: "眼睛", bold: true }, { word: "mouth", meaning: "嘴巴", bold: true }, { word: "arm", meaning: "手臂", bold: true }, { word: "can", meaning: "能；可以", bold: false }, { word: "share", meaning: "分享", bold: true }, { word: "smile", meaning: "微笑", bold: true }, { word: "listen", meaning: "听", bold: true }, { word: "help", meaning: "帮助", bold: true }, { word: "say", meaning: "说", bold: false }, { word: "friend", meaning: "朋友", bold: false }, { word: "good", meaning: "好的", bold: false }
+                ],
+                "Unit 2": [
+                    { word: "mum", meaning: "妈妈", bold: true }, { word: "dad", meaning: "爸爸", bold: true }, { word: "grandma", meaning: "奶奶", bold: true }, { word: "grandpa", meaning: "爷爷", bold: true }, { word: "grandfather", meaning: "祖父", bold: true }, { word: "grandmother", meaning: "祖母", bold: true }, { word: "mother", meaning: "母亲", bold: true }, { word: "father", meaning: "父亲", bold: true }, { word: "me", meaning: "我", bold: true }, { word: "sister", meaning: "姐妹", bold: true }, { word: "family", meaning: "家庭", bold: true }, { word: "big", meaning: "大的", bold: true }, { word: "cousin", meaning: "表兄妹", bold: true }, { word: "brother", meaning: "兄弟", bold: true }, { word: "baby", meaning: "婴儿", bold: true }, { word: "uncle", meaning: "叔叔", bold: true }, { word: "aunt", meaning: "阿姨", bold: true }, { word: "small", meaning: "小的", bold: true }
+                ],
+                "Unit 3": [
+                    { word: "like", meaning: "喜欢", bold: true }, { word: "dog", meaning: "狗", bold: true }, { word: "pet", meaning: "宠物", bold: false }, { word: "cat", meaning: "猫", bold: true }, { word: "fish", meaning: "鱼", bold: true }, { word: "bird", meaning: "鸟", bold: true }, { word: "rabbit", meaning: "兔子", bold: true }, { word: "go", meaning: "去", bold: false }, { word: "zoo", meaning: "动物园", bold: false }, { word: "fox", meaning: "狐狸", bold: false }, { word: "Miss", meaning: "小姐", bold: false }, { word: "panda", meaning: "熊猫", bold: true }, { word: "red panda", meaning: "小熊猫", bold: false }, { word: "cute", meaning: "可爱的", bold: false }, { word: "monkey", meaning: "猴子", bold: true }, { word: "tiger", meaning: "老虎", bold: true }, { word: "elephant", meaning: "大象", bold: true }, { word: "lion", meaning: "狮子", bold: true }, { word: "animal", meaning: "动物", bold: false }, { word: "giraffe", meaning: "长颈鹿", bold: true }, { word: "tall", meaning: "高的", bold: true }, { word: "fast", meaning: "快速的", bold: true }
+                ],
+                "Unit 4": [
+                    { word: "apple", meaning: "苹果", bold: true }, { word: "banana", meaning: "香蕉", bold: true }, { word: "farm", meaning: "农场", bold: false }, { word: "air", meaning: "空气", bold: true }, { word: "orange", meaning: "橙子；橙色", bold: true }, { word: "grape", meaning: "葡萄", bold: true }, { word: "school", meaning: "学校", bold: false }, { word: "garden", meaning: "花园", bold: false }, { word: "need", meaning: "需要", bold: false }, { word: "water", meaning: "水", bold: true }, { word: "flower", meaning: "花", bold: true }, { word: "grass", meaning: "草", bold: false }, { word: "plant", meaning: "植物", bold: false }, { word: "new", meaning: "新的", bold: false }, { word: "tree", meaning: "树", bold: true }, { word: "sun", meaning: "太阳", bold: true }, { word: "give", meaning: "给予", bold: false }, { word: "them", meaning: "他们", bold: false }
+                ],
+                "Unit 5": [
+                    { word: "colour", meaning: "颜色", bold: false }, { word: "orange", meaning: "橙色", bold: true }, { word: "green", meaning: "绿色", bold: true }, { word: "red", meaning: "红色", bold: true }, { word: "make", meaning: "制作", bold: false }, { word: "purple", meaning: "紫色", bold: true }, { word: "brown", meaning: "棕色", bold: true }, { word: "bear", meaning: "熊", bold: false }, { word: "yellow", meaning: "黄色", bold: true }, { word: "duck", meaning: "鸭子", bold: false }, { word: "sea", meaning: "海洋", bold: false }, { word: "some", meaning: "一些", bold: false }, { word: "pink", meaning: "粉色", bold: true }, { word: "draw", meaning: "画画", bold: false }, { word: "white", meaning: "白色", bold: true }, { word: "black", meaning: "黑色", bold: true }
+                ],
+                "Unit 6": [
+                    { word: "one", meaning: "一", bold: true }, { word: "two", meaning: "二", bold: true }, { word: "three", meaning: "三", bold: true }, { word: "four", meaning: "四", bold: true }, { word: "five", meaning: "五", bold: true }, { word: "six", meaning: "六", bold: true }, { word: "seven", meaning: "七", bold: true }, { word: "eight", meaning: "八", bold: true }, { word: "nine", meaning: "九", bold: true }, { word: "ten", meaning: "十", bold: true }, { word: "old", meaning: "年老的", bold: false }, { word: "year", meaning: "年", bold: false }, { word: "o'clock", meaning: "点钟", bold: false }, { word: "cut", meaning: "切", bold: false }, { word: "eat", meaning: "吃", bold: false }, { word: "cake", meaning: "蛋糕", bold: false }
+                ]
+            },
+            lower: {
+                "Unit 1": [
+                    { word: "where", meaning: "哪里", bold: false }, { word: "from", meaning: "从...", bold: false }, { word: "about", meaning: "关于", bold: false }, { word: "today", meaning: "今天", bold: false }, { word: "teacher", meaning: "老师", bold: true }, { word: "student", meaning: "学生", bold: true }, { word: "after", meaning: "在...之后", bold: false }, { word: "who", meaning: "谁", bold: false }, { word: "girl", meaning: "女孩", bold: true }, { word: "neighbour", meaning: "邻居", bold: false }, { word: "boy", meaning: "男孩", bold: true }, { word: "woman", meaning: "女人", bold: true }, { word: "man", meaning: "男人", bold: true }, { word: "Mr", meaning: "先生", bold: false }, { word: "classmate", meaning: "同学", bold: false }, { word: "he", meaning: "他", bold: false }, { word: "also", meaning: "也", bold: false }, { word: "English", meaning: "英语", bold: false }, { word: "she", meaning: "她", bold: false }, { word: "very", meaning: "非常", bold: false }, { word: "UK", meaning: "英国", bold: true }, { word: "China", meaning: "中国", bold: true }, { word: "Canada", meaning: "加拿大", bold: true }, { word: "USA", meaning: "美国", bold: true }
+                ],
+                "Unit 2": [
+                    { word: "has", meaning: "有", bold: false }, { word: "long", meaning: "长的", bold: true }, { word: "body", meaning: "身体", bold: false }, { word: "short", meaning: "短的", bold: true }, { word: "leg", meaning: "腿", bold: false }, { word: "right", meaning: "正确的；右边", bold: false }, { word: "fat", meaning: "胖的", bold: true }, { word: "thin", meaning: "瘦的", bold: true }, { word: "slow", meaning: "慢的", bold: true }, { word: "love", meaning: "爱", bold: false }, { word: "tail", meaning: "尾巴", bold: false }, { word: "her", meaning: "她的", bold: false }, { word: "gift", meaning: "礼物", bold: false }, { word: "picture", meaning: "图画", bold: true }, { word: "card", meaning: "卡片", bold: true }, { word: "sing", meaning: "唱歌", bold: true }, { word: "dance", meaning: "跳舞", bold: true }, { word: "talk", meaning: "说话", bold: false }, { word: "face", meaning: "脸", bold: false }, { word: "all", meaning: "全部", bold: false }, { word: "song", meaning: "歌曲", bold: false }, { word: "or", meaning: "或者", bold: false }, { word: "much", meaning: "许多", bold: false }
+                ],
+                "Unit 3": [
+                    { word: "eraser", meaning: "橡皮", bold: false }, { word: "find", meaning: "找到", bold: false }, { word: "ruler", meaning: "尺子", bold: true }, { word: "pen", meaning: "钢笔", bold: true }, { word: "pencil", meaning: "铅笔", bold: true }, { word: "book", meaning: "书", bold: true }, { word: "bag", meaning: "书包", bold: true }, { word: "paper", meaning: "纸", bold: false }, { word: "these", meaning: "这些", bold: false }, { word: "see", meaning: "看见", bold: true }, { word: "smell", meaning: "闻", bold: true }, { word: "taste", meaning: "品尝", bold: true }, { word: "hear", meaning: "听见", bold: true }, { word: "touch", meaning: "触摸", bold: true }, { word: "nose", meaning: "鼻子", bold: false }, { word: "tongue", meaning: "舌头", bold: false }, { word: "class", meaning: "班级", bold: false }, { word: "in", meaning: "在...里", bold: false }, { word: "computer", meaning: "电脑", bold: false }, { word: "learn", meaning: "学习", bold: false }
+                ],
+                "Unit 4": [
+                    { word: "breakfast", meaning: "早餐", bold: false }, { word: "time", meaning: "时间", bold: false }, { word: "bread", meaning: "面包", bold: true }, { word: "egg", meaning: "鸡蛋", bold: true }, { word: "milk", meaning: "牛奶", bold: true }, { word: "noodle", meaning: "面条", bold: true }, { word: "juice", meaning: "果汁", bold: true }, { word: "rice", meaning: "米饭", bold: true }, { word: "meat", meaning: "肉", bold: true }, { word: "vegetable", meaning: "蔬菜", bold: true }, { word: "healthy", meaning: "健康的", bold: false }, { word: "plate", meaning: "盘子", bold: false }, { word: "soup", meaning: "汤", bold: true }, { word: "fruit", meaning: "水果", bold: true }, { word: "colourful", meaning: "色彩缤纷", bold: false }, { word: "candy", meaning: "糖果", bold: false }, { word: "yummy", meaning: "美味的", bold: false }
+                ],
+                "Unit 5": [
+                    { word: "boat", meaning: "小船", bold: true }, { word: "cool", meaning: "酷的", bold: false }, { word: "keep", meaning: "保持", bold: false }, { word: "at", meaning: "在", bold: false }, { word: "home", meaning: "家", bold: false }, { word: "ball", meaning: "球", bold: true }, { word: "doll", meaning: "玩偶", bold: true }, { word: "car", meaning: "汽车", bold: true }, { word: "on", meaning: "在...上", bold: true }, { word: "shelf", meaning: "架子", bold: false }, { word: "in", meaning: "在...里", bold: true }, { word: "box", meaning: "盒子", bold: false }, { word: "cap", meaning: "帽子", bold: true }, { word: "map", meaning: "地图", bold: true }, { word: "under", meaning: "在下面", bold: true }, { word: "still", meaning: "仍然", bold: false }, { word: "put", meaning: "放置", bold: false }
+                ],
+                "Unit 6": [
+                    { word: "fifteen", meaning: "十五", bold: false }, { word: "twelve", meaning: "十二", bold: true }, { word: "fourteen", meaning: "十四", bold: true }, { word: "thirteen", meaning: "十三", bold: true }, { word: "eleven", meaning: "十一", bold: true }, { word: "twenty", meaning: "二十", bold: false }, { word: "seventeen", meaning: "十七", bold: true }, { word: "sixteen", meaning: "十六", bold: true }, { word: "eighteen", meaning: "十八", bold: false }, { word: "nineteen", meaning: "十九", bold: false }, { word: "piggy bank", meaning: "储蓄罐", bold: false }, { word: "pay", meaning: "支付", bold: false }, { word: "back", meaning: "背部；返回", bold: false }
+                ]
+            }
+        },
+        4: {
+            upper: {
+                "Unit 1": [
+                    { word: "PE", meaning: "体育", bold: false },{ word: "job", meaning: "工作", bold: false },{ word: "doctor", meaning: "医生", bold: true },{ word: "farmer", meaning: "农民", bold: true },{ word: "nurse", meaning: "护士", bold: true },{ word: "office worker", meaning: "办公室职员", bold: true },{ word: "factory worker", meaning: "工厂工人", bold: true },{ word: "busy", meaning: "忙碌的", bold: false },{ word: "tired", meaning: "疲倦的", bold: false },{ word: "chore", meaning: "家务", bold: false },{ word: "cook", meaning: "厨师；烹饪", bold: true },{ word: "clean", meaning: "清洁", bold: false },{ word: "room", meaning: "房间", bold: false },{ word: "look after", meaning: "照顾", bold: true },{ word: "sweep", meaning: "打扫", bold: true },{ word: "floor", meaning: "地板", bold: true },{ word: "together", meaning: "一起", bold: false },{ word: "people", meaning: "人们", bold: false },{ word: "child", meaning: "孩子", bold: false }
+                ],
+                "Unit 2": [
+                    { word: "his", meaning: "他的", bold: false },{ word: "strong", meaning: "强壮的", bold: true },{ word: "hair", meaning: "头发", bold: true },{ word: "also", meaning: "也", bold: false },{ word: "kind", meaning: "和蔼的", bold: true },{ word: "quiet", meaning: "安静的", bold: true },{ word: "read", meaning: "阅读", bold: true },{ word: "Chinese", meaning: "语文；中国人", bold: true },{ word: "play", meaning: "玩", bold: true },{ word: "game", meaning: "游戏", bold: true },{ word: "football", meaning: "足球", bold: true },{ word: "basketball", meaning: "篮球", bold: false },{ word: "always", meaning: "总是", bold: false },{ word: "best", meaning: "最好的", bold: false }
+                ],
+                "Unit 3": [
+                    { word: "afternoon", meaning: "下午", bold: false },{ word: "there", meaning: "那里", bold: false },{ word: "playground", meaning: "操场", bold: true },{ word: "park", meaning: "公园", bold: true },{ word: "over", meaning: "结束", bold: false },{ word: "hospital", meaning: "医院", bold: true },{ word: "shop", meaning: "商店", bold: true },{ word: "toilet", meaning: "厕所", bold: true },{ word: "bus stop", meaning: "公交站", bold: true },{ word: "sport", meaning: "运动", bold: true },{ word: "walk", meaning: "步行", bold: true },{ word: "library", meaning: "图书馆", bold: false },{ word: "favourite", meaning: "最喜欢的", bold: false },{ word: "place", meaning: "地方", bold: false },{ word: "photo", meaning: "照片", bold: false },{ word: "story", meaning: "故事", bold: false },{ word: "buy", meaning: "买", bold: false }
+                ],
+                "Unit 4": [
+                    { word: "firefighter", meaning: "消防员", bold: false },{ word: "why", meaning: "为什么", bold: false },{ word: "driver", meaning: "司机", bold: true },{ word: "cleaner", meaning: "清洁工", bold: true },{ word: "cook", meaning: "厨师", bold: true },{ word: "delivery worker", meaning: "快递员", bold: true },{ word: "police officer", meaning: "警察", bold: true },{ word: "a lot of", meaning: "许多", bold: false },{ word: "now", meaning: "现在", bold: false },{ word: "make the bed", meaning: "整理床铺", bold: false },{ word: "old", meaning: "老的", bold: true },{ word: "ell", meaning: "？", bold: false },{ word: "everyone", meaning: "每个人", bold: false },{ word: "Ms", meaning: "女士", bold: false }
+                ],
+                "Unit 5": [
+                    { word: "speak", meaning: "说", bold: false },{ word: "weather", meaning: "天气", bold: false },{ word: "sunny", meaning: "晴朗的", bold: true },{ word: "hot", meaning: "热的", bold: true },{ word: "cold", meaning: "冷的", bold: true },{ word: "windy", meaning: "有风的", bold: true },{ word: "cloudy", meaning: "多云的", bold: true },{ word: "rainy", meaning: "下雨的", bold: true },{ word: "snowy", meaning: "下雪的", bold: true },{ word: "cool", meaning: "凉爽的", bold: true },{ word: "warm", meaning: "温暖的", bold: true },{ word: "film", meaning: "电影", bold: false },{ word: "fly", meaning: "飞", bold: false },{ word: "kite", meaning: "风筝", bold: false },{ word: "snowman", meaning: "雪人", bold: false },{ word: "fun", meaning: "乐趣", bold: false },{ word: "their", meaning: "他们的", bold: false },{ word: "swim", meaning: "游泳", bold: false },{ word: "Sydney", meaning: "悉尼", bold: false }
+                ],
+                "Unit 6": [
+                    { word: "whose", meaning: "谁的", bold: false },{ word: "sweater", meaning: "毛衣", bold: true },{ word: "sock", meaning: "袜子", bold: true },{ word: "shirt", meaning: "衬衫", bold: true },{ word: "mine", meaning: "我的", bold: false },{ word: "wear", meaning: "穿", bold: false },{ word: "coat", meaning: "外套", bold: true },{ word: "dress", meaning: "连衣裙", bold: true },{ word: "winter", meaning: "冬天", bold: true },{ word: "spring", meaning: "春天", bold: true },{ word: "summer", meaning: "夏天", bold: true },{ word: "autumn", meaning: "秋天", bold: true },{ word: "which", meaning: "哪一个", bold: false },{ word: "season", meaning: "季节", bold: true },{ word: "snow", meaning: "雪", bold: false },{ word: "get together", meaning: "团聚", bold: false },{ word: "T-shirt", meaning: "T恤", bold: false },{ word: "fall", meaning: "秋天", bold: false },{ word: "leaf", meaning: "叶子", bold: false },{ word: "leaves", meaning: "叶子（复数）", bold: false },{ word: "glove", meaning: "手套", bold: false },{ word: "then", meaning: "然后", bold: false }
+                ]
+            },
+            lower: {
+                "Unit 1": [
+                    { word: "sorry", meaning: "抱歉", bold: false },{ word: "hurry", meaning: "赶快", bold: false },{ word: "late", meaning: "迟到", bold: true },{ word: "class", meaning: "班级", bold: true },{ word: "ready", meaning: "准备好", bold: false },{ word: "rule", meaning: "规则", bold: false },{ word: "classroom", meaning: "教室", bold: true },{ word: "turn off", meaning: "关闭", bold: true },{ word: "light", meaning: "灯", bold: true },{ word: "blackboard", meaning: "黑板", bold: false },{ word: "desk", meaning: "书桌", bold: true },{ word: "chair", meaning: "椅子", bold: true },{ word: "tidy", meaning: "整洁的", bold: false },{ word: "music", meaning: "音乐", bold: false },{ word: "door", meaning: "门", bold: true },{ word: "window", meaning: "窗户", bold: true },{ word: "fan", meaning: "风扇", bold: true },{ word: "when", meaning: "什么时候", bold: false },{ word: "understand", meaning: "理解", bold: false },{ word: "wall", meaning: "墙", bold: false },{ word: "newspaper", meaning: "报纸", bold: false },{ word: "hand out", meaning: "分发", bold: false },{ word: "workbook", meaning: "练习册", bold: false }
+                ],
+                "Unit 2": [
+                    { word: "watch", meaning: "手表", bold: false },{ word: "TV", meaning: "电视", bold: false },{ word: "homework", meaning: "作业", bold: true },{ word: "first", meaning: "第一", bold: false },{ word: "wet", meaning: "湿的", bold: false },{ word: "run", meaning: "跑", bold: false },{ word: "living room", meaning: "客厅", bold: true },{ word: "safe", meaning: "安全的", bold: false },{ word: "word", meaning: "单词", bold: true },{ word: "wash", meaning: "洗", bold: true },{ word: "helpful", meaning: "有帮助的", bold: false },{ word: "loud", meaning: "大声的", bold: false },{ word: "sleep", meaning: "睡觉", bold: false },{ word: "bedroom", meaning: "卧室", bold: true },{ word: "kitchen", meaning: "厨房", bold: true },{ word: "study", meaning: "书房", bold: true },{ word: "bathroom", meaning: "浴室", bold: true },{ word: "think", meaning: "思考", bold: false },{ word: "work", meaning: "工作", bold: false },{ word: "hard", meaning: "努力地", bold: false },{ word: "follow", meaning: "跟随", bold: false },{ word: "feel", meaning: "感觉", bold: false }
+                ],
+                "Unit 3": [
+                    { word: "over", meaning: "结束", bold: false },{ word: "kid", meaning: "小孩", bold: false },{ word: "dinner", meaning: "晚餐", bold: true },{ word: "art", meaning: "美术", bold: true },{ word: "lunch", meaning: "午餐", bold: true },{ word: "maths", meaning: "数学", bold: true },{ word: "get up", meaning: "起床", bold: true },{ word: "go to school", meaning: "上学", bold: true },{ word: "go home", meaning: "回家", bold: true },{ word: "go to bed", meaning: "上床睡觉", bold: true },{ word: "want", meaning: "想要", bold: false },{ word: "clock", meaning: "时钟", bold: false },{ word: "just", meaning: "只是", bold: false },{ word: "minute", meaning: "分钟", bold: false }
+                ],
+                "Unit 4": [
+                    { word: "trousers", meaning: "裤子", bold: true },{ word: "pair", meaning: "一对", bold: false },{ word: "clothes", meaning: "衣服", bold: false },{ word: "those", meaning: "那些", bold: false },{ word: "shorts", meaning: "短裤", bold: true },{ word: "jacket", meaning: "夹克", bold: true },{ word: "skirt", meaning: "裙子", bold: true },{ word: "expensive", meaning: "昂贵的", bold: true },{ word: "cheap", meaning: "便宜的", bold: true },{ word: "shoe", meaning: "鞋子", bold: true },{ word: "dear", meaning: "亲爱的", bold: false },{ word: "beautiful", meaning: "美丽的", bold: true },{ word: "take", meaning: "拿", bold: false },{ word: "hat", meaning: "帽子", bold: true },{ word: "sunglasses", meaning: "太阳镜", bold: true },{ word: "free", meaning: "免费的", bold: false },{ word: "large", meaning: "大的", bold: false },{ word: "size", meaning: "尺寸", bold: false },{ word: "list", meaning: "清单", bold: false },{ word: "try on", meaning: "试穿", bold: false },{ word: "any", meaning: "任何", bold: false }
+                ],
+                "Unit 5": [
+                    { word: "cow", meaning: "奶牛", bold: true },{ word: "horse", meaning: "马", bold: true },{ word: "sheep", meaning: "绵羊", bold: true },{ word: "pig", meaning: "猪", bold: true },{ word: "chicken", meaning: "鸡", bold: true },{ word: "tomato", meaning: "西红柿", bold: true },{ word: "bee", meaning: "蜜蜂", bold: false },{ word: "mouse", meaning: "老鼠", bold: false },{ word: "carrot", meaning: "胡萝卜", bold: true },{ word: "potato", meaning: "土豆", bold: true },{ word: "green bean", meaning: "豆角", bold: false },{ word: "can", meaning: "罐子", bold: false },{ word: "a box of", meaning: "一盒", bold: false }
+                ],
+                "Unit 6": [
+                    { word: "feed", meaning: "喂", bold: true },{ word: "pass", meaning: "传递", bold: false },{ word: "pick", meaning: "摘", bold: true },{ word: "milk", meaning: "挤奶", bold: true },{ word: "knife", meaning: "刀", bold: true },{ word: "fork", meaning: "叉", bold: true },{ word: "chopstick", meaning: "筷子", bold: true },{ word: "bowl", meaning: "碗", bold: true },{ word: "waste", meaning: "浪费", bold: false },{ word: "food", meaning: "食物", bold: false },{ word: "delicious", meaning: "美味的", bold: false },{ word: "clear the table", meaning: "收拾餐桌", bold: false },{ word: "set the table", meaning: "摆餐具", bold: false },{ word: "supermarket", meaning: "超市", bold: false },{ word: "herself", meaning: "她自己", bold: false },{ word: "week", meaning: "星期", bold: false },{ word: "salad", meaning: "沙拉", bold: false }
+                ]
+            }
+        },
+        5: {
+            upper: {
+                "Unit 1": [
+                    { word: "team", meaning: "团队", bold: false },{ word: "player", meaning: "运动员", bold: false },{ word: "him", meaning: "他（宾格）", bold: false },{ word: "lovely", meaning: "可爱的", bold: true },{ word: "clever", meaning: "聪明的", bold: true },{ word: "young", meaning: "年轻的", bold: true },{ word: "hard-working", meaning: "勤奋的", bold: true },{ word: "robot", meaning: "机器人", bold: true },{ word: "jump", meaning: "跳", bold: true },{ word: "rope", meaning: "绳子", bold: true },{ word: "piano", meaning: "钢琴", bold: true },{ word: "chess", meaning: "国际象棋", bold: true },{ word: "front", meaning: "前面", bold: false },{ word: "easy", meaning: "容易的", bold: false },{ word: "star", meaning: "星星", bold: false },{ word: "wonderful", meaning: "精彩的", bold: false },{ word: "Australia", meaning: "澳大利亚", bold: false }
+                ],
+                "Unit 2": [
+                    { word: "sad", meaning: "悲伤的", bold: true },{ word: "matter", meaning: "事情", bold: false },{ word: "project", meaning: "项目", bold: false },{ word: "centre", meaning: "中心", bold: false },{ word: "agree", meaning: "同意", bold: false },{ word: "finish", meaning: "完成", bold: false },{ word: "worried", meaning: "担心的", bold: true },{ word: "both", meaning: "两者都", bold: false },{ word: "excited", meaning: "兴奋的", bold: false },{ word: "wrong", meaning: "错误的", bold: false },{ word: "angry", meaning: "生气的", bold: true },{ word: "afraid", meaning: "害怕的", bold: true },{ word: "parent", meaning: "父/母", bold: true },{ word: "ask", meaning: "问", bold: true },{ word: "laugh", meaning: "笑", bold: true },{ word: "move", meaning: "移动", bold: true },{ word: "yours", meaning: "你的（名词性物主代词）", bold: true }
+                ],
+                "Unit 3": [
+                    { word: "Wednesday", meaning: "星期三", bold: true },{ word: "subject", meaning: "科目", bold: false },{ word: "Tuesday", meaning: "星期二", bold: true },{ word: "Friday", meaning: "星期五", bold: true },{ word: "Monday", meaning: "星期一", bold: true },{ word: "Thursday", meaning: "星期四", bold: true },{ word: "Saturday", meaning: "星期六", bold: true },{ word: "Sunday", meaning: "星期日", bold: true },{ word: "start", meaning: "开始", bold: false },{ word: "usually", meaning: "通常", bold: false },{ word: "weekend", meaning: "周末", bold: false },{ word: "sometimes", meaning: "有时", bold: false },{ word: "lesson", meaning: "课", bold: true },{ word: "evening", meaning: "晚上", bold: true },{ word: "answer", meaning: "回答", bold: true },{ word: "ping-pong", meaning: "乒乓球", bold: true },{ word: "night", meaning: "夜晚", bold: true },{ word: "visit", meaning: "参观", bold: true },{ word: "grandparent", meaning: "祖父母", bold: true }
+                ],
+                "Unit 4": [
+                    { word: "stay", meaning: "停留", bold: false },{ word: "should", meaning: "应该", bold: true },{ word: "flu", meaning: "流感", bold: true },{ word: "else", meaning: "其他", bold: true },{ word: "exercise", meaning: "锻炼", bold: true },{ word: "enough", meaning: "足够的", bold: true },{ word: "if", meaning: "如果", bold: true },{ word: "habit", meaning: "习惯", bold: true },{ word: "house", meaning: "房屋", bold: true },{ word: "show", meaning: "展示", bold: true },{ word: "phone", meaning: "电话", bold: true },{ word: "then", meaning: "然后", bold: true },{ word: "rest", meaning: "休息", bold: true },{ word: "take care of", meaning: "照顾", bold: true },{ word: "check", meaning: "检查", bold: true },{ word: "less", meaning: "更少的", bold: true },{ word: "brush", meaning: "刷", bold: true },{ word: "tooth", meaning: "牙齿（单数）", bold: true },{ word: "teeth", meaning: "牙齿（复数）", bold: true },{ word: "twice", meaning: "两次", bold: true },{ word: "hour", meaning: "小时", bold: true },{ word: "free", meaning: "免费的/自由的", bold: true }
+                ],
+                "Unit 5": [
+                    { word: "hungry", meaning: "饥饿的", bold: false },{ word: "beef", meaning: "牛肉", bold: true },{ word: "ice cream", meaning: "冰淇淋", bold: true },{ word: "dumpling", meaning: "饺子", bold: true },{ word: "tea", meaning: "茶", bold: true },{ word: "hamburger", meaning: "汉堡包", bold: true },{ word: "Mrs", meaning: "太太", bold: false },{ word: "coconut", meaning: "椰子", bold: false },{ word: "interesting", meaning: "有趣的", bold: false },{ word: "seed", meaning: "种子", bold: true },{ word: "pull", meaning: "拉", bold: false },{ word: "stem", meaning: "茎", bold: true },{ word: "root", meaning: "根", bold: true },{ word: "lotus", meaning: "莲花", bold: true },{ word: "lake", meaning: "湖", bold: true },{ word: "world", meaning: "世界", bold: true },{ word: "round", meaning: "圆的", bold: true },{ word: "different", meaning: "不同的", bold: true },{ word: "way", meaning: "方式", bold: true }
+                ],
+                "Unit 6": [
+                    { word: "river", meaning: "河流", bold: true },{ word: "nature", meaning: "自然", bold: false },{ word: "waterfall", meaning: "瀑布", bold: true },{ word: "forest", meaning: "森林", bold: true },{ word: "famous", meaning: "著名的", bold: true },{ word: "mountain", meaning: "山", bold: true },{ word: "wind", meaning: "风", bold: true },{ word: "trip", meaning: "旅行", bold: true },{ word: "dangerous", meaning: "危险的", bold: true },{ word: "heavy", meaning: "重的", bold: true },{ word: "hotel", meaning: "旅馆", bold: true },{ word: "close", meaning: "关闭", bold: true },{ word: "umbrella", meaning: "雨伞", bold: true },{ word: "raincoat", meaning: "雨衣", bold: true },{ word: "worry", meaning: "担心", bold: true },{ word: "fine", meaning: "好的", bold: true },{ word: "fog", meaning: "雾", bold: true },{ word: "flood", meaning: "洪水", bold: true },{ word: "fire", meaning: "火", bold: true },{ word: "know", meaning: "知道", bold: true },{ word: "before", meaning: "在...之前", bold: true },{ word: "go hiking", meaning: "去远足", bold: true },{ word: "bring", meaning: "带来", bold: true }
+                ]
+            },
+            lower: {
+                "Unit 1": [
+                    { word: "eat breakfast", meaning: "吃早餐", bold: true },{ word: "play sports", meaning: "做运动", bold: true },{ word: "have class", meaning: "上课", bold: true },{ word: "exercise", meaning: "锻炼", bold: true },{ word: "do morning exercises", meaning: "做早操", bold: true },{ word: "eat dinner", meaning: "吃晚餐", bold: true },{ word: "clean my room", meaning: "打扫房间", bold: true },{ word: "go for a walk", meaning: "散步", bold: true },{ word: "go shopping", meaning: "购物", bold: true },{ word: "take", meaning: "学习；上课", bold: true },{ word: "dancing", meaning: "跳舞", bold: true },{ word: "take a dancing class", meaning: "上舞蹈课", bold: true },{ word: "when", meaning: "什么时候", bold: false },{ word: "usually", meaning: "通常", bold: false },{ word: "a.m.", meaning: "上午", bold: false },{ word: "p.m.", meaning: "下午", bold: false },{ word: "why", meaning: "为什么", bold: false },{ word: "work", meaning: "工作", bold: false },{ word: "always", meaning: "总是", bold: false },{ word: "go swimming", meaning: "去游泳", bold: false }
+                ],
+                "Unit 2": [
+                    { word: "spring", meaning: "春天", bold: true },{ word: "summer", meaning: "夏天", bold: true },{ word: "autumn", meaning: "秋天", bold: true },{ word: "winter", meaning: "冬天", bold: true },{ word: "season", meaning: "季节", bold: true },{ word: "picnic", meaning: "野餐", bold: true },{ word: "go on a picnic", meaning: "去野餐", bold: true },{ word: "pick", meaning: "摘", bold: true },{ word: "pick apples", meaning: "摘苹果", bold: true },{ word: "snowman", meaning: "雪人", bold: true },{ word: "make a snowman", meaning: "堆雪人", bold: true },{ word: "go swimming", meaning: "去游泳", bold: true },{ word: "which", meaning: "哪一个", bold: false },{ word: "best", meaning: "最", bold: false },{ word: "snow", meaning: "雪", bold: false },{ word: "good job", meaning: "做得好", bold: false },{ word: "because", meaning: "因为", bold: false },{ word: "vacation", meaning: "假期", bold: false }
+                ],
+                "Unit 3": [
+                    { word: "January", meaning: "一月", bold: true },{ word: "February", meaning: "二月", bold: true },{ word: "March", meaning: "三月", bold: true },{ word: "April", meaning: "四月", bold: true },{ word: "May", meaning: "五月", bold: true },{ word: "June", meaning: "六月", bold: true },{ word: "July", meaning: "七月", bold: true },{ word: "August", meaning: "八月", bold: true },{ word: "September", meaning: "九月", bold: true },{ word: "October", meaning: "十月", bold: true },{ word: "November", meaning: "十一月", bold: true },{ word: "December", meaning: "十二月", bold: true },{ word: "few", meaning: "很少", bold: false },{ word: "a few", meaning: "一些", bold: false },{ word: "sports", meaning: "运动", bold: false },{ word: "sports meet", meaning: "运动会", bold: false },{ word: "trip", meaning: "旅行", bold: false },{ word: "plant", meaning: "种植", bold: false },{ word: "contest", meaning: "比赛", bold: false },{ word: "Labour Day", meaning: "劳动节", bold: false },{ word: "the Great Wall", meaning: "长城", bold: false },{ word: "national", meaning: "国家的", bold: false },{ word: "National Day", meaning: "国庆节", bold: false },{ word: "Thanksgiving Day", meaning: "感恩节", bold: false },{ word: "Christmas", meaning: "圣诞节", bold: false }
+                ],
+                "Unit 4": [
+                    { word: "first", meaning: "第一", bold: true },{ word: "second", meaning: "第二", bold: true },{ word: "third", meaning: "第三", bold: true },{ word: "fourth", meaning: "第四", bold: true },{ word: "fifth", meaning: "第五", bold: true },{ word: "twelfth", meaning: "第十二", bold: true },{ word: "twentieth", meaning: "第二十", bold: true },{ word: "twenty-first", meaning: "第二十一", bold: true },{ word: "twenty-third", meaning: "第二十三", bold: true },{ word: "thirtieth", meaning: "第三十", bold: true }
+                ],
+                "Unit 5": [
+                    { word: "mine", meaning: "我的", bold: true },{ word: "yours", meaning: "你的", bold: true },{ word: "his", meaning: "他的", bold: true },{ word: "hers", meaning: "她的", bold: true },{ word: "theirs", meaning: "他们的", bold: true },{ word: "ours", meaning: "我们的", bold: true },{ word: "climbing", meaning: "攀爬", bold: true },{ word: "eating", meaning: "吃", bold: true },{ word: "playing", meaning: "玩", bold: true },{ word: "jumping", meaning: "跳", bold: true },{ word: "drinking", meaning: "喝", bold: true },{ word: "sleeping", meaning: "睡觉", bold: true }
+                ],
+                "Unit 6": [
+                    { word: "doing morning exercises", meaning: "做早操", bold: true },{ word: "having lunch", meaning: "吃午餐", bold: true },{ word: "reading a book", meaning: "读书", bold: true },{ word: "listening to music", meaning: "听音乐", bold: true },{ word: "keep", meaning: "保持", bold: true },{ word: "keep to the right", meaning: "靠右", bold: true },{ word: "keep your desk clean", meaning: "保持课桌整洁", bold: true },{ word: "talk quietly", meaning: "小声说话", bold: true },{ word: "turn", meaning: "轮流", bold: true },{ word: "take turns", meaning: "轮流", bold: true },{ word: "bamboo", meaning: "竹子", bold: false },{ word: "say", meaning: "说", bold: false },{ word: "teach", meaning: "教", bold: false }
+                ]
+            }
+        },
+        6: {
+            upper: {
+                "Unit 1": [
+                    { word: "was", meaning: "是（过去式）", bold: false },{ word: "clomb", meaning: "攀登（原词）", bold: false },{ word: "kilometre", meaning: "公里", bold: false },{ word: "gingerbread house", meaning: "姜饼屋", bold: false },{ word: "send", meaning: "发送", bold: false },{ word: "went", meaning: "去（过去式）", bold: false },{ word: "thousand", meaning: "千", bold: false },{ word: "clay", meaning: "粘土", bold: false },{ word: "saw", meaning: "看见（过去式）", bold: false },{ word: "village", meaning: "村庄", bold: false },{ word: "ate", meaning: "吃（过去式）", bold: false },{ word: "dry", meaning: "干的", bold: false },{ word: "took", meaning: "拿（过去式）", bold: false },{ word: "view", meaning: "景色", bold: false },{ word: "inspiring", meaning: "鼓舞人心的", bold: false },{ word: "bamboo", meaning: "竹子", bold: false },{ word: "pumpkin", meaning: "南瓜", bold: false },{ word: "restaurant", meaning: "餐厅", bold: false },{ word: "airport", meaning: "机场", bold: false },{ word: "New Zealand", meaning: "新西兰", bold: false },{ word: "Hong Kong-Zhuhai-Macao Bridge", meaning: "港珠澳大桥", bold: false },{ word: "Paris", meaning: "巴黎", bold: false },{ word: "Eiffel Tower", meaning: "埃菲尔铁塔", bold: false },{ word: "Terracotta Warriors", meaning: "兵马俑", bold: false },{ word: "Jinggangshan Revolution Museum", meaning: "井冈山革命博物馆", bold: false },{ word: "the Red Army", meaning: "红军", bold: false }
+                ],
+                "Unit 2": [
+                    { word: "paste", meaning: "粘贴", bold: false },{ word: "dress", meaning: "连衣裙", bold: false },{ word: "gala", meaning: "盛会", bold: false },{ word: "count down", meaning: "倒计时", bold: false },{ word: "marathon", meaning: "马拉松", bold: false },{ word: "as", meaning: "作为", bold: false },{ word: "race", meaning: "比赛", bold: false },{ word: "ran", meaning: "跑（过去式）", bold: false },{ word: "cheer", meaning: "欢呼", bold: false },{ word: "book fair", meaning: "书展", bold: false },{ word: "writer", meaning: "作家", bold: false },{ word: "read", meaning: "读（过去式）", bold: false },{ word: "made", meaning: "制作（过去式）", bold: false },{ word: "sang", meaning: "唱歌（过去式）", bold: false },{ word: "wore", meaning: "穿（过去式）", bold: false },{ word: "yesterday", meaning: "昨天", bold: false },{ word: "notice", meaning: "通知", bold: false },{ word: "woke", meaning: "醒来（过去式）", bold: false },{ word: "later", meaning: "后来", bold: false },{ word: "judge", meaning: "评判", bold: false },{ word: "begin", meaning: "开始", bold: false },{ word: "won", meaning: "赢（过去式）", bold: false },{ word: "winner", meaning: "获胜者", bold: false },{ word: "ever", meaning: "曾经", bold: false },{ word: "exciting", meaning: "令人兴奋的", bold: false }
+                ],
+                "Unit 3": [
+                    { word: "cold", meaning: "感冒", bold: false },{ word: "ill", meaning: "生病的", bold: false },{ word: "head", meaning: "头", bold: false },{ word: "runny nose", meaning: "流鼻涕", bold: false },{ word: "soon", meaning: "不久", bold: false },{ word: "fever", meaning: "发烧", bold: false },{ word: "cough", meaning: "咳嗽", bold: false },{ word: "discuss", meaning: "讨论", bold: false },{ word: "diet", meaning: "饮食", bold: false },{ word: "stay up", meaning: "熬夜", bold: false },{ word: "cry", meaning: "哭", bold: false },{ word: "another", meaning: "另一个", bold: false },{ word: "call", meaning: "打电话", bold: false },{ word: "email", meaning: "电子邮件", bold: false },{ word: "unhappy", meaning: "不高兴的", bold: false },{ word: "glass", meaning: "玻璃", bold: false },{ word: "may", meaning: "可以", bold: false },{ word: "add", meaning: "添加", bold: false },{ word: "video", meaning: "视频", bold: false },{ word: "better", meaning: "更好的", bold: false }
+                ],
+                "Unit 4": [
+                    { word: "money", meaning: "钱", bold: false },{ word: "money pocket", meaning: "钱袋", bold: false },{ word: "schoolbag", meaning: "书包", bold: false },{ word: "goods", meaning: "商品", bold: false },{ word: "drink", meaning: "饮料", bold: false },{ word: "service", meaning: "服务", bold: false },{ word: "haircut", meaning: "理发", bold: false },{ word: "microscope", meaning: "显微镜", bold: false },{ word: "lucky", meaning: "幸运的", bold: false },{ word: "half", meaning: "一半", bold: false },{ word: "save up", meaning: "储蓄", bold: false },{ word: "sale", meaning: "促销", bold: false },{ word: "ticket", meaning: "票", bold: false },{ word: "manage", meaning: "管理", bold: false },{ word: "sell", meaning: "卖", bold: false },{ word: "jar", meaning: "罐子", bold: false },{ word: "for example", meaning: "例如", bold: false }
+                ],
+                "Unit 5": [
+                    { word: "planet", meaning: "行星", bold: false },{ word: "earth", meaning: "地球", bold: false },{ word: "sky", meaning: "天空", bold: false },{ word: "daytime", meaning: "白天", bold: false },{ word: "cloud", meaning: "云", bold: false },{ word: "moon", meaning: "月亮", bold: false },{ word: "star", meaning: "星星", bold: false },{ word: "space", meaning: "太空", bold: false },{ word: "outer space", meaning: "外层空间", bold: false },{ word: "space station", meaning: "空间站", bold: false },{ word: "scene", meaning: "场景", bold: false },{ word: "marble", meaning: "大理石", bold: false },{ word: "satellite", meaning: "卫星", bold: false },{ word: "soil", meaning: "土壤", bold: false },{ word: "alien", meaning: "外星人", bold: false },{ word: "sunrise", meaning: "日出", bold: false },{ word: "rover", meaning: "漫游者", bold: false },{ word: "into", meaning: "进入", bold: false },{ word: "telescope", meaning: "望远镜", bold: false },{ word: "astronaut", meaning: "宇航员", bold: false },{ word: "spaceship", meaning: "宇宙飞船", bold: false },{ word: "month", meaning: "月", bold: false },{ word: "taikonaut", meaning: "中国宇航员", bold: false },{ word: "cloth", meaning: "布料", bold: false },{ word: "toothpaste", meaning: "牙膏", bold: false },{ word: "question", meaning: "问题", bold: false },{ word: "sunset", meaning: "日落", bold: false },{ word: "time", meaning: "时间", bold: false },{ word: "Mars", meaning: "火星", bold: false }
+                ],
+                "Unit 6": [
+                    { word: "power", meaning: "电力", bold: false },{ word: "electricity", meaning: "电", bold: false },{ word: "solar", meaning: "太阳的", bold: false },{ word: "type", meaning: "类型", bold: false },{ word: "energy", meaning: "能量", bold: false },{ word: "light", meaning: "光", bold: false },{ word: "head", meaning: "头", bold: false },{ word: "cool", meaning: "凉爽的", bold: false },{ word: "run", meaning: "使...运转", bold: false },{ word: "resource", meaning: "资源", bold: false },{ word: "run out", meaning: "耗尽", bold: false },{ word: "change", meaning: "变化", bold: false },{ word: "quick", meaning: "快速的", bold: false },{ word: "shower", meaning: "淋浴", bold: false },{ word: "unplug", meaning: "拔掉插头", bold: false },{ word: "difference", meaning: "差异", bold: false },{ word: "reduce", meaning: "减少", bold: false },{ word: "air conditioner", meaning: "空调", bold: false },{ word: "drive", meaning: "驾驶", bold: false },{ word: "reuse", meaning: "再利用", bold: false },{ word: "own", meaning: "自己的", bold: false },{ word: "market", meaning: "市场", bold: false },{ word: "bottle", meaning: "瓶子", bold: false },{ word: "top", meaning: "顶部", bold: false },{ word: "useful", meaning: "有用的", bold: false },{ word: "dirty", meaning: "肮脏的", bold: false },{ word: "side", meaning: "侧面", bold: false }
+                ]
+            },
+            lower: {
+                "Unit 1": [
+                    { word: "younger", meaning: "更年轻的", bold: true },{ word: "older", meaning: "更年长的", bold: true },{ word: "taller", meaning: "更高的", bold: true },{ word: "shorter", meaning: "更矮的", bold: true },{ word: "longer", meaning: "更长的", bold: true },{ word: "thinner", meaning: "更瘦的", bold: true },{ word: "heavier", meaning: "更重的", bold: true },{ word: "bigger", meaning: "更大的", bold: true },{ word: "smaller", meaning: "更小的", bold: true },{ word: "stronger", meaning: "更强壮的", bold: true },{ word: "dinosaur", meaning: "恐龙", bold: false },{ word: "hall", meaning: "大厅", bold: false },{ word: "metre", meaning: "米", bold: false },{ word: "than", meaning: "比", bold: false },{ word: "both", meaning: "两者都", bold: false },{ word: "kilogram", meaning: "千克", bold: false },{ word: "countryside", meaning: "乡村", bold: false },{ word: "lower", meaning: "更低的", bold: false },{ word: "shadow", meaning: "影子", bold: false },{ word: "become", meaning: "变成", bold: false }
+                ],
+                "Unit 2": [
+                    { word: "cleaned", meaning: "打扫了", bold: true },{ word: "stayed", meaning: "待了", bold: true },{ word: "washed", meaning: "洗了", bold: true },{ word: "watched", meaning: "看了", bold: true },{ word: "had", meaning: "有；吃", bold: true },{ word: "had a cold", meaning: "感冒了", bold: true },{ word: "slept", meaning: "睡了", bold: true },{ word: "read", meaning: "读了", bold: true },{ word: "saw", meaning: "看见了", bold: true },{ word: "last", meaning: "上一个", bold: true },{ word: "yesterday", meaning: "昨天", bold: true },{ word: "before", meaning: "在...之前", bold: true },{ word: "drank", meaning: "喝了", bold: false },{ word: "show", meaning: "演出", bold: false },{ word: "magazine", meaning: "杂志", bold: false },{ word: "better", meaning: "更好的", bold: false },{ word: "faster", meaning: "更快的", bold: false },{ word: "hotel", meaning: "旅馆", bold: false },{ word: "fixed", meaning: "修理了", bold: false },{ word: "broken", meaning: "破碎的", bold: false },{ word: "lamp", meaning: "台灯", bold: false },{ word: "loud", meaning: "大声的", bold: false },{ word: "enjoy", meaning: "享受", bold: false },{ word: "stay", meaning: "停留", bold: false }
+                ],
+                "Unit 3": [
+                    { word: "went", meaning: "去了", bold: true },{ word: "camp", meaning: "露营", bold: true },{ word: "went camping", meaning: "去露营", bold: true },{ word: "fish", meaning: "鱼；钓鱼", bold: true },{ word: "went fishing", meaning: "去钓鱼", bold: true },{ word: "rode", meaning: "骑了", bold: true },{ word: "hurt", meaning: "受伤", bold: true },{ word: "ate", meaning: "吃了", bold: true },{ word: "took", meaning: "拿了", bold: true },{ word: "took pictures", meaning: "拍照", bold: true },{ word: "bought", meaning: "买了", bold: true },{ word: "gift", meaning: "礼物", bold: true },{ word: "fell", meaning: "摔倒", bold: false },{ word: "off", meaning: "离开", bold: false },{ word: "mule", meaning: "骡子", bold: false },{ word: "Turpan", meaning: "吐鲁番", bold: false },{ word: "could", meaning: "可以", bold: false },{ word: "till", meaning: "直到", bold: false },{ word: "beach", meaning: "海滩", bold: false },{ word: "laughed", meaning: "笑了", bold: false }
+                ],
+                "Unit 4": [
+                    { word: "dining hall", meaning: "餐厅", bold: true },{ word: "grass", meaning: "草", bold: true },{ word: "gym", meaning: "体育馆", bold: true },{ word: "ago", meaning: "以前", bold: true },{ word: "cycling", meaning: "骑自行车", bold: true },{ word: "go cycling", meaning: "去骑自行车", bold: true },{ word: "ice-skate", meaning: "滑冰", bold: true },{ word: "badminton", meaning: "羽毛球", bold: true },{ word: "star", meaning: "星星", bold: false },{ word: "easy", meaning: "容易的", bold: false },{ word: "look up", meaning: "查阅", bold: false },{ word: "Internet", meaning: "互联网", bold: false },{ word: "different", meaning: "不同的", bold: false },{ word: "active", meaning: "活跃的", bold: false },{ word: "race", meaning: "赛跑", bold: false },{ word: "nothing", meaning: "什么都没有", bold: false },{ word: "thought", meaning: "想", bold: false },{ word: "felt", meaning: "感觉", bold: false },{ word: "cheetah", meaning: "猎豹", bold: false },{ word: "trip", meaning: "绊倒", bold: false },{ word: "woke", meaning: "醒来", bold: false },{ word: "dream", meaning: "梦", bold: false }
+                ]
+            }
+        }
+    };
+
+    // ================================================================
+    //  全局状态
+    // ================================================================
+    let currentGrade = "3";
+    let currentBook = "upper";
+    let currentUnit = "Unit 1";
+    let boldOnly = false;          // 默认关闭：先看全部词
+    let currentMode = "chi2eng";
+    const unitSelection = {}; // 存储用户自定义选词 { unit: Set(word) }
+    let singleQuestionQueue = [];
+    let score = 0, answeredCount = 0, answered = false;
+    let currentQuestionObj = null, currentCorrectValue = "";
+    let isPKMode = false, pkActive = false, players = [], pkTargetScore = 5, nextPlayerId = 1;
+    let glassEnabled = false; // 默认关闭
+
+    // DOM 引用
+    const gradeSelect = document.getElementById('gradeSelect');
+    const bookSelect = document.getElementById('bookSelect');
+    const unitSelect = document.getElementById('unitSelect');
+    const modeChiBtn = document.getElementById('modeChi2EngBtn');
+    const modeEngBtn = document.getElementById('modeEng2ChiBtn');
+    const boldToggleBtn = document.getElementById('boldToggleBtn');
+    const selectWordsBtn = document.getElementById('selectWordsBtn');
+    const pkModeBtn = document.getElementById('pkModeBtn');
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    const glassToggleBtn = document.getElementById('glassToggleBtn');
+    const singleDiv = document.getElementById('singleMode');
+    const pkDiv = document.getElementById('pkMode');
+    const modeBadge = document.getElementById('modeBadge');
+    const scoreSpan = document.getElementById('scoreValue');
+    const answeredSpan = document.getElementById('answeredCount');
+    const questionDisplay = document.getElementById('questionDisplay');
+    const optionsArea = document.getElementById('optionsArea');
+    const feedbackDiv = document.getElementById('feedbackMsg');
+    const nextBtn = document.getElementById('nextBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const pkContainer = document.getElementById('pkContainer');
+    const addPlayerBtn = document.getElementById('addPlayerBtn');
+    const pkStartBtn = document.getElementById('pkStartBtn');
+    const pkResetBtn = document.getElementById('pkResetBtn');
+    const targetScoreInput = document.getElementById('targetScoreInput');
+
+    // ================================================================
+    //  工具函数
+    // ================================================================
+    // 选词以前只按单元名（"Unit 1"）存，可 6 个年级都有 Unit 1，
+    // 在一处选了词，别的年级同名单元会被一起过滤掉。这里带上年级和册别。
+    function selKey(grade, book, unit) {
+        return grade + '|' + book + '|' + unit;
+    }
+
+    // ================================================================
+    //  教材切换用：接力出版社《英语》四年级上册（词汇表 I，第 62-64 页）
+    //  ⚠️ 人教版还是上面那份 wordBank，一个字不动；接力版平行放一份。
+    //  ⚠️ 唯一来源 `D:\Ollama\xiaoxiaole\vocab_src\jieli.json`，别手抄第二份。
+    //  ⚠️ 借用同一套三层结构：[年级键][册][单元]；接力版只有一个年级键「接力四上」，
+    //     册仍然写 upper（四年级上册）。
+    // ================================================================
+    const JIELI_BANK = {
+            "接力四上": {
+                upper: {
+                    "Unit 1": [
+                        { word: "these", meaning: "这些", bold: true },{ word: "wash", meaning: "洗", bold: true },{ word: "brush", meaning: "（用刷子）刷净", bold: false },
+                        { word: "wave", meaning: "挥动；挥舞", bold: false },{ word: "body", meaning: "身体", bold: true },{ word: "shake", meaning: "摇动；抖动", bold: false },
+                        { word: "feet", meaning: "脚（foot 的复数形式）", bold: false },{ word: "with", meaning: "用", bold: true },{ word: "eat", meaning: "吃", bold: true },
+                        { word: "listen", meaning: "听", bold: true },{ word: "write", meaning: "写", bold: true },{ word: "they", meaning: "他们；她们；它们", bold: true },
+                        { word: "clock", meaning: "时钟", bold: true },{ word: "blackboard", meaning: "黑板", bold: true },{ word: "out", meaning: "（从……里）出来", bold: true },
+                        { word: "say", meaning: "说", bold: true }
+                    ],
+                    "Unit 2": [
+                        { word: "behind", meaning: "在……后面", bold: true },{ word: "schoolbag", meaning: "书包", bold: true },{ word: "cup", meaning: "杯子", bold: true },
+                        { word: "move", meaning: "移动", bold: true },{ word: "excuse", meaning: "原谅", bold: false },{ word: "park", meaning: "公园", bold: true },
+                        { word: "along", meaning: "沿着", bold: false },{ word: "street", meaning: "街道", bold: true },{ word: "turn", meaning: "转向", bold: true },
+                        { word: "school", meaning: "学校", bold: true },{ word: "zoo", meaning: "动物园", bold: true },{ word: "hospital", meaning: "医院", bold: true },
+                        { word: "round", meaning: "转过来；调转方向", bold: false }
+                    ],
+                    "Unit 3": [
+                        { word: "sky", meaning: "天空", bold: false },{ word: "plane", meaning: "飞机", bold: true }
+                    ],
+                    "Unit 4": [
+                        { word: "weather", meaning: "天气", bold: true },{ word: "windy", meaning: "多风的", bold: true },{ word: "sunny", meaning: "晴朗的", bold: true },
+                        { word: "cool", meaning: "凉爽的", bold: true },{ word: "cloudy", meaning: "多云的", bold: true },{ word: "rainy", meaning: "下雨的", bold: false },
+                        { word: "warm", meaning: "暖和的", bold: true },{ word: "wear", meaning: "穿", bold: true },{ word: "shirt", meaning: "衬衫", bold: true },
+                        { word: "spring", meaning: "春天，春季", bold: true },{ word: "summer", meaning: "夏天，夏季", bold: true },{ word: "autumn", meaning: "秋天，秋季", bold: true },
+                        { word: "winter", meaning: "冬天，冬季", bold: true },{ word: "which", meaning: "哪一个", bold: true },{ word: "season", meaning: "季节", bold: true },
+                        { word: "best", meaning: "最", bold: true }
+                    ],
+                    "Unit 5": [
+                        { word: "family", meaning: "家，家庭", bold: true },{ word: "father", meaning: "父亲", bold: true },{ word: "Mrs.", meaning: "太太，夫人", bold: true },
+                        { word: "sister", meaning: "姐姐，妹妹", bold: true },{ word: "brother", meaning: "哥哥，弟弟", bold: true },{ word: "his", meaning: "他的", bold: true },
+                        { word: "cleaner", meaning: "清洁工", bold: false },{ word: "dancer", meaning: "舞蹈家", bold: false },{ word: "singer", meaning: "歌唱家，歌手", bold: false }
+                    ],
+                    "Unit 6": [
+                        { word: "light", meaning: "浅色的", bold: true },{ word: "clean", meaning: "干净的", bold: true },{ word: "boat", meaning: "小船", bold: true },
+                        { word: "grass", meaning: "草", bold: true },{ word: "skirt", meaning: "短裙", bold: true },{ word: "milk", meaning: "牛奶", bold: true },
+                        { word: "beef", meaning: "牛肉", bold: false },{ word: "chicken", meaning: "鸡肉", bold: true },{ word: "thirsty", meaning: "渴的", bold: false }
+                    ],
+                    "Unit 7": [
+                        { word: "eleven", meaning: "十一", bold: true },{ word: "twelve", meaning: "十二", bold: true },{ word: "thirteen", meaning: "十三", bold: true },
+                        { word: "fourteen", meaning: "十四", bold: true },{ word: "fifteen", meaning: "十五", bold: true },{ word: "sixteen", meaning: "十六", bold: true },
+                        { word: "seventeen", meaning: "十七", bold: true },{ word: "eighteen", meaning: "十八", bold: true },{ word: "nineteen", meaning: "十九", bold: true },
+                        { word: "twenty", meaning: "二十", bold: true },{ word: "balloon", meaning: "气球", bold: false },{ word: "win", meaning: "赢，获胜", bold: true },
+                        { word: "many", meaning: "许多", bold: true },{ word: "our", meaning: "我们的", bold: true },{ word: "thirty", meaning: "三十", bold: true },
+                        { word: "study", meaning: "学习", bold: true },{ word: "fork", meaning: "叉子", bold: false },{ word: "spoon", meaning: "勺，匙，调羹", bold: false },
+                        { word: "pear", meaning: "梨", bold: false },{ word: "grape", meaning: "葡萄", bold: true },{ word: "tomato", meaning: "西红柿", bold: true }
+                    ],
+                    "Unit 8": [
+                        { word: "animal", meaning: "动物", bold: true },{ word: "those", meaning: "那些", bold: true },{ word: "duck", meaning: "鸭子", bold: true },
+                        { word: "tiger", meaning: "老虎", bold: true }
+                    ],
+                    "附 · 词组": [
+                        { word: "nature park", meaning: "自然公园", bold: false },{ word: "go out", meaning: "出去", bold: false },{ word: "come in", meaning: "进来", bold: false },
+                        { word: "put up", meaning: "举起来", bold: false },{ word: "turn right", meaning: "向右转", bold: false },{ word: "turn left", meaning: "向左转", bold: false },
+                        { word: "make new friends", meaning: "结交新朋友", bold: false }
+                    ],
+                },
+            },
+    };
+
+    const PUBLISHERS = [{ id: 'pep', name: '人教版' }, { id: 'jieli', name: '接力版' }];
+    const LS_PUBLISHER = 'match.publisher';       // ⚠️ 键名带工具前缀
+    let publisher = (function () {
+        try { return lsGet(LS_PUBLISHER) === 'jieli' ? 'jieli' : 'pep'; }
+        catch (e) { return 'pep'; }
+    })();
+    function activeBank() { return publisher === 'jieli' ? JIELI_BANK : wordBank; }
+    function gradeLabel(g) { return g === '接力四上' ? '接力·四年级上册' : (g + '年级'); }
+    function bookLabel(b) { return b === 'lower' ? '下册' : '上册'; }
+
+    function getCurrentWordList(grade, book, unit) {
+        let words = activeBank()[grade]?.[book]?.[unit] || [];
+        if (boldOnly) words = words.filter(w => w.bold === true);
+        const selectedSet = unitSelection[selKey(grade, book, unit)];
+        if (selectedSet && selectedSet.size > 0) {
+            words = words.filter(w => selectedSet.has(w.word));
+        }
+        return words;
+    }
+
+    function getUnits(grade, book) {
+        const bk = activeBank()[grade]?.[book];
+        const units = bk ? Object.keys(bk) : [];
+        return units.sort();
+    }
+
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function buildSingleQueue() {
+        const words = getCurrentWordList(currentGrade, currentBook, currentUnit);
+        const queue = words.map(item => ({ ...item }));
+        singleQuestionQueue = shuffleArray(queue);
+        if (singleQuestionQueue.length === 0) {
+            feedbackDiv.innerHTML = '⚠️ 当前单元无单词，请调整筛选条件';
+        }
+    }
+
+    function getNextSingleQuestion() {
+        if (singleQuestionQueue.length === 0) {
+            buildSingleQueue();
+            if (singleQuestionQueue.length === 0) return null;
+            feedbackDiv.innerHTML = '🔄 所有单词已答完，重新洗牌！';
+        }
+        return singleQuestionQueue.pop();
+    }
+
+    function generateQuestionFromItem(item, mode) {
+        if (!item) return null;
+        const pool = getCurrentWordList(currentGrade, currentBook, currentUnit);
+        let distractors, options, questionText, correctAnswer;
+        if (mode === 'chi2eng') {
+            questionText = item.meaning;
+            correctAnswer = item.word;
+            const others = pool.filter(w => w.word !== item.word);
+            let shuffled = shuffleArray([...others]);
+            let distSet = new Set();
+            for (let w of shuffled) {
+                if (distSet.size >= 2) break;
+                distSet.add(w.word);
+            }
+            distractors = Array.from(distSet);
+            while (distractors.length < 2) distractors.push('teacher');
+            options = [correctAnswer, ...distractors.slice(0, 2)];
+        } else {
+            questionText = item.word;
+            correctAnswer = item.meaning;
+            const others = pool.filter(w => w.meaning !== item.meaning);
+            let shuffled = shuffleArray([...others]);
+            let distSet = new Set();
+            for (let w of shuffled) {
+                if (distSet.size >= 2) break;
+                distSet.add(w.meaning);
+            }
+            distractors = Array.from(distSet);
+            while (distractors.length < 2) distractors.push('老师');
+            options = [correctAnswer, ...distractors.slice(0, 2)];
+        }
+        shuffleArray(options);
+        return { questionText, correctAnswer, options, correctItem: item };
+    }
+
+    // ================================================================
+    //  单人模式
+    // ================================================================
+    function refreshSingleQuestion() {
+        const item = getNextSingleQuestion();
+        if (!item) {
+            questionDisplay.innerText = '⚠️ 暂无单词，请检查设置';
+            optionsArea.innerHTML = '';
+            return;
+        }
+        const qData = generateQuestionFromItem(item, currentMode);
+        if (!qData) {
+            questionDisplay.innerText = '⚠️ 生成题目失败';
+            optionsArea.innerHTML = '';
+            return;
+        }
+        currentQuestionObj = qData;
+        currentCorrectValue = qData.correctAnswer;
+        questionDisplay.innerText = qData.questionText;
+        replayAnim(questionDisplay, 'q-in');
+        replayAnim(document.querySelector('.question-card'), 'q-lift');
+        let html = '';
+        const letters = ['A', 'B', 'C'];
+        qData.options.forEach((opt, idx) => {
+            html += `<div class="option opt-in" style="--i:${idx}" data-opt="${escapeHtml(opt)}"><div class="opt-letter">${letters[idx]}</div><div>${escapeHtml(opt)}</div></div>`;
+        });
+        optionsArea.innerHTML = html;
+        answered = false;
+        feedbackDiv.classList.remove('is-correct', 'is-wrong', 'fb-pop');
+        feedbackDiv.style.background = '';
+        feedbackDiv.innerHTML = currentMode === 'chi2eng' ? '🤔 选择正确的英文单词～' : '🤔 选择正确的中文意思～';
+        document.querySelectorAll('.option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (answered) return;
+                const selected = btn.getAttribute('data-opt');
+                checkSingleAnswer(selected, btn);
+            });
+        });
+    }
+
+    function checkSingleAnswer(selected, btn) {
+        const isCorrect = (selected === currentCorrectValue);
+        // 用类而不是内联样式：高级渲染下才有对应的玻璃配色，也不会把内联色盖在毛玻璃上
+        if (isCorrect) {
+            score++; answeredCount++; updateSingleStats();
+            floatBadge(scoreSpan.parentElement, '+1', true);
+            replayAnim(scoreSpan.parentElement, 'bump');
+            feedbackDiv.innerHTML = `✅ 漂亮！正确答案是 “${escapeHtml(currentCorrectValue)}” ✅ +1分`;
+            feedbackDiv.classList.add('is-correct');
+            replayAnim(btn, 'is-correct');
+            sfx.playCorrect(); sfx.addStreak();
+        } else {
+            answeredCount++; updateSingleStats();
+            feedbackDiv.innerHTML = `❌ 不对哦！正确答案是 “${escapeHtml(currentCorrectValue)}”。继续加油~ ❌`;
+            feedbackDiv.classList.add('is-wrong');
+            replayAnim(btn, 'is-wrong');
+            sfx.playWrong(); sfx.resetStreak();
+            document.querySelectorAll('.option').forEach(optDiv => {
+                if (optDiv.getAttribute('data-opt') === currentCorrectValue) {
+                    replayAnim(optDiv, 'is-correct');
+                }
+            });
+        }
+        replayAnim(feedbackDiv, 'fb-pop');
+        answered = true;
+        document.querySelectorAll('.option').forEach(opt => opt.style.pointerEvents = 'none');
+    }
+
+    function updateSingleStats() {
+        scoreSpan.innerText = score;
+        answeredSpan.innerText = answeredCount;
+    }
+
+    function nextSingle() {
+        if (!answered && currentQuestionObj) {
+            feedbackDiv.innerHTML = '⚠️ 请先回答当前题目再继续～';
+            return;
+        }
+        sfx.playNext();
+        refreshSingleQuestion();
+    }
+
+    function resetSingle() {
+        score = 0; answeredCount = 0; sfx.resetStreak(); updateSingleStats();
+        buildSingleQueue();
+        refreshSingleQuestion();
+        sfx.playReset();
+        feedbackDiv.innerHTML = '🔄 已重置，新的一轮开始！';
+    }
+
+    // ================================================================
+    //  PK 模式（复用之前的逻辑，略作调整）
+    // ================================================================
+    function buildPlayerQueue(player) {
+        const words = getCurrentWordList(currentGrade, currentBook, currentUnit);
+        const queue = words.map(item => ({ ...item }));
+        player.questionQueue = shuffleArray(queue);
+    }
+
+    function getNextPlayerQuestion(player) {
+        if (!player.questionQueue || player.questionQueue.length === 0) {
+            buildPlayerQueue(player);
+        }
+        if (player.questionQueue.length === 0) return null;
+        return player.questionQueue.pop();
+    }
+
+    function loadQuestionForPlayer(p) {
+        const item = getNextPlayerQuestion(p);
+        if (!item) {
+            buildPlayerQueue(p);
+            const retry = getNextPlayerQuestion(p);
+            if (!retry) return false;
+            return loadQuestionForPlayer(p);
+        }
+        const qData = generateQuestionFromItem(item, currentMode);
+        if (!qData) return false;
+        p.questionData = qData;
+        p.correctAnswer = qData.correctAnswer;
+        const qDiv = document.getElementById(`q_${p.idx}`);
+        const optsDiv = document.getElementById(`opts_${p.idx}`);
+        if (qDiv) {
+            qDiv.classList.remove('question-pop');
+            void qDiv.offsetWidth;
+            qDiv.classList.add('question-pop');
+            qDiv.innerText = qData.questionText;
+        }
+        if (optsDiv) {
+            optsDiv.innerHTML = '';
+            const letters = ['A','B','C'];
+            qData.options.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'pk-option opt-in';
+                btn.style.setProperty('--i', idx);
+                btn.innerHTML = `${letters[idx]}. ${escapeHtml(opt)}`;
+                btn.setAttribute('data-opt', opt);
+                btn.addEventListener('click', () => {
+                    if (!pkActive || p.answered) return;
+                    const selected = btn.getAttribute('data-opt');
+                    const isCorrect = (selected === p.correctAnswer);
+                    // PK 每题答完会立刻给该玩家换下一题（选项整块重建），
+                    // 所以别在这里给选项标对错 —— 反馈靠卡片闪光 + 分数的加减 + 音效。
+                    if (isCorrect) {
+                        p.score = Math.min(p.score + 1, pkTargetScore);
+                        floatBadge(document.getElementById('score_' + p.idx), '+1', true);
+                        sfx.playCorrect();
+                        flashPlayerCard(p.idx, true);
+                    } else {
+                        p.score = Math.max(p.score - 1, 0);
+                        floatBadge(document.getElementById('score_' + p.idx), '-1', false);
+                        sfx.playWrong();
+                        flashPlayerCard(p.idx, false);
+                    }
+                    updatePlayerScoreUI(p.idx, p.score);
+                    if (checkWinner(p.idx)) return;
+                    p.answered = true;
+                    optsDiv.childNodes.forEach(btn => btn.style.pointerEvents = 'none');
+                    if (p.timer) clearInterval(p.timer);
+                    p.timer = null;
+                    if (pkActive && !checkWinner(p.idx)) {
+                        p.answered = false;
+                        p.timeLeft = 10;
+                        setTimerLabel(p.idx, 10);
+                        if (loadQuestionForPlayer(p)) startTimerForPlayer(p);
+                    }
+                });
+                optsDiv.appendChild(btn);
+            });
+        }
+        return true;
+    }
+
+    function startTimerForPlayer(p) {
+        if (!pkActive) return;
+        if (p.timer) clearInterval(p.timer);
+        let time = 10;
+        p.timeLeft = time;
+        setTimerLabel(p.idx, time);
+        p.timer = setInterval(() => {
+            if (!pkActive || p.answered) return;
+            time--;
+            p.timeLeft = time;
+            setTimerLabel(p.idx, time);
+            if (time <= 0) {
+                clearInterval(p.timer);
+                p.timer = null;
+                p.answered = true;
+                p.score = Math.max(p.score - 1, 0);
+                updatePlayerScoreUI(p.idx, p.score);
+                flashPlayerCard(p.idx, false);
+                sfx.playWrong();
+                if (checkWinner(p.idx)) return;
+                p.answered = false;
+                p.timeLeft = 10;
+                setTimerLabel(p.idx, 10);
+                if (loadQuestionForPlayer(p)) startTimerForPlayer(p);
+            }
+        }, 1000);
+    }
+
+    function updatePlayerScoreUI(idx, score) {
+        const scoreSpan = document.getElementById(`score_${idx}`);
+        if (scoreSpan) scoreSpan.innerText = score;
+    }
+
+    function flashPlayerCard(idx, isCorrect) {
+        const card = document.querySelector(`.pk-player[data-idx='${idx}']`);
+        if (!card) return;
+        const className = isCorrect ? 'correct-flash' : 'wrong-flash';
+        replayAnim(card, className);
+        setTimeout(() => card.classList.remove(className), 520);
+    }
+
+    function checkWinner(winnerIdx) {
+        const winner = players.find(p => p.idx === winnerIdx);
+        if (winner && winner.score >= pkTargetScore) {
+            pkActive = false;
+            for (let p of players) if (p.timer) clearInterval(p.timer);
+            sfx.playCheer();
+            showFireworkForPlayer(winnerIdx);
+            const sorted = [...players].sort((a,b) => b.score - a.score);
+            let rankHtml = '';
+            for (let i=0; i<sorted.length; i++) {
+                rankHtml += `<div class="rank-item">${i+1}. 玩家 ${sorted[i].idx} — ${sorted[i].score} 分</div>`;
+            }
+            const modal = document.createElement('div');
+            modal.className = 'rank-modal';
+            modal.innerHTML = `
+                <div class="rank-card">
+                    <h2>🏆 比赛结束 🏆</h2>
+                    <div class="rank-list">${rankHtml}</div>
+                    <button class="rank-close">关闭</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.querySelector('.rank-close').addEventListener('click', () => modal.remove());
+            return true;
+        }
+        return false;
+    }
+
+    function startPKGame() {
+        let newTarget = parseInt(targetScoreInput.value, 10);
+        if (isNaN(newTarget) || newTarget < 1) newTarget = 5;
+        pkTargetScore = newTarget;
+        targetScoreInput.value = pkTargetScore;
+        if (pkActive) stopAllTimersAndReset();
+        pkActive = true;
+        for (let p of players) {
+            p.score = 0;
+            p.answered = false;
+            p.timeLeft = 10;
+            if (p.timer) clearInterval(p.timer);
+            buildPlayerQueue(p);
+            updatePlayerScoreUI(p.idx, 0);
+            const winMsg = document.getElementById(`win_${p.idx}`);
+            if (winMsg) winMsg.innerText = '';
+            if (!loadQuestionForPlayer(p)) { pkActive = false; return; }
+            startTimerForPlayer(p);
+        }
+    }
+
+    function resetPKGame() {
+        if (pkActive) stopAllTimersAndReset();
+        pkActive = false;
+        for (let p of players) {
+            p.score = 0;
+            p.answered = false;
+            if (p.timer) clearInterval(p.timer);
+            buildPlayerQueue(p);
+            updatePlayerScoreUI(p.idx, 0);
+            const qDiv = document.getElementById(`q_${p.idx}`);
+            const optsDiv = document.getElementById(`opts_${p.idx}`);
+            const timerSpan = document.getElementById(`timer_${p.idx}`);
+            if (qDiv) qDiv.innerText = "等待开始";
+            if (optsDiv) optsDiv.innerHTML = "";
+            if (timerSpan) {
+                timerSpan.innerText = "--s";
+                timerSpan.classList.remove('urgent');
+                timerSpan.style.removeProperty('--t');
+            }
+        }
+    }
+
+    function stopAllTimersAndReset() {
+        for (let p of players) if (p.timer) clearInterval(p.timer);
+        pkActive = false;
+        for (let p of players) {
+            const qDiv = document.getElementById(`q_${p.idx}`);
+            const optsDiv = document.getElementById(`opts_${p.idx}`);
+            const timerSpan = document.getElementById(`timer_${p.idx}`);
+            if (qDiv) qDiv.innerText = "等待开始";
+            if (optsDiv) optsDiv.innerHTML = "";
+            if (timerSpan) {
+                timerSpan.innerText = "--s";
+                timerSpan.classList.remove('urgent');
+                timerSpan.style.removeProperty('--t');
+            }
+        }
+    }
+
+    function addPlayer() {
+        if (players.length >= 8) return;
+        const newId = nextPlayerId++;
+        const newPlayer = {
+            idx: newId, score: 0, timer: null, answered: false, timeLeft: 10,
+            questionData: null, correctAnswer: "", questionQueue: []
+        };
+        buildPlayerQueue(newPlayer);
+        players.push(newPlayer);
+        updatePKContainer();
+        if (pkActive) stopAllTimersAndReset();
+    }
+
+    function removePlayer(idx) {
+        if (players.length <= 2) return;
+        const index = players.findIndex(p => p.idx === idx);
+        if (index !== -1) {
+            if (players[index].timer) clearInterval(players[index].timer);
+            players.splice(index, 1);
+            updatePKContainer();
+            if (pkActive) stopAllTimersAndReset();
+        }
+    }
+
+    function updatePKContainer() {
+        pkContainer.innerHTML = '';
+        for (let p of players) {
+            const card = document.createElement('div');
+            card.className = 'pk-player';
+            card.setAttribute('data-idx', p.idx);
+            card.innerHTML = `
+                <button class="remove-player" data-idx="${p.idx}">✖</button>
+                <h3>🧑‍🎓 玩家 ${p.idx}</h3>
+                <div class="pk-score" id="score_${p.idx}">${p.score}</div>
+                <div class="pk-question" id="q_${p.idx}">等待开始</div>
+                <div class="pk-options" id="opts_${p.idx}"></div>
+                <div class="pk-timer" id="timer_${p.idx}">--s</div>
+                <div class="winner-msg" id="win_${p.idx}"></div>
+            `;
+            pkContainer.appendChild(card);
+        }
+        document.querySelectorAll('.remove-player').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.getAttribute('data-idx'));
+                removePlayer(idx);
+            });
+        });
+    }
+
+    // ================================================================
+    //  模式切换
+    // ================================================================
+    function setPKMode(enable) {
+        isPKMode = enable;
+        if (enable) {
+            singleDiv.style.display = 'none';
+            pkDiv.style.display = 'block';
+            modeBadge.innerHTML = '🎮 多人独立PK · 全词遍历 🎮';
+            pkModeBtn.textContent = '📖 返回单人模式';
+            players = [];
+            nextPlayerId = 1;
+            addPlayer(); addPlayer();
+            updatePKContainer();
+            resetPKGame();
+        } else {
+            singleDiv.style.display = 'block';
+            pkDiv.style.display = 'none';
+            modeBadge.innerHTML = '✨ 单词模式 · 单人 ✨';
+            pkModeBtn.textContent = '🎮 多人PK模式';
+            resetSingle();
+        }
+        sfx.playModeSwitch();
+    }
+
+    // ================================================================
+    //  选词自定义
+    // ================================================================
+    function openWordSelector() {
+        const modal = document.getElementById('wordSelectModal');
+        modal.style.display = 'flex';
+        renderWordCheckboxes();
+    }
+
+    function closeWordSelector() {
+        document.getElementById('wordSelectModal').style.display = 'none';
+    }
+
+    function renderWordCheckboxes() {
+        const container = document.getElementById('wordCheckboxList');
+        const unit = currentUnit;
+        let words = activeBank()[currentGrade]?.[currentBook]?.[unit] || [];
+        let selectedSet = unitSelection[selKey(currentGrade, currentBook, unit)] || new Set();
+        container.innerHTML = '';
+        let count = 0;
+        words.forEach(w => {
+            const div = document.createElement('div');
+            div.className = 'word-checkbox-item';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = w.word;
+            checkbox.checked = selectedSet.has(w.word);
+            checkbox.addEventListener('change', updateSelectedCount);
+            const label = document.createElement('label');
+            label.textContent = `${w.word} (${w.meaning})`;
+            if (w.bold) {
+                const tag = document.createElement('span');
+                tag.className = 'bold-tag';
+                tag.textContent = '粗体';
+                label.appendChild(tag);
+            }
+            div.appendChild(checkbox);
+            div.appendChild(label);
+            container.appendChild(div);
+            if (checkbox.checked) count++;
+        });
+        document.getElementById('selectedCount').textContent = `已选 ${count} 个`;
+    }
+
+    function updateSelectedCount() {
+        const checkboxes = document.querySelectorAll('#wordCheckboxList input[type="checkbox"]');
+        let count = 0;
+        checkboxes.forEach(cb => { if (cb.checked) count++; });
+        document.getElementById('selectedCount').textContent = `已选 ${count} 个`;
+    }
+
+    // 选词事件绑定
+    document.getElementById('selectAllBtn').addEventListener('click', () => {
+        document.querySelectorAll('#wordCheckboxList input[type="checkbox"]').forEach(cb => cb.checked = true);
+        updateSelectedCount();
+    });
+    document.getElementById('deselectAllBtn').addEventListener('click', () => {
+        document.querySelectorAll('#wordCheckboxList input[type="checkbox"]').forEach(cb => cb.checked = false);
+        updateSelectedCount();
+    });
+    document.getElementById('selectBoldBtn').addEventListener('click', () => {
+        const items = document.querySelectorAll('#wordCheckboxList .word-checkbox-item');
+        items.forEach(item => {
+            const cb = item.querySelector('input[type="checkbox"]');
+            const tag = item.querySelector('.bold-tag');
+            if (tag) cb.checked = true;
+        });
+        updateSelectedCount();
+    });
+    document.getElementById('wordSelectConfirm').addEventListener('click', () => {
+        const unit = currentUnit;
+        const checkboxes = document.querySelectorAll('#wordCheckboxList input[type="checkbox"]');
+        const selectedSet = new Set();
+        checkboxes.forEach(cb => {
+            if (cb.checked) selectedSet.add(cb.value);
+        });
+        const key = selKey(currentGrade, currentBook, currentUnit);
+        if (selectedSet.size === 0) {
+            delete unitSelection[key];
+        } else {
+            unitSelection[key] = selectedSet;
+        }
+        closeWordSelector();
+        if (isPKMode) {
+            resetPKGame();
+        } else {
+            buildSingleQueue();
+            resetSingle();
+        }
+        sfx.playModeSwitch();
+    });
+    document.getElementById('wordSelectCancel').addEventListener('click', closeWordSelector);
+
+    // ================================================================
+    //  高级渲染开关
+    // ================================================================
+    // localStorage 是同域共用的（五个工具都挂在 726113394-cloud.github.io 下），
+    // 键名必须带工具前缀，否则这里开了高级渲染、别的工具也跟着变。
+    // 有些环境（隐私模式、个别浏览器的 file://）读写会直接抛异常，包一层别让脚本停摆。
+    const LS_GLASS = 'match.glassEnabled';
+    const LS_GLASS_WARNED = 'match.glassPerfWarned';
+    function lsGet(key, legacyKey) {
+        try {
+            const v = localStorage.getItem(key);
+            if (v !== null) return v;
+            return legacyKey ? localStorage.getItem(legacyKey) : null;
+        } catch (e) { return null; }
+    }
+    function lsSet(key, value) {
+        try { localStorage.setItem(key, value); } catch (e) {}
+    }
+
+    function applyGlass(on) {
+        glassEnabled = !!on;
+        if (on) {
+            document.documentElement.setAttribute('data-glass', 'enabled');
+            glassToggleBtn.classList.add('active');
+            glassToggleBtn.textContent = '💎 高级渲染 (开)';
+            glassToggleBtn.setAttribute('aria-pressed', 'true');
+        } else {
+            document.documentElement.removeAttribute('data-glass');
+            glassToggleBtn.classList.remove('active');
+            glassToggleBtn.textContent = '💎 高级渲染';
+            glassToggleBtn.setAttribute('aria-pressed', 'false');
+        }
+        lsSet(LS_GLASS, on ? 'true' : 'false');
+    }
+
+    function toggleGlass() {
+        applyGlass(!glassEnabled);
+        if (glassEnabled) checkGlassFrameHealth();
+    }
+
+    // 毛玻璃在低端机上会明显掉帧，量一次帧间隔，卡的话提一句（只提一次）
+    let glassHealthChecked = false;
+    function checkGlassFrameHealth() {
+        if (glassHealthChecked || lsGet(LS_GLASS_WARNED) === 'true') return;
+        glassHealthChecked = true;
+        const gaps = [];
+        let last = performance.now();
+        let n = 0;
+        const tick = () => {
+            const now = performance.now();
+            gaps.push(now - last);
+            last = now;
+            if (++n < 45) { requestAnimationFrame(tick); return; }
+            gaps.sort((a, b) => a - b);
+            if (gaps[Math.floor(gaps.length / 2)] > 32) {
+                lsSet(LS_GLASS_WARNED, 'true');
+                toast('💎 高级渲染在这台设备上有点吃力\n再点一次 💎 可以关掉，不影响做题', 5000);
+            }
+        };
+        requestAnimationFrame(tick);
+    }
+
+    // 轻提示：比 alert 温和，不打断做题
+    let toastTimer = null;
+    function toast(msg, ms) {
+        let el = document.getElementById('matchToast');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'matchToast';
+            el.setAttribute('role', 'status');
+            el.setAttribute('aria-live', 'polite');
+            document.body.appendChild(el);
+        }
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove('show'), ms || 2600);
+    }
+
+    // ================================================================
+    //  UI 联动
+    // ================================================================
+    function populateGrades() {
+        const grades = Object.keys(activeBank());
+        gradeSelect.innerHTML = grades.map(g => `<option value="${g}">${gradeLabel(g)}</option>`).join('');
+        if (grades.indexOf(currentGrade) < 0) currentGrade = grades[0] || currentGrade;
+        gradeSelect.value = currentGrade;
+        updateUnits();
+        gradeSelect.addEventListener('change', () => {
+            currentGrade = gradeSelect.value;
+            updateUnits();
+            loadUnit();
+        });
+        bookSelect.addEventListener('change', () => {
+            currentBook = bookSelect.value;
+            updateUnits();
+            loadUnit();
+        });
+        unitSelect.addEventListener('change', () => {
+            currentUnit = unitSelect.value;
+            loadUnit();
+        });
+    }
+
+    /* ★ 换教材：重建「年级」和「册」两级（⚠️ **不要**再调 populateGrades ——
+       它会重复绑定 change，于是切一次会 loadUnit 两遍）。默认人教版时一个字节都不动。 */
+    function setPublisher(p) {
+        publisher = (p === 'jieli') ? 'jieli' : 'pep';
+        try { lsSet(LS_PUBLISHER, publisher); } catch (e) {}
+        const bank = activeBank();
+        const gk = Object.keys(bank);
+        gradeSelect.innerHTML = gk.map(g => `<option value="${g}">${gradeLabel(g)}</option>`).join('');
+        currentGrade = gk[0] || currentGrade;
+        gradeSelect.value = currentGrade;
+        const bk = Object.keys(bank[currentGrade] || {});
+        bookSelect.innerHTML = bk.map(b => `<option value="${b}">${bookLabel(b)}</option>`).join('');
+        currentBook = bk[0] || currentBook;
+        bookSelect.value = currentBook;
+        updateUnits();
+        loadUnit();
+    }
+    function initPublisher() {
+        const sel = document.getElementById('publisherSelect');
+        if (!sel) return;
+        sel.value = publisher;
+        sel.addEventListener('change', () => setPublisher(sel.value));
+        if (publisher !== 'pep') setPublisher(publisher);   // 存档是接力版才重建
+    }
+
+    function updateUnits() {
+        const units = getUnits(currentGrade, currentBook);
+        unitSelect.innerHTML = units.map(u => `<option value="${u}">${u}</option>`).join('');
+        if (units.length) currentUnit = units[0];
+        unitSelect.value = currentUnit;
+    }
+
+    function loadUnit() {
+        if (isPKMode) {
+            resetPKGame();
+        } else {
+            buildSingleQueue();
+            resetSingle();
+        }
+        sfx.playModeSwitch();
+    }
+
+    function setTranslateMode(mode) {
+        if (mode === currentMode) return;
+        currentMode = mode;
+        if (mode === 'chi2eng') { modeChiBtn.classList.add('active'); modeEngBtn.classList.remove('active'); }
+        else { modeChiBtn.classList.remove('active'); modeEngBtn.classList.add('active'); }
+        if (isPKMode) { resetPKGame(); }
+        else { buildSingleQueue(); refreshSingleQuestion(); }
+        sfx.playModeSwitch();
+    }
+
+    function toggleBold() {
+        boldOnly = !boldOnly;
+        boldToggleBtn.innerHTML = boldOnly ? "⭐ 仅粗体词: 开" : "⭐ 仅粗体词: 关";
+        if (boldOnly) boldToggleBtn.classList.add('active'); else boldToggleBtn.classList.remove('active');
+        if (isPKMode) { resetPKGame(); }
+        else { buildSingleQueue(); resetSingle(); }
+        sfx.playModeSwitch();
+    }
+
+    function toggleSound() {
+        sfx.playToggleSound();
+        const enabled = sfx.toggle();
+        soundToggleBtn.textContent = enabled ? "🔊 音效开启" : "🔇 音效关闭";
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
+    }
+
+    const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // 重置这类「一点就没了」的操作改成点两次：第一次只是上膛，3 秒内不确认自动复原
+    function armConfirm(btn, action) {
+        if (btn.dataset.armed === '1') {
+            disarmConfirm(btn);
+            action();
+            return;
+        }
+        btn.dataset.armed = '1';
+        btn.classList.add('arming');
+        // 用 textContent 而不是 innerHTML：按下时刚插进去的水波元素会被一起换掉，
+        // 不会在复原时留下一个「幽灵水波」又飘一次
+        btn.textContent = '⚠️ 再点一次';
+        clearTimeout(btn._armTimer);
+        btn._armTimer = setTimeout(() => disarmConfirm(btn), 5000);
+    }
+    function disarmConfirm(btn) {
+        if (!btn || btn.dataset.armed !== '1') return;
+        btn.dataset.armed = '0';
+        btn.classList.remove('arming');
+        btn.textContent = btn.dataset.label || '';   // 原始文案写死在 HTML 的 data-label 上
+        clearTimeout(btn._armTimer);
+    }
+
+    // 点哪儿从哪儿荡开一圈水波
+    function rippleAt(el, ev) {
+        if (REDUCE_MOTION) return;
+        const r = el.getBoundingClientRect();
+        const d = Math.max(r.width, r.height) * 2.2;
+        const s = document.createElement('span');
+        s.className = 'ripple';
+        s.style.width = d + 'px';
+        s.style.height = d + 'px';
+        s.style.left = (ev.clientX - r.left - d / 2) + 'px';
+        s.style.top = (ev.clientY - r.top - d / 2) + 'px';
+        el.appendChild(s);
+        setTimeout(() => s.remove(), 620);
+    }
+
+    // 得分飘字
+    function floatBadge(host, text, good) {
+        if (!host || REDUCE_MOTION) return;
+        const s = document.createElement('span');
+        s.className = 'float-badge ' + (good ? 'good' : 'bad');
+        s.textContent = text;
+        host.appendChild(s);
+        setTimeout(() => s.remove(), 900);
+    }
+
+    // 同一个元素要重放同一个动画，必须先摘掉类、强制重排一次，否则不会重播
+    function replayAnim(el, cls) {
+        if (!el) return;
+        el.classList.remove(cls);
+        void el.offsetWidth;
+        el.classList.add(cls);
+    }
+
+    // PK 计时数字：最后 3 秒标红并闪动，给玩家一个「快没时间了」的信号
+    function setTimerLabel(idx, time) {
+        const el = document.getElementById(`timer_${idx}`);
+        if (!el) return;
+        el.innerText = time + 's';
+        el.classList.toggle('urgent', time <= 3);
+        el.style.setProperty('--t', Math.max(0, Math.min(10, time)) / 10);   // 底部进度条
+    }
+
+    // ================================================================
+    //  初始化
+    // ================================================================
+    // 设备性能档位：核心少 / 内存小 / 系统要求减弱动效 -> 换更轻的渲染
+    (function detectPerfTier() {
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const cores = navigator.hardwareConcurrency || 8;
+        const mem = navigator.deviceMemory || 8;
+        if (reduce || cores <= 4 || mem <= 4) document.documentElement.dataset.perf = 'low';
+    })();
+
+    // 读取本地存储的高级渲染状态（旧键 glassEnabled 读一次做迁移）
+    applyGlass(lsGet(LS_GLASS, 'glassEnabled') === 'true');
+
+    populateGrades();
+
+    initPublisher();
+    buildSingleQueue();
+    refreshSingleQuestion();
+    soundToggleBtn.textContent = "🔊 音效开启";
+    // 粗体开关的初始态跟着 boldOnly 走，别在这里硬写 active
+    boldToggleBtn.innerHTML = boldOnly ? "⭐ 仅粗体词: 开" : "⭐ 仅粗体词: 关";
+    boldToggleBtn.classList.toggle('active', boldOnly);
+
+    // 事件绑定
+    unitSelect.addEventListener('change', loadUnit);
+    modeChiBtn.addEventListener('click', () => setTranslateMode('chi2eng'));
+    modeEngBtn.addEventListener('click', () => setTranslateMode('eng2chi'));
+    nextBtn.addEventListener('click', nextSingle);
+    resetBtn.addEventListener('click', () => armConfirm(resetBtn, resetSingle));
+    soundToggleBtn.addEventListener('click', toggleSound);
+    boldToggleBtn.addEventListener('click', toggleBold);
+    pkModeBtn.addEventListener('click', () => setPKMode(!isPKMode));
+    addPlayerBtn.addEventListener('click', () => { if (isPKMode) addPlayer(); });
+    pkStartBtn.addEventListener('click', () => { if (isPKMode) startPKGame(); });
+    pkResetBtn.addEventListener('click', () => { if (isPKMode) armConfirm(pkResetBtn, resetPKGame); });
+
+    // 点别处就把「上膛」状态撤掉，免得过一会儿误触生效
+    document.addEventListener('click', (e) => {
+        [resetBtn, pkResetBtn].forEach(b => { if (b && !b.contains(e.target)) disarmConfirm(b); });
+    });
+
+    // 水波统一委托，省得每个按钮都挂一遍
+    document.addEventListener('pointerdown', (e) => {
+        const el = e.target.closest && e.target.closest('.option, .pk-option, button');
+        if (!el || el.disabled) return;
+        rippleAt(el, e);
+    });
+    selectWordsBtn.addEventListener('click', openWordSelector);
+    glassToggleBtn.addEventListener('click', toggleGlass);
+</script>
+</body>
+</html></template>
 <script>/* ============================================================
    来自太空的英语站台 —— 外壳脚本
    要点：
@@ -20107,7 +22636,7 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
      ⚠️ 单词喊麦王根本没有高级渲染开关（backdrop-filter 是写死的），
         表里没有它，联动会跳过 —— 这是事实，别给它造一个。
      ================================================================ */
-  var QUALITY = {"xxl": {"sel": "#glassToggle", "cls": "active", "key": "glassMode", "on": "1", "off": "0"}, "pattern": {"sel": "#glassToggle", "cls": "on", "key": "patternBuilder.glassEnabled", "on": "1", "off": "0"}, "listen": {"sel": "#glassToggleBtn", "aria": "aria-pressed", "key": "listen.glassEnabled", "on": "true", "off": "false"}, "read": {"sel": "#advancedToggleHeader", "cls": "active"}};
+  var QUALITY = {"xxl": {"sel": "#glassToggle", "cls": "active", "key": "glassMode", "on": "1", "off": "0"}, "pattern": {"sel": "#glassToggle", "cls": "on", "key": "patternBuilder.glassEnabled", "on": "1", "off": "0"}, "listen": {"sel": "#glassToggleBtn", "aria": "aria-pressed", "key": "listen.glassEnabled", "on": "true", "off": "false"}, "read": {"sel": "#advancedToggleHeader", "cls": "active"}, "match": {"sel": "#glassToggleBtn", "cls": "active", "key": "match.glassEnabled", "on": "true", "off": "false"}};
 
   function qualityKeys(on) {
     Object.keys(QUALITY).forEach(function (k) {
@@ -20431,14 +22960,14 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
      ================================================================ */
   var GUIDE = [
     { ico: '🚀', h: '欢迎来到「来自太空的英语站台」',
-      p: '这里一共有 <b>5 种英语练习</b>：中英消消乐、单词喊麦王、句型建筑师、听力练习场、英语认读系统。' +
+      p: '这里一共有 <b>6 种英语练习</b>：中英消消乐、句型建筑师、听力练习场、英语认读系统、单词喊麦王、单词匹配练习。' +
          '练习随时能换，不用重开页面，也不用记网址。' },
     { ico: '🎯', h: '左上角这个靶子按钮，管着一切',
       p: '看屏幕<b>左上角</b>那个 <b>🎯</b> 按钮 —— 站台的所有功能都收在它里面（切换练习、音效、音乐）。' +
          '它平时是半透明的，不会挡住练习内容。',
       spot: true },
     { ico: '📂', h: '点它，左边的抽屉就滑出来了',
-      p: '抽屉里有 <b>🏠 目录</b> 和 <b>5 个练习</b>，点哪个就切到哪个；想回目录就点「🏠 目录」。',
+      p: '抽屉里有 <b>🏠 目录</b> 和 <b>6 个练习</b>，点哪个就切到哪个；想回目录就点「🏠 目录」。',
       spot: true },
     { ico: '🎵', h: '抽屉底下有一排开关',
       p: '先看头两个：<b>音效</b>控制点击时的"啵"声；<b>音乐</b>默认 <b>5%</b> 音量 —— ' +
