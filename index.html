@@ -374,20 +374,41 @@ body.liquid .guide-card{
   flex:0 0 auto;font-size:.68rem;font-weight:700;color:#3d5a86;
   min-width:30px;text-align:right;
 }
-/* 极矮的窗口（小手机 640 高、横屏手机）再收一档间距，尽量让它根本不需要滚。
+/* 矮窗口再收一档间距，尽量让它根本不需要滚。
    滚动条本身已经藏掉了（见 .panel），这里是第二道保险。
-   ⚠️ 只收间距和图标尺寸，**不把 .pitem 压到 48 以下** ——
-      技能里"选项卡 ≥48px、工具条开关 ≥44px"是给触屏定的硬规矩。 */
-@media (max-height:680px){
-  /* ★ 2026-10：站台加了第 6 个工具（单词匹配练习）后，360×640 那种小屏差 15px 装不下。
-     高度只能从**间距**里省 —— .pitem ≥48px、开关 ≥44px 是触屏的硬规矩，不许压尺寸。
-     这一块只在 max-height:680px 生效，桌面/大屏一个像素都不动。 */
-  .panel{padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));gap:4px}
-  .brand{padding:7px;margin-bottom:2px}
-  .brand-au{margin-top:5px;padding-top:5px}
-  .panel-sec{margin:5px 6px 1px}
-  .sbtn{min-height:50px}
+   ⚠️ 只收间距/图标尺寸/装饰性文字，**不把 .pitem 压到 48 以下、开关压到 44 以下** ——
+      那是技能里给触屏定的硬规矩，测试也会盯。 */
+/* ★ 2026-10：加了第 7 个工具（考核中心）后预算重算过，从 680 提到 768。
+   实测（verify_hub_fit.js + 逐孩子量高度）：
+     1366x700 原来 791 > 700（超 91）、360x640 原来 712 > 640（超 72）。
+   7 个工具 + 目录 = 8 个条目 × 48px 是死的（触屏规矩），所以只能从这几处省：
+     · 面板内边距 14→8、条目间距 7→3
+     · 品牌卡内边距 10→7（96→80）
+     · 三个 .panel-sec 的上间距 10→4、下边距 3→0
+   收完实测 1366x700 = 654、360x640 = 624（这一档 + 下面 680 那一档合起来）。 */
+@media (max-height:768px){
+  .panel{padding:7px 12px calc(7px + env(safe-area-inset-bottom,0px));gap:2px}
+  /* ★ 品牌卡只收 2px 内边距（96 → 92.5）：verify_contrast.py 用「≥90」判它没被压扁，
+     把高度从这里省会直接触发那条断言。要省就从间距（gap / panel-sec 外边距）里省。 */
+  .brand{padding:9px;margin:0 0 2px}
+  .brand-au{margin-top:7px;padding-top:7px}
+  .panel-sec{margin:2px 6px 0}
+  .sbtn{min-height:48px}
   .sbtn .cico{width:20px;height:20px;font-size:.72rem;border-radius:7px}
+}
+
+@media (max-height:680px){
+  /* 小手机 640 高：再收一档。
+     ★ 这一档品牌卡才真的收（92.5 → 86.5）：verify_hub_fit.js 的判据是「≥80」，
+       86.5 过得去；而 640 高要装 8 个条目 + 两个分节 + 播放器，是真的不够。
+     ★ 隐藏的是 .chint（"已开启/已关闭"那种状态词），不是开关本身：
+       开关的颜色**本身就是状态**（CSS 上面写了"别只靠那两个字"），
+       触摸屏上少一行小字换 13px 高度，划算。 */
+  .panel{padding:4px 12px calc(4px + env(safe-area-inset-bottom,0px))}
+  .brand-au{margin-top:3px;padding-top:3px}
+  .pitem.exam{margin-top:4px}
+  .sbtn{min-height:48px}
+  .sbtn .chint{display:none}
   /* ⚠️ 这里千万别顺手把 .mnav / .pitem 压小：技能里"选项卡 ≥48px、
      工具条小控件 ≥44px"是给触屏定的，省高度只能省间距和图标，不能省尺寸。
      （我第一版把 .mnav 写成 40px，被 verify_hub_fit.js 当场抓出来了。）
@@ -395,13 +416,15 @@ body.liquid .guide-card{
 }
 
 /* 横屏手机 / 极矮窗口：抽屉铺满全屏，条目改**三列**。
-   竖着一列排 6 个条目在 390 高的屏幕上永远装不下（实测超出 215px）；
-   铺满后横向有空间，三列刚好两行装完（844 宽时每格 281px，够）。
-   ⚠️ 两条都是踩过的坑：
+   竖着一列排 8 个条目在 390 高的屏幕上永远装不下；
+   铺满后横向有空间，够宽就四列两行装完（844 宽时每格 208px，够放「中英消消乐 + ›」）。
+   ⚠️ 三条都是踩过的坑：
       grid-auto-rows:max-content —— 不加的话 .brand 会被压扁
       （它带 overflow:hidden，在 grid 里自动最小高度同样会变成 0，实测被压到 31px）；
       横向用 grid 也是为了让"条目两列/三列"跟满宽的行共存，
-      flex 做不到只让一部分孩子换列。 */
+      flex 做不到只让一部分孩子换列；
+      ★ 抽屉里**不能**再加满宽的分节小标题 —— 它会强制换行，
+        8 个条目会从两行变成三行、白多 53px（考核那条因此做成了 .pitem.exam）。 */
 @media (max-height:480px){
   .panel{
     width:100vw;border-radius:0;
@@ -414,7 +437,7 @@ body.liquid .guide-card{
   .brand-au{margin-top:6px;padding-top:6px}
   /* 铺满后这两条别跟着拉得太宽，右边留白比拉长好看 */
   .sbar{max-width:520px}
-  /* ★ 条目从 5 个变 6 个（加了单词匹配练习）后，「目录 + 6」= 7 个，
+  /* ★ 条目从 7 个变 8 个（加了考核中心）后，「目录 + 7」= 8 个，
      3 列要排 3 行、在 390 高的横屏手机上超出 47px。够宽就改 4 列，两行装完。 */
   @media (min-width:700px){
     .panel{grid-template-columns:repeat(4,1fr)}
@@ -474,8 +497,36 @@ body.liquid .guide-card{
   margin-top:6px;padding:11px 22px;border-radius:40px;font-size:.92rem;font-weight:800;color:#fff;
   background:linear-gradient(135deg,#2f5d9e,#b0457e);min-height:44px;display:inline-flex;align-items:center;
 }
-.resume{margin:0 auto 18px;max-width:1080px;display:none}
-.resume.on{display:block}
+/* 「考核」分节：考核不是练习，在目录页单独成一块（老师要的"新板块"）。
+   ⚠️ 分节标题必须 grid-column:1/-1 —— .cards 是 auto-fit 网格，不写就只占一格。 */
+.home-sec{
+  grid-column:1/-1;display:flex;align-items:center;gap:12px;margin:8px 2px -2px;
+}
+.home-sec .hs-l{
+  flex:1 1 auto;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,rgba(47,93,158,0),rgba(176,69,126,.42),rgba(47,93,158,0));
+}
+.home-sec .hs-t{
+  flex:0 0 auto;font-size:1rem;font-weight:800;letter-spacing:4px;color:#8f3c66;
+  padding:5px 18px 5px 22px;border-radius:20px;background:rgba(255,255,255,.92);
+  border:1.5px solid rgba(176,69,126,.32);box-shadow:0 2px 10px rgba(44,84,140,.10);
+}
+/* 考核卡片比练习卡更"重"一点：边框偏蓝、说明区加一条淡底，一眼能和练习区分开 */
+.card.exam{border-color:rgba(47,93,158,.34);background:rgba(255,255,255,.9)}
+.card.exam:hover{border-color:#2f5d9e}
+
+/* ===== 「考核」条目：不是练习，用配色和一条留白把它区分开 =====
+   ⚠️ 故意**不用**单独一条 .panel-sec 小标题：那是满宽孩子，在矮屏的网格布局里
+      会强制换行、白多一整行（实测横屏手机 +53px 直接撑破抽屉预算）。
+      首页那边有一条真正的「考 核」分节标题（.home-sec），概念在目录页讲清楚了。 */
+.pitem.exam{
+  margin-top:7px;
+  background:linear-gradient(135deg,rgba(47,93,158,.14),rgba(176,69,126,.14));
+  box-shadow:inset 0 0 0 1.5px rgba(47,93,158,.24);
+}
+.pitem.exam.on{box-shadow:inset 0 0 0 1.5px rgba(47,93,158,.4)}
+
+.resume{margin:0 auto 18px;max-width:1080px;display:none}.resume.on{display:block}
 .resume button{
   width:100%;min-height:52px;border-radius:20px;font-family:inherit;font-size:.98rem;font-weight:700;
   border:2px dashed rgba(176,69,126,.45);background:rgba(255,255,255,.6);color:#2a3f66;cursor:pointer;
@@ -804,7 +855,7 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
       <div class="brand-row">
         <span class="brand-txt">
           <span class="brand-name">来自太空的英语站台</span>
-          <span class="brand-sub">小学英语练习 · 6 个工具</span>
+          <span class="brand-sub">小学英语练习 · 7 个工具</span>
         </span>
       </div>
       <div class="brand-au">
@@ -823,15 +874,16 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
       <button class="pitem anim-in" style="--i:4" data-tool="read"><span class="pico">📖</span><span class="plb">英语认读系统</span><span class="pgo">›</span></button>
       <button class="pitem anim-in" style="--i:5" data-tool="shout"><span class="pico">🎤</span><span class="plb">单词喊麦王</span><span class="pgo">›</span></button>
       <button class="pitem anim-in" style="--i:6" data-tool="match"><span class="pico">🔗</span><span class="plb">单词匹配练习</span><span class="pgo">›</span></button>
-    <div class="panel-sec anim-in sec-set" style="--i:7">站台设置</div>
-    <div class="sbar anim-in" style="--i:8">
+      <button class="pitem anim-in exam" style="--i:7" data-tool="exam"><span class="pico">📝</span><span class="plb">考核中心</span><span class="pgo">›</span></button>
+    <div class="panel-sec anim-in sec-set" style="--i:8">站台设置</div>
+    <div class="sbar anim-in" style="--i:9">
       <button class="sbtn" id="soundBtn" type="button"><span class="cico">🔊</span><span class="slb">音效</span><span class="chint" id="soundHint">已开启</span></button>
       <button class="sbtn" id="liquidBtn" type="button"><span class="cico">💧</span><span class="slb">玻璃</span><span class="chint" id="liquidHint">已关闭</span></button>
       <button class="sbtn" id="musicBtn" type="button"><span class="cico">🎵</span><span class="slb">音乐</span><span class="chint" id="musicHint">播放中</span></button>
       <button class="sbtn" id="fsBtn" type="button"><span class="cico">⛶</span><span class="slb">全屏</span><span class="chint" id="fsHint">未开启</span></button>
       <button class="sbtn off" id="landBtn" type="button"><span class="cico">🔄</span><span class="slb">横屏</span><span class="chint" id="landLabel">竖屏</span></button>
     </div>
-    <div class="mbar anim-in" style="--i:9">
+    <div class="mbar anim-in" style="--i:10">
       <button class="mnav" id="musicPrev" type="button" aria-label="上一首">⏮</button>
       <span class="mname" id="musicName">—</span>
       <button class="mnav" id="musicNext" type="button" aria-label="下一首">⏭</button>
@@ -842,7 +894,7 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
   <!-- 首次使用引导：必须一步步走完才能关（没有关闭按钮） -->
   <div class="guide-mask" id="guideMask">
     <div class="guide-card" role="dialog" aria-modal="true" aria-labelledby="guideH">
-      <div class="guide-step" id="guideStepNo">第 1 步 / 共 4 步</div>
+      <div class="guide-step" id="guideStepNo">第 1 步 / 共 6 步</div>
       <div class="guide-body anim" id="guideBody">
         <div class="guide-ico" id="guideIco">🚀</div>
         <h3 class="guide-h" id="guideH">欢迎</h3>
@@ -914,8 +966,15 @@ body[data-perf="low"] .menu-fab .fab-ico{transition:none!important}
         <span class="ds">看中文选英文（或反过来），练词义辨认；还能开多人 PK</span></span>
         <span class="go">开始练习 →</span>
       </button>
+      <div class="home-sec" aria-hidden="true"><span class="hs-l"></span><span class="hs-t">考 核</span><span class="hs-l"></span></div>
+      <button class="card exam" data-tool="exam">
+        <span class="ico">📝</span>
+        <span class="txt"><span class="nm">考核中心</span>
+        <span class="ds">老师设范围，系统随机组卷；四种题型一条龙考完直接出成绩</span></span>
+        <span class="go">进入考核 →</span>
+      </button>
       </div>
-      <p class="foot-hint">⚠️ 本文件和 <b>audio</b> 文件夹必须在同一目录，不要把网页单独拷走。<br>听力 / 句型 / 认读三种练习共用这一个 audio 文件夹（录音已去重）；消消乐、喊麦王、匹配练习都不发音，不需要录音。背景音乐也放在里面。</p>
+      <p class="foot-hint">⚠️ 本文件和 <b>audio</b> 文件夹必须在同一目录，不要把网页单独拷走。<br>听力 / 句型 / 认读 / 考核里的听力题共用这一个 audio 文件夹（录音已去重）；消消乐、喊麦王、匹配练习都不发音，不需要录音。背景音乐也放在里面。</p>
     </section>
   </main>
   <audio id="bgm" preload="auto"></audio>
@@ -22155,6 +22214,2036 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
 </script>
 </body>
 </html></template>
+<template id="tpl-exam"><!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>📝 考核中心 · 来自太空的小头脑</title>
+<style>
+/* ============================================================
+   📝 考核中心 —— 站台里的第 7 个工具
+   一条龙考核：老师设范围 → 系统随机组卷 → 四种题型流水做 → 当场出成绩 + 错题入库
+
+   设计纪律（跟工具族其它成员一致，都是踩出来的）：
+   · 单文件、零外链、内联 SVG/emoji、原生 JS、WebAudio 合成音效
+   · 全站只用一个 <audio>，**绝不写 audio.src = ''**（那会同步递归把浏览器卡死）
+   · 主容器不用 backdrop-filter（一有重绘就把背景重算一遍）
+   · 所有可点控件高 ≥44px，写在基础规则里（平板 768–1024px 不进窄屏媒体查询）
+   · 视觉反馈必须在同一帧可见：配对错误只改边框/抖动，不重建棋盘
+   · 不用 transform:scale + infinite 做提醒动画（会让自动化点击一直等"元素稳定"）
+   ============================================================ */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+[hidden]{display:none!important}   /* 作者样式会顶掉 UA 的 [hidden]，必须自己兜一条 */
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+  background:linear-gradient(160deg,#e8f1fb 0%,#fdeaf3 46%,#fdf7e6 78%,#ffffff 100%);
+  color:#1c2f4a;min-height:100%;
+  font-size:16px;line-height:1.5;
+}
+body.advanced{background:linear-gradient(150deg,#dfeafa 0%,#fbe0ee 44%,#fdf0d6 76%,#fff 100%)}
+
+/* 高级渲染：两团极缓的色斑，只动 transform（走合成层，几乎免费）。
+   ⚠️ 不要给移动的图层挂 filter:blur() —— 那是每帧重算一次模糊。 */
+body::before,body::after{
+  content:'';position:fixed;z-index:0;pointer-events:none;opacity:0;visibility:hidden;
+  width:72vmax;height:72vmax;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,rgba(96,140,220,.42) 0%,rgba(96,140,220,0) 70%);
+}
+body::after{background:radial-gradient(circle at 50% 50%,rgba(214,110,170,.38) 0%,rgba(214,110,170,0) 70%);
+  left:auto;right:-24vmax;top:auto;bottom:-30vmax}
+body::before{left:-26vmax;top:-28vmax}
+body.advanced::before,body.advanced::after{opacity:1;visibility:visible}
+@media (prefers-reduced-motion: no-preference){
+  body.advanced::before{animation:driftA 26s ease-in-out infinite alternate}
+  body.advanced::after{animation:driftB 31s ease-in-out infinite alternate}
+}
+@keyframes driftA{from{transform:translate3d(0,0,0)}to{transform:translate3d(14vmax,10vmax,0)}}
+@keyframes driftB{from{transform:translate3d(0,0,0)}to{transform:translate3d(-12vmax,-9vmax,0)}}
+
+.app{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:0 14px 34px}
+
+/* ===== 顶栏 ===== */
+.top{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 0 10px;
+}
+.top-l{display:flex;align-items:center;gap:9px;min-width:0;margin-right:auto}
+.logo{font-size:1.5rem;line-height:1}
+.tnames{display:flex;flex-direction:column;min-width:0}
+.tnames b{font-size:1.3rem;letter-spacing:.4px}
+.tnames i{font-size:.8rem;font-style:normal;color:#4a6389}
+.top-r{display:flex;gap:8px;flex-wrap:wrap}
+.tbtn{
+  display:inline-flex;align-items:center;gap:6px;
+  min-height:44px;padding:0 13px;border-radius:12px;cursor:pointer;
+  border:1.5px solid #ccd9ec;background:rgba(255,255,255,.9);color:#2a4160;
+  font-family:inherit;font-size:.92rem;font-weight:600;
+  box-shadow:0 1px 3px rgba(40,70,120,.1);
+  transition:background .18s,border-color .18s,transform .12s;
+  position:relative;overflow:hidden;
+}
+.tbtn:hover{border-color:#8fb0d8;background:#fff}
+.tbtn:active{transform:scale(.97)}
+.tbtn.active{border-color:#2f5d9e;background:linear-gradient(135deg,#2f5d9e,#b0457e);color:#fff}
+.tbtn .ti{font-size:1.05rem}
+.tbtn.icon{padding:0;width:44px;justify-content:center}
+.tbtn.icon .ti{font-size:1.2rem}
+.tbadge{
+  min-width:19px;height:19px;padding:0 5px;border-radius:10px;
+  background:#d9534f;color:#fff;font-size:.72rem;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.tbtn.active .tbadge{background:rgba(255,255,255,.32)}
+
+/* ===== 视图 ===== */
+.view{display:none}
+.view.on{display:block;animation:vin .3s ease both}
+@media (prefers-reduced-motion: reduce){.view.on{animation:none}}
+@keyframes vin{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+.h1{font-size:1.5rem;margin:8px 0 2px}
+.sub{color:#4a6389;font-size:.9rem;margin:0 0 16px}
+
+/* ===== 设置页的分块 ===== */
+.blk{
+  background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.9);
+  border-radius:16px;padding:13px 14px 14px;margin-bottom:12px;
+  box-shadow:0 3px 14px rgba(44,84,140,.08);
+}
+.bhd{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.bno{
+  width:23px;height:23px;border-radius:50%;flex:0 0 auto;
+  background:linear-gradient(135deg,#2f5d9e,#b0457e);color:#fff;
+  font-size:.8rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;
+}
+.bt{font-weight:700;font-size:1rem}
+.bact{margin-left:auto;display:flex;gap:7px}
+/* ⚠️ 小按钮也是**能点的控件**，一样要 ≥44px（工具族的硬规矩，触屏上 36px 点不准）。
+   曾经写成 36px，被 verify_exam.js 的 O 段当场抓出来。 */
+.mini{
+  min-height:44px;padding:0 14px;border-radius:10px;cursor:pointer;
+  border:1.5px solid #ccd9ec;background:#fff;color:#2a4160;
+  font-family:inherit;font-size:.85rem;font-weight:600;
+}
+.mini:hover{border-color:#8fb0d8}
+.mini:active{transform:scale(.97)}
+.mini.danger{color:#b8322f;border-color:#ecc3c2;background:#fff7f6}
+.mini.danger:hover{border-color:#d9534f}
+.bhint{margin:9px 0 0;font-size:.83rem;color:#5b7396;line-height:1.5}
+.bhint.warn{color:#b06a15}
+
+/* ===== chip 选择器（册 / 单元 / 题型 / 题量 / 计时） ===== */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  min-height:44px;padding:0 15px;border-radius:12px;cursor:pointer;
+  border:1.5px solid #ccd9ec;background:#fff;color:#2a4160;
+  font-family:inherit;font-size:.95rem;font-weight:600;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:background .16s,border-color .16s,color .16s,transform .12s;
+}
+.chip:hover:not([disabled]){border-color:#8fb0d8}
+.chip:active:not([disabled]){transform:scale(.97)}
+.chip[aria-pressed="true"]{
+  border-color:#2f5d9e;background:linear-gradient(135deg,#2f5d9e,#b0457e);color:#fff;
+  box-shadow:0 3px 10px rgba(47,93,158,.26);
+}
+.chip .ci{font-size:1.05rem}
+.chip[disabled]{opacity:.45;cursor:not-allowed;background:#f4f6fa}
+.chip.mute[aria-pressed="true"]{background:linear-gradient(135deg,#5b7396,#8b6f9c);border-color:#5b7396}
+
+.two{display:flex;gap:12px;flex-wrap:wrap}
+.two>.sub-blk{flex:1 1 260px;min-width:0}
+.two .bhd{margin-bottom:9px}
+
+/* ===== 开始 ===== */
+.go{display:flex;flex-direction:column;align-items:center;gap:10px;margin:18px 0 6px;text-align:center}
+.gol{margin:0;font-size:.92rem;color:#4a6389;min-height:1.4em}
+.big{
+  min-height:52px;padding:0 30px;border-radius:15px;cursor:pointer;
+  border:0;font-family:inherit;font-size:1.08rem;font-weight:800;letter-spacing:.5px;
+  color:#fff;background:linear-gradient(135deg,#2f5d9e,#b0457e);
+  box-shadow:0 5px 18px rgba(47,93,158,.3);
+  transition:transform .14s,box-shadow .2s,opacity .2s;
+  position:relative;overflow:hidden;
+}
+.big:hover:not([disabled]){transform:translateY(-1px);box-shadow:0 7px 22px rgba(47,93,158,.36)}
+.big:active:not([disabled]){transform:scale(.98)}
+.big[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
+.big.ghost{
+  background:#fff;color:#2a4160;border:1.5px solid #ccd9ec;box-shadow:0 1px 4px rgba(40,70,120,.1);
+}
+.big.ghost:hover{background:#f7fafd}
+
+/* 点击水波（高级渲染才有） */
+.wave{
+  position:absolute;border-radius:50%;pointer-events:none;
+  background:rgba(255,255,255,.45);transform:scale(0);
+  animation:waveGo .5s ease-out forwards;
+}
+@keyframes waveGo{to{transform:scale(2.6);opacity:0}}
+
+/* ===== 做题页 ===== */
+.qbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 0 10px}
+.qbar-l{display:flex;align-items:center;gap:9px;min-width:0}
+.qtag{
+  padding:5px 11px;border-radius:9px;font-size:.85rem;font-weight:700;
+  background:linear-gradient(135deg,#2f5d9e,#b0457e);color:#fff;
+}
+.qno{font-size:.9rem;color:#4a6389;font-weight:600}
+.qbar-r{margin-left:auto;display:flex;align-items:center;gap:9px}
+.clock{
+  font-size:1rem;font-weight:800;color:#2a4160;
+  min-width:56px;text-align:center;padding:6px 9px;border-radius:10px;
+  background:rgba(255,255,255,.9);border:1.5px solid #ccd9ec;
+}
+.clock.hurry{color:#fff;background:#d9534f;border-color:#d9534f}
+.prog{height:8px;border-radius:6px;background:rgba(255,255,255,.85);overflow:hidden;border:1px solid #dce6f4}
+.prog>i{display:block;height:100%;width:0;border-radius:6px;
+  background:linear-gradient(90deg,#2f5d9e,#b0457e);transition:width .3s ease}
+
+.qbody{
+  background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.95);
+  border-radius:18px;padding:16px;margin:13px 0 0;
+  box-shadow:0 4px 18px rgba(44,84,140,.09);
+  min-height:230px;
+}
+.qprompt{text-align:center;font-size:1.1rem;font-weight:700;line-height:1.55;margin:0 0 6px}
+.qprompt .big-word{font-size:clamp(1.7rem,7vw,2.5rem);letter-spacing:1px;display:block;margin-bottom:2px}
+.qprompt .zh-word{font-size:clamp(1.5rem,6vw,2.2rem);display:block;letter-spacing:1px}
+.qsub{text-align:center;font-size:.86rem;color:#5b7396;margin:0 0 14px}
+.qsub.warn{color:#b06a15}
+
+/* 听力题的播放按钮：学生唯一入口，做大 */
+.speaker{display:flex;justify-content:center;margin:4px 0 16px}
+.playbtn{
+  min-height:60px;min-width:min(280px,78vw);padding:0 24px;border-radius:16px;cursor:pointer;
+  border:0;color:#fff;font-family:inherit;font-size:1.1rem;font-weight:800;
+  background:linear-gradient(135deg,#2f5d9e,#b0457e);
+  box-shadow:0 5px 18px rgba(47,93,158,.3);
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  transition:transform .14s;position:relative;overflow:hidden;
+}
+.playbtn:hover{transform:translateY(-1px)}
+.playbtn:active{transform:scale(.98)}
+.playbtn.playing{background:linear-gradient(135deg,#1f4a82,#93406c)}
+
+/* 选项 */
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+@media (max-width:430px){.opts{grid-template-columns:1fr}}
+.opt{
+  min-height:56px;padding:11px 15px;border-radius:14px;cursor:pointer;
+  border:2px solid #d3dded;background:#fff;color:#1c2f4a;
+  font-family:inherit;font-size:1.1rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  overflow-wrap:break-word;word-break:normal;
+  transition:border-color .16s,background .16s,transform .12s;
+}
+.opt:hover:not([disabled]){border-color:#8fb0d8;background:#f8fbff}
+.opt:active:not([disabled]){transform:scale(.985)}
+.opt[disabled]{cursor:default}
+.opt.pick{border-color:#2f5d9e;background:#eaf2fd}
+.opt.good{border-color:#2e9e6b;background:#e8f8f0;color:#1d7a50}
+.opt.bad{border-color:#d9534f;background:#fdeceb;color:#a5302c}
+.opt.dim{opacity:.5}
+
+/* 高级渲染下的错峰入场。
+   ⚠️ 用**专门的 .enter 类**（动画结束就摘掉），不要写成 `body.advanced .opt{animation:…}`：
+      那样它的特异性(0,2,1)会**压过** `.mcard.bad{animation:shake}`(0,2,0)，
+      红闪就永远播不出来 —— 这正是技能文档里记过的那类 CSS 特异性静默覆盖。
+      另外 fill-mode 用 `backwards` 而不是 `both`：both 会把 `transform:none` 一直压着，
+      `.mcard.done{transform:scale(.96)}` 就失效了。 */
+@media (prefers-reduced-motion: no-preference){
+  .opt.enter,.mcard.enter,.tok.enter{animation:cardIn .34s ease backwards;animation-delay:calc(var(--i,0) * 45ms)}
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* 配对棋盘 */
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.board{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.mcard{
+  min-height:62px;padding:9px 10px;border-radius:14px;cursor:pointer;
+  border:2px solid #d3dded;background:#fff;color:#1c2f4a;
+  font-family:inherit;font-size:1rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  overflow-wrap:break-word;word-break:normal;
+  transition:border-color .16s,background .16s,opacity .3s,transform .12s;
+}
+.mcard.zh{background:#fbf6ff;border-color:#e2d4ee}
+.mcard:hover:not([disabled]){border-color:#8fb0d8}
+.mcard.pick{border-color:#2f5d9e;background:#eaf2fd}
+.mcard.done{border-color:#2e9e6b;background:#e8f8f0;opacity:.35;cursor:default;transform:scale(.96)}
+/* ⚠️ 错误反馈只动边框和抖动，**不重建棋盘**：重建会把没画出来的反馈一起销毁 */
+.mcard.bad{border-color:#d9534f;background:#fdeceb;animation:shake .34s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@media (prefers-reduced-motion: reduce){.mcard.bad{animation:none}}
+
+/* 句子排序 */
+.pool,.answer{
+  display:flex;flex-wrap:wrap;gap:9px;min-height:62px;padding:11px;
+  border-radius:14px;border:2px dashed #cbd8ea;background:#fbfdff;
+}
+.answer{border-style:solid;border-color:#c3d3e8;background:#f3f8fe;align-items:center}
+.answer.empty::before{
+  content:'点下面的词卡，把句子排进这里';color:#8496b0;font-size:.88rem;font-weight:600;
+}
+.tok{
+  min-height:44px;padding:9px 13px;border-radius:12px;cursor:pointer;
+  border:2px solid #d3dded;background:#fff;color:#1c2f4a;
+  font-family:inherit;font-size:1.05rem;font-weight:700;
+  transition:border-color .16s,background .16s,transform .12s;
+}
+.tok:hover{border-color:#8fb0d8}
+.tok:active{transform:scale(.97)}
+.tok.in{border-color:#9dbfe6;background:#eaf2fd}
+.tok.ord{background:#eef5fd;border-color:#9dbfe6}
+.answer .tok{background:#fff}
+.answer.checked .tok.good{border-color:#2e9e6b;background:#e8f8f0}
+.answer.checked .tok.bad{border-color:#d9534f;background:#fdeceb}
+.answer.checked{animation:none}
+.qzone-lb{font-size:.82rem;font-weight:700;color:#5b7396;margin:0 0 7px}
+.zone+.zone{margin-top:14px}
+
+/* 反馈条 */
+.fb{
+  display:flex;align-items:center;gap:9px;justify-content:center;
+  margin-top:14px;padding:11px 14px;border-radius:13px;
+  font-size:1.02rem;font-weight:800;
+  animation:fbIn .26s ease both;
+}
+@media (prefers-reduced-motion: reduce){.fb{animation:none}}
+@keyframes fbIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.fb.good{background:#e8f8f0;color:#1d7a50;border:2px solid #a5ddc2}
+.fb.bad{background:#fdeceb;color:#a5302c;border:2px solid #efb9b7}
+.fb .fbi{font-size:1.25rem}
+
+.qfoot{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+
+/* ===== 成绩页 ===== */
+.scorecard{
+  background:rgba(255,255,255,.92);border-radius:20px;padding:20px 16px;text-align:center;
+  box-shadow:0 5px 22px rgba(44,84,140,.12);border:1px solid rgba(255,255,255,.95);
+}
+.sc-num{font-size:clamp(2.9rem,13vw,4.2rem);font-weight:900;line-height:1;
+  background:linear-gradient(135deg,#2f5d9e,#b0457e);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sc-num small{font-size:.34em;font-weight:800}
+.sc-badge{display:inline-block;margin-top:8px;padding:6px 16px;border-radius:20px;
+  font-weight:800;font-size:1.02rem;color:#fff;background:linear-gradient(135deg,#2f5d9e,#b0457e)}
+.sc-badge.soso{background:linear-gradient(135deg,#c98a2b,#d9a03d)}
+.sc-badge.low{background:linear-gradient(135deg,#8d5a8f,#a5707f)}
+.sc-meta{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:14px;color:#4a6389;font-size:.92rem}
+.sc-meta b{color:#1c2f4a;font-size:1.1rem}
+.sc-go{display:flex;justify-content:center;gap:11px;flex-wrap:wrap;margin-top:18px}
+
+.detail{margin-top:16px;background:rgba(255,255,255,.9);border-radius:16px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.95);box-shadow:0 3px 14px rgba(44,84,140,.08)}
+.detail>summary{
+  cursor:pointer;padding:14px 16px;font-weight:800;font-size:1rem;list-style:none;
+  display:flex;align-items:center;gap:9px;min-height:48px;
+}
+.detail>summary::-webkit-details-marker{display:none}
+.detail>summary::after{content:'▾';margin-left:auto;color:#5b7396;transition:transform .2s}
+.detail[open]>summary::after{transform:rotate(180deg)}
+.dlist{padding:0 12px 12px}
+.drow{
+  display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:12px;
+  background:#f8fbff;margin-bottom:8px;border-left:5px solid #a5ddc2;
+}
+.drow.bad{border-left-color:#efb9b7;background:#fff7f6}
+.drow .dno{font-weight:800;color:#4a6389;font-size:.85rem;min-width:26px;padding-top:2px}
+.drow .dmain{flex:1;min-width:0}
+.drow .dtag{font-size:.75rem;font-weight:700;color:#5b7396;display:block;margin-bottom:3px}
+.drow .dq{font-weight:700;font-size:1rem;overflow-wrap:break-word;word-break:normal}
+.drow .da{font-size:.86rem;color:#5b7396;margin-top:4px;overflow-wrap:break-word}
+.drow .da s{color:#a5302c;text-decoration-thickness:2px}
+.drow .da b{color:#1d7a50}
+.dmark{font-size:1.2rem;line-height:1.2}
+
+/* ===== 抽屉式面板（错题本 / 玩法） ===== */
+.sheet-mask{
+  position:fixed;inset:0;z-index:70;background:rgba(15,32,54,.44);
+  opacity:0;pointer-events:none;transition:opacity .26s;
+}
+.sheet-mask.on{opacity:1;pointer-events:auto}
+.sheet{
+  position:fixed;z-index:71;left:50%;top:50%;transform:translate(-50%,-46%) scale(.97);
+  width:min(680px,94vw);max-height:86vh;display:flex;flex-direction:column;
+  background:#fff;border-radius:20px;box-shadow:0 18px 50px rgba(15,35,65,.35);
+  opacity:0;pointer-events:none;transition:opacity .26s,transform .26s;
+}
+.sheet.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+@media (prefers-reduced-motion: reduce){.sheet,.sheet-mask{transition:none}}
+.sh-hd{display:flex;align-items:center;gap:10px;padding:15px 16px 12px;border-bottom:1px solid #e6eef7}
+.sh-hd h2{margin:0;font-size:1.15rem;flex:1}
+.sh-x{
+  width:44px;height:44px;border-radius:12px;border:1.5px solid #ccd9ec;background:#fff;
+  cursor:pointer;font-size:1.1rem;color:#2a4160;font-family:inherit;
+}
+.sh-x:hover{border-color:#8fb0d8}
+.sh-bd{padding:14px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sh-ft{padding:12px 16px 16px;border-top:1px solid #e6eef7;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sh-ft .spacer{margin-left:auto}
+
+.empty{
+  text-align:center;color:#5b7396;padding:26px 10px;font-size:.95rem;line-height:1.7;
+}
+.empty .eico{font-size:2.4rem;display:block;margin-bottom:8px}
+
+.wrow{
+  display:flex;gap:10px;align-items:center;padding:11px 12px;border-radius:12px;
+  background:#f8fbff;margin-bottom:8px;border:1px solid #e6eef7;
+}
+.wrow .wt{font-size:.75rem;font-weight:700;color:#5b7396;display:block}
+.wrow .wq{font-weight:700;font-size:1rem;overflow-wrap:break-word;word-break:normal}
+.wrow .wa{font-size:.85rem;color:#5b7396;overflow-wrap:break-word;word-break:normal}
+.wrow .wmain{flex:1;min-width:0}
+.wtime{font-size:.75rem;color:#8496b0;white-space:nowrap}
+
+.helplist{margin:0;padding:0;list-style:none}
+.helplist li{display:flex;gap:11px;padding:11px 0;border-bottom:1px dashed #e6eef7;font-size:.95rem;line-height:1.6}
+.helplist li:last-child{border-bottom:0}
+.helplist .hn{
+  flex:0 0 auto;width:26px;height:26px;border-radius:50%;font-size:.82rem;font-weight:800;
+  background:linear-gradient(135deg,#2f5d9e,#b0457e);color:#fff;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.helplist b{color:#1c2f4a}
+
+/* ===== 小药丸 ===== */
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);z-index:90;
+  background:rgba(20,40,66,.92);color:#fff;padding:11px 18px;border-radius:14px;
+  font-size:.92rem;font-weight:600;max-width:86vw;text-align:center;
+  opacity:0;pointer-events:none;transition:opacity .24s,transform .24s;
+}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ===== 确认框（破坏性操作） ===== */
+.cf{margin:0;text-align:center}
+.cf h3{margin:6px 0 8px;font-size:1.15rem}
+.cf p{margin:0 0 4px;color:#4a6389;font-size:.94rem;line-height:1.6}
+.cf .cficon{font-size:2.2rem}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="top-l">
+      <span class="logo" aria-hidden="true">📝</span>
+      <span class="tnames"><b>考核中心</b><i>小学英语 · 人教版 · 随机组卷</i></span>
+    </div>
+    <div class="top-r">
+      <button class="tbtn" id="wrongBtn" type="button">
+        <span class="ti">📕</span><span class="tl">错题本</span>
+        <span class="tbadge" id="wrongBadge" hidden>0</span>
+      </button>
+      <button class="tbtn" id="helpBtn" type="button"><span class="ti">❓</span><span class="tl">玩法</span></button>
+      <button class="tbtn" id="glassToggleBtn" type="button" aria-pressed="false">
+        <span class="ti">✨</span><span class="tl">高级渲染</span>
+      </button>
+      <button class="tbtn icon" id="sfxBtn" type="button" aria-pressed="true"><span class="ti">🔊</span></button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ================= ① 设置 ================= -->
+    <section id="setup" class="view on">
+      <h1 class="h1">开始一场考核</h1>
+      <p class="sub">选好范围 → 点「开始考核」，系统随机组卷，一条龙做完直接出成绩</p>
+
+      <div class="blk">
+        <div class="bhd"><span class="bno">①</span><span class="bt">考哪一册</span></div>
+        <div class="chips" id="bookChips" role="group" aria-label="选择册别"></div>
+      </div>
+
+      <div class="blk">
+        <div class="bhd">
+          <span class="bno">②</span><span class="bt">考哪些单元</span>
+          <span class="bact">
+            <button class="mini" id="unitAll" type="button">全册</button>
+            <button class="mini" id="unitNone" type="button">清空</button>
+          </span>
+        </div>
+        <div class="chips" id="unitChips" role="group" aria-label="选择单元"></div>
+        <p class="bhint" id="unitHint"></p>
+      </div>
+
+      <div class="blk">
+        <div class="bhd"><span class="bno">③</span><span class="bt">考哪几种题型</span></div>
+        <div class="chips" id="typeChips" role="group" aria-label="选择题型"></div>
+        <p class="bhint" id="typeHint"></p>
+      </div>
+
+      <div class="blk two">
+        <div class="sub-blk">
+          <div class="bhd"><span class="bno">④</span><span class="bt">每种题型几题</span></div>
+          <div class="chips" id="countChips" role="group" aria-label="每种题型的题量"></div>
+        </div>
+        <div class="sub-blk">
+          <div class="bhd"><span class="bno">⑤</span><span class="bt">计时</span></div>
+          <div class="chips" id="timerChips" role="group" aria-label="是否计时"></div>
+        </div>
+      </div>
+
+      <div class="go">
+        <p class="gol" id="goHint"></p>
+        <button class="big" id="startBtn" type="button" disabled>开始考核</button>
+      </div>
+    </section>
+
+    <!-- ================= ② 做题 ================= -->
+    <section id="quiz" class="view">
+      <div class="qbar">
+        <div class="qbar-l">
+          <span class="qtag" id="qType">听音选词</span>
+          <span class="qno" id="qNo">第 1 / 1 题</span>
+        </div>
+        <div class="qbar-r">
+          <span class="clock" id="qClock" hidden>30s</span>
+          <button class="mini danger" id="quitBtn" type="button">结束考核</button>
+        </div>
+      </div>
+      <div class="prog"><i id="progBar"></i></div>
+      <div class="qbody" id="qBody"></div>
+      <div class="qfoot" id="qFoot"></div>
+    </section>
+
+    <!-- ================= ③ 成绩 ================= -->
+    <section id="result" class="view">
+      <div class="scorecard">
+        <div class="sc-num" id="scNum">0<small> 分</small></div>
+        <div><span class="sc-badge" id="scBadge">继续加油</span></div>
+        <div class="sc-meta">
+          <span>正确 <b id="scRight">0</b> / <span id="scTotal">0</span></span>
+          <span>用时 <b id="scTime">0</b></span>
+          <span>错题 <b id="scWrong">0</b></span>
+        </div>
+        <div class="sc-go">
+          <button class="big" id="againBtn" type="button">再考一次</button>
+          <button class="big ghost" id="wrongRedoBtn" type="button">只练错题</button>
+          <button class="big ghost" id="backSetupBtn" type="button">重新设置</button>
+        </div>
+      </div>
+      <details class="detail" id="detailBox">
+        <summary><span aria-hidden="true">📋</span>逐题明细（对错与正确答案）</summary>
+        <div class="dlist" id="detailList"></div>
+      </details>
+    </section>
+  </main>
+</div>
+
+<div class="sheet-mask" id="sheetMask"></div>
+
+<!-- 错题本 -->
+<div class="sheet" id="wrongSheet" role="dialog" aria-modal="true" aria-labelledby="wsH" aria-hidden="true">
+  <div class="sh-hd">
+    <h2 id="wsH">📕 错题本</h2>
+    <button class="sh-x" id="wsClose" type="button" aria-label="关闭">✕</button>
+  </div>
+  <div class="sh-bd" id="wsBody"></div>
+  <div class="sh-ft">
+    <button class="big" id="wsRedoBtn" type="button">重考错题</button>
+    <span class="spacer"></span>
+    <button class="mini danger" id="wsClearBtn" type="button">清空错题本</button>
+  </div>
+</div>
+
+<!-- 玩法 -->
+<div class="sheet" id="helpSheet" role="dialog" aria-modal="true" aria-labelledby="hsH" aria-hidden="true">
+  <div class="sh-hd">
+    <h2 id="hsH">❓ 怎么用</h2>
+    <button class="sh-x" id="hsClose" type="button" aria-label="关闭">✕</button>
+  </div>
+  <div class="sh-bd">
+    <ul class="helplist">
+      <li><span class="hn">1</span><span><b>老师设范围</b>：选一册 → 勾要考的单元（可多选）→ 勾题型 → 选每种题型几题。点「开始考核」。</span></li>
+      <li><span class="hn">2</span><span><b>系统随机组卷</b>：每次考的题都不一样，同一场里不会重复出题。</span></li>
+      <li><span class="hn">3</span><span><b>四种题型</b>：<b>听音选词</b>（放录音选中文）、<b>看中文选英文</b>、<b>中英配对</b>（连对 4 组）、<b>句子排序</b>（把词排成句子）。</span></li>
+      <li><span class="hn">4</span><span><b>做完就出成绩</b>：百分制分数 + 逐题明细（含正确答案）；做错的题自动进<b>错题本</b>。</span></li>
+      <li><span class="hn">5</span><span><b>错题可以重考</b>：右上角 📕，点「重考错题」只考错的那些题。</span></li>
+      <li><span class="hn">6</span><span><b>听力题没声音？</b>说明这个网页没有和 <b>audio 文件夹</b>放在一起（在站台里用不会有这个问题）。</span></li>
+    </ul>
+  </div>
+  <div class="sh-ft"><span class="spacer"></span><button class="big" id="hsOk" type="button">知道了</button></div>
+</div>
+
+<!-- 确认框 -->
+<div class="sheet" id="confirmSheet" role="dialog" aria-modal="true" aria-labelledby="cfH" aria-hidden="true">
+  <div class="sh-bd cf">
+    <div class="cficon" id="cfIcon">⚠️</div>
+    <h3 id="cfH">确认</h3>
+    <p id="cfP"></p>
+  </div>
+  <div class="sh-ft">
+    <span class="spacer"></span>
+    <button class="mini" id="cfNo" type="button">取消</button>
+    <button class="big" id="cfYes" type="button">确定</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<audio id="audio" preload="auto"></audio>
+
+<script>
+/* ============================================================
+   数据区：由 _tut/sync_exam_data.py 从「听力练习场」与「英语认读系统」派生生成，勿手改
+   EXAM_WORDS[册][单元] = [[英文, 中文, 是否粗体词], ...]
+   EXAM_SENTS[册][单元] = [[英文句子, 中文], ...]
+   ============================================================ */
+/* ===== VOCAB:BEGIN (由 sync_exam_data.py 生成，勿手改) ===== */
+const EXAM_WORDS = {"三上":{"Unit 1":[["name","名字",0],["nice","美好的",0],["ear","耳朵",1],["hand","手",1],["eye","眼睛",1],["mouth","嘴巴",1],["arm","手臂",1],["can","能；可以",0],["share","分享",1],["smile","微笑",1],["listen","听",1],["help","帮助",1],["say","说",0],["friend","朋友",0],["good","好的",0]],"Unit 2":[["mum","妈妈",1],["dad","爸爸",1],["grandma","奶奶",1],["grandpa","爷爷",1],["grandfather","祖父",1],["grandmother","祖母",1],["mother","母亲",1],["father","父亲",1],["me","我",1],["sister","姐妹",1],["family","家庭",1],["big","大的",1],["cousin","表兄妹",1],["brother","兄弟",1],["baby","婴儿",1],["uncle","叔叔",1],["aunt","阿姨",1],["small","小的",1]],"Unit 3":[["like","喜欢",1],["dog","狗",1],["pet","宠物",0],["cat","猫",1],["fish","鱼",1],["bird","鸟",1],["rabbit","兔子",1],["go","去",0],["zoo","动物园",0],["fox","狐狸",0],["Miss","小姐",0],["panda","熊猫",1],["red panda","小熊猫",0],["cute","可爱的",0],["monkey","猴子",1],["tiger","老虎",1],["elephant","大象",1],["lion","狮子",1],["animal","动物",0],["giraffe","长颈鹿",1],["tall","高的",1],["fast","快速的",1]],"Unit 4":[["apple","苹果",1],["banana","香蕉",1],["farm","农场",0],["air","空气",1],["orange","橙子；橙色",1],["grape","葡萄",1],["school","学校",0],["garden","花园",0],["need","需要",0],["water","水",1],["flower","花",1],["grass","草",0],["plant","植物",0],["new","新的",0],["tree","树",1],["sun","太阳",1],["give","给予",0],["them","他们",0]],"Unit 5":[["colour","颜色",0],["orange","橙色",1],["green","绿色",1],["red","红色",1],["make","制作",0],["purple","紫色",1],["brown","棕色",1],["bear","熊",0],["yellow","黄色",1],["duck","鸭子",0],["sea","海洋",0],["some","一些",0],["pink","粉色",1],["draw","画画",0],["white","白色",1],["black","黑色",1]],"Unit 6":[["one","一",1],["two","二",1],["three","三",1],["four","四",1],["five","五",1],["six","六",1],["seven","七",1],["eight","八",1],["nine","九",1],["ten","十",1],["old","年老的",0],["year","年",0],["o'clock","点钟",0],["cut","切",0],["eat","吃",0],["cake","蛋糕",0]]},"三下":{"Unit 1":[["where","哪里",0],["from","从...",0],["about","关于",0],["today","今天",0],["teacher","老师",1],["student","学生",1],["after","在...之后",0],["who","谁",0],["girl","女孩",1],["neighbour","邻居",0],["boy","男孩",1],["woman","女人",1],["man","男人",1],["Mr","先生",0],["classmate","同学",0],["he","他",0],["also","也",0],["English","英语",0],["she","她",0],["very","非常",0],["UK","英国",1],["China","中国",1],["Canada","加拿大",1],["USA","美国",1]],"Unit 2":[["has","有",0],["long","长的",1],["body","身体",0],["short","短的",1],["leg","腿",0],["right","正确的；右边",0],["fat","胖的",1],["thin","瘦的",1],["slow","慢的",1],["love","爱",0],["tail","尾巴",0],["her","她的",0],["gift","礼物",0],["picture","图画",1],["card","卡片",1],["sing","唱歌",1],["dance","跳舞",1],["talk","说话",0],["face","脸",0],["all","全部",0],["song","歌曲",0],["or","或者",0],["much","许多",0]],"Unit 3":[["eraser","橡皮",0],["find","找到",0],["ruler","尺子",1],["pen","钢笔",1],["pencil","铅笔",1],["book","书",1],["bag","书包",1],["paper","纸",0],["these","这些",0],["see","看见",1],["smell","闻",1],["taste","品尝",1],["hear","听见",1],["touch","触摸",1],["nose","鼻子",0],["tongue","舌头",0],["class","班级",0],["in","在...里",0],["computer","电脑",0],["learn","学习",0]],"Unit 4":[["breakfast","早餐",0],["time","时间",0],["bread","面包",1],["egg","鸡蛋",1],["milk","牛奶",1],["noodle","面条",1],["juice","果汁",1],["rice","米饭",1],["meat","肉",1],["vegetable","蔬菜",1],["healthy","健康的",0],["plate","盘子",0],["soup","汤",1],["fruit","水果",1],["colourful","色彩缤纷",0],["candy","糖果",0],["yummy","美味的",0]],"Unit 5":[["boat","小船",1],["cool","酷的",0],["keep","保持",0],["at","在",0],["home","家",0],["ball","球",1],["doll","玩偶",1],["car","汽车",1],["on","在...上",1],["shelf","架子",0],["in","在...里",1],["box","盒子",0],["cap","帽子",1],["map","地图",1],["under","在下面",1],["still","仍然",0],["put","放置",0]],"Unit 6":[["fifteen","十五",0],["twelve","十二",1],["fourteen","十四",1],["thirteen","十三",1],["eleven","十一",1],["twenty","二十",0],["seventeen","十七",1],["sixteen","十六",1],["eighteen","十八",0],["nineteen","十九",0],["piggy bank","储蓄罐",0],["pay","支付",0],["back","背部；返回",0]]},"四上":{"Unit 1":[["PE","体育",0],["job","工作",0],["doctor","医生",1],["farmer","农民",1],["nurse","护士",1],["office worker","办公室职员",1],["factory worker","工厂工人",1],["busy","忙碌的",0],["tired","疲倦的",0],["chore","家务",0],["cook","厨师；烹饪",1],["clean","清洁",0],["room","房间",0],["look after","照顾",1],["sweep","打扫",1],["floor","地板",1],["together","一起",0],["people","人们",0],["child","孩子",0]],"Unit 2":[["his","他的",0],["strong","强壮的",1],["hair","头发",1],["also","也",0],["kind","和蔼的",1],["quiet","安静的",1],["read","阅读",1],["Chinese","语文；中国人",1],["play","玩",1],["game","游戏",1],["football","足球",1],["basketball","篮球",0],["always","总是",0],["best","最好的",0]],"Unit 3":[["afternoon","下午",0],["there","那里",0],["playground","操场",1],["park","公园",1],["over","结束",0],["hospital","医院",1],["shop","商店",1],["toilet","厕所",1],["bus stop","公交站",1],["sport","运动",1],["walk","步行",1],["library","图书馆",0],["favourite","最喜欢的",0],["place","地方",0],["photo","照片",0],["story","故事",0],["buy","买",0]],"Unit 4":[["firefighter","消防员",0],["why","为什么",0],["driver","司机",1],["cleaner","清洁工",1],["cook","厨师",1],["delivery worker","快递员",1],["police officer","警察",1],["a lot of","许多",0],["now","现在",0],["make the bed","整理床铺",0],["old","老的",1],["ell","？",0],["everyone","每个人",0],["Ms","女士",0]],"Unit 5":[["speak","说",0],["weather","天气",0],["sunny","晴朗的",1],["hot","热的",1],["cold","冷的",1],["windy","有风的",1],["cloudy","多云的",1],["rainy","下雨的",1],["snowy","下雪的",1],["cool","凉爽的",1],["warm","温暖的",1],["film","电影",0],["fly","飞",0],["kite","风筝",0],["snowman","雪人",0],["fun","乐趣",0],["their","他们的",0],["swim","游泳",0],["Sydney","悉尼",0]],"Unit 6":[["whose","谁的",0],["sweater","毛衣",1],["sock","袜子",1],["shirt","衬衫",1],["mine","我的",0],["wear","穿",0],["coat","外套",1],["dress","连衣裙",1],["winter","冬天",1],["spring","春天",1],["summer","夏天",1],["autumn","秋天",1],["which","哪一个",0],["season","季节",1],["snow","雪",0],["get together","团聚",0],["T-shirt","T恤",0],["fall","秋天",0],["leaf","叶子",0],["leaves","叶子（复数）",0],["glove","手套",0],["then","然后",0]]},"四下":{"Unit 1":[["sorry","抱歉",0],["hurry","赶快",0],["late","迟到",1],["class","班级",1],["ready","准备好",0],["rule","规则",0],["classroom","教室",1],["turn off","关闭",1],["light","灯",1],["blackboard","黑板",0],["desk","书桌",1],["chair","椅子",1],["tidy","整洁的",0],["music","音乐",0],["door","门",1],["window","窗户",1],["fan","风扇",1],["when","什么时候",0],["understand","理解",0],["wall","墙",0],["newspaper","报纸",0],["hand out","分发",0],["workbook","练习册",0]],"Unit 2":[["watch","手表",0],["TV","电视",0],["homework","作业",1],["first","第一",0],["wet","湿的",0],["run","跑",0],["living room","客厅",1],["safe","安全的",0],["word","单词",1],["wash","洗",1],["helpful","有帮助的",0],["loud","大声的",0],["sleep","睡觉",0],["bedroom","卧室",1],["kitchen","厨房",1],["study","书房",1],["bathroom","浴室",1],["think","思考",0],["work","工作",0],["hard","努力地",0],["follow","跟随",0],["feel","感觉",0]],"Unit 3":[["over","结束",0],["kid","小孩",0],["dinner","晚餐",1],["art","美术",1],["lunch","午餐",1],["maths","数学",1],["get up","起床",1],["go to school","上学",1],["go home","回家",1],["go to bed","上床睡觉",1],["want","想要",0],["clock","时钟",0],["just","只是",0],["minute","分钟",0]],"Unit 4":[["trousers","裤子",1],["pair","一对",0],["clothes","衣服",0],["those","那些",0],["shorts","短裤",1],["jacket","夹克",1],["skirt","裙子",1],["expensive","昂贵的",1],["cheap","便宜的",1],["shoe","鞋子",1],["dear","亲爱的",0],["beautiful","美丽的",1],["take","拿",0],["hat","帽子",1],["sunglasses","太阳镜",1],["free","免费的",0],["large","大的",0],["size","尺寸",0],["list","清单",0],["try on","试穿",0],["any","任何",0]],"Unit 5":[["cow","奶牛",1],["horse","马",1],["sheep","绵羊",1],["pig","猪",1],["chicken","鸡",1],["tomato","西红柿",1],["bee","蜜蜂",0],["mouse","老鼠",0],["carrot","胡萝卜",1],["potato","土豆",1],["green bean","豆角",0],["can","罐子",0],["a box of","一盒",0]],"Unit 6":[["feed","喂",1],["pass","传递",0],["pick","摘",1],["milk","挤奶",1],["knife","刀",1],["fork","叉",1],["chopstick","筷子",1],["bowl","碗",1],["waste","浪费",0],["food","食物",0],["delicious","美味的",0],["clear the table","收拾餐桌",0],["set the table","摆餐具",0],["supermarket","超市",0],["herself","她自己",0],["week","星期",0],["salad","沙拉",0]]},"五上":{"Unit 1":[["team","团队",0],["player","运动员",0],["him","他（宾格）",0],["lovely","可爱的",1],["clever","聪明的",1],["young","年轻的",1],["hard-working","勤奋的",1],["robot","机器人",1],["jump","跳",1],["rope","绳子",1],["piano","钢琴",1],["chess","国际象棋",1],["front","前面",0],["easy","容易的",0],["star","星星",0],["wonderful","精彩的",0],["Australia","澳大利亚",0]],"Unit 2":[["sad","悲伤的",1],["matter","事情",0],["project","项目",0],["centre","中心",0],["agree","同意",0],["finish","完成",0],["worried","担心的",1],["both","两者都",0],["excited","兴奋的",0],["wrong","错误的",0],["angry","生气的",1],["afraid","害怕的",1],["parent","父/母",1],["ask","问",1],["laugh","笑",1],["move","移动",1],["yours","你的（名词性物主代词）",1]],"Unit 3":[["Wednesday","星期三",1],["subject","科目",0],["Tuesday","星期二",1],["Friday","星期五",1],["Monday","星期一",1],["Thursday","星期四",1],["Saturday","星期六",1],["Sunday","星期日",1],["start","开始",0],["usually","通常",0],["weekend","周末",0],["sometimes","有时",0],["lesson","课",1],["evening","晚上",1],["answer","回答",1],["ping-pong","乒乓球",1],["night","夜晚",1],["visit","参观",1],["grandparent","祖父母",1]],"Unit 4":[["stay","停留",0],["should","应该",1],["flu","流感",1],["else","其他",1],["exercise","锻炼",1],["enough","足够的",1],["if","如果",1],["habit","习惯",1],["house","房屋",1],["show","展示",1],["phone","电话",1],["then","然后",1],["rest","休息",1],["take care of","照顾",1],["check","检查",1],["less","更少的",1],["brush","刷",1],["tooth","牙齿（单数）",1],["teeth","牙齿（复数）",1],["twice","两次",1],["hour","小时",1],["free","免费的/自由的",1]],"Unit 5":[["hungry","饥饿的",0],["beef","牛肉",1],["ice cream","冰淇淋",1],["dumpling","饺子",1],["tea","茶",1],["hamburger","汉堡包",1],["Mrs","太太",0],["coconut","椰子",0],["interesting","有趣的",0],["seed","种子",1],["pull","拉",0],["stem","茎",1],["root","根",1],["lotus","莲花",1],["lake","湖",1],["world","世界",1],["round","圆的",1],["different","不同的",1],["way","方式",1]],"Unit 6":[["river","河流",1],["nature","自然",0],["waterfall","瀑布",1],["forest","森林",1],["famous","著名的",1],["mountain","山",1],["wind","风",1],["trip","旅行",1],["dangerous","危险的",1],["heavy","重的",1],["hotel","旅馆",1],["close","关闭",1],["umbrella","雨伞",1],["raincoat","雨衣",1],["worry","担心",1],["fine","好的",1],["fog","雾",1],["flood","洪水",1],["fire","火",1],["know","知道",1],["before","在...之前",1],["go hiking","去远足",1],["bring","带来",1]]},"五下":{"Unit 1":[["eat breakfast","吃早餐",1],["play sports","做运动",1],["have class","上课",1],["exercise","锻炼",1],["do morning exercises","做早操",1],["eat dinner","吃晚餐",1],["clean my room","打扫房间",1],["go for a walk","散步",1],["go shopping","购物",1],["take","学习；上课",1],["dancing","跳舞",1],["take a dancing class","上舞蹈课",1],["when","什么时候",0],["usually","通常",0],["a.m.","上午",0],["p.m.","下午",0],["why","为什么",0],["work","工作",0],["always","总是",0],["go swimming","去游泳",0]],"Unit 2":[["spring","春天",1],["summer","夏天",1],["autumn","秋天",1],["winter","冬天",1],["season","季节",1],["picnic","野餐",1],["go on a picnic","去野餐",1],["pick","摘",1],["pick apples","摘苹果",1],["snowman","雪人",1],["make a snowman","堆雪人",1],["go swimming","去游泳",1],["which","哪一个",0],["best","最",0],["snow","雪",0],["good job","做得好",0],["because","因为",0],["vacation","假期",0]],"Unit 3":[["January","一月",1],["February","二月",1],["March","三月",1],["April","四月",1],["May","五月",1],["June","六月",1],["July","七月",1],["August","八月",1],["September","九月",1],["October","十月",1],["November","十一月",1],["December","十二月",1],["few","很少",0],["a few","一些",0],["sports","运动",0],["sports meet","运动会",0],["trip","旅行",0],["plant","种植",0],["contest","比赛",0],["Labour Day","劳动节",0],["the Great Wall","长城",0],["national","国家的",0],["National Day","国庆节",0],["Thanksgiving Day","感恩节",0],["Christmas","圣诞节",0]],"Unit 4":[["first","第一",1],["second","第二",1],["third","第三",1],["fourth","第四",1],["fifth","第五",1],["twelfth","第十二",1],["twentieth","第二十",1],["twenty-first","第二十一",1],["twenty-third","第二十三",1],["thirtieth","第三十",1]],"Unit 5":[["mine","我的",1],["yours","你的",1],["his","他的",1],["hers","她的",1],["theirs","他们的",1],["ours","我们的",1],["climbing","攀爬",1],["eating","吃",1],["playing","玩",1],["jumping","跳",1],["drinking","喝",1],["sleeping","睡觉",1]],"Unit 6":[["doing morning exercises","做早操",1],["having lunch","吃午餐",1],["reading a book","读书",1],["listening to music","听音乐",1],["keep","保持",1],["keep to the right","靠右",1],["keep your desk clean","保持课桌整洁",1],["talk quietly","小声说话",1],["turn","轮流",1],["take turns","轮流",1],["bamboo","竹子",0],["say","说",0],["teach","教",0]]},"六上":{"Unit 1":[["was","是（过去式）",0],["clomb","攀登（原词）",0],["kilometre","公里",0],["gingerbread house","姜饼屋",0],["send","发送",0],["went","去（过去式）",0],["thousand","千",0],["clay","粘土",0],["saw","看见（过去式）",0],["village","村庄",0],["ate","吃（过去式）",0],["dry","干的",0],["took","拿（过去式）",0],["view","景色",0],["inspiring","鼓舞人心的",0],["bamboo","竹子",0],["pumpkin","南瓜",0],["restaurant","餐厅",0],["airport","机场",0],["New Zealand","新西兰",0],["Hong Kong-Zhuhai-Macao Bridge","港珠澳大桥",0],["Paris","巴黎",0],["Eiffel Tower","埃菲尔铁塔",0],["Terracotta Warriors","兵马俑",0],["Jinggangshan Revolution Museum","井冈山革命博物馆",0],["the Red Army","红军",0]],"Unit 2":[["paste","粘贴",0],["dress","连衣裙",0],["gala","盛会",0],["count down","倒计时",0],["marathon","马拉松",0],["as","作为",0],["race","比赛",0],["ran","跑（过去式）",0],["cheer","欢呼",0],["book fair","书展",0],["writer","作家",0],["read","读（过去式）",0],["made","制作（过去式）",0],["sang","唱歌（过去式）",0],["wore","穿（过去式）",0],["yesterday","昨天",0],["notice","通知",0],["woke","醒来（过去式）",0],["later","后来",0],["judge","评判",0],["begin","开始",0],["won","赢（过去式）",0],["winner","获胜者",0],["ever","曾经",0],["exciting","令人兴奋的",0]],"Unit 3":[["cold","感冒",0],["ill","生病的",0],["head","头",0],["runny nose","流鼻涕",0],["soon","不久",0],["fever","发烧",0],["cough","咳嗽",0],["discuss","讨论",0],["diet","饮食",0],["stay up","熬夜",0],["cry","哭",0],["another","另一个",0],["call","打电话",0],["email","电子邮件",0],["unhappy","不高兴的",0],["glass","玻璃",0],["may","可以",0],["add","添加",0],["video","视频",0],["better","更好的",0]],"Unit 4":[["money","钱",0],["money pocket","钱袋",0],["schoolbag","书包",0],["goods","商品",0],["drink","饮料",0],["service","服务",0],["haircut","理发",0],["microscope","显微镜",0],["lucky","幸运的",0],["half","一半",0],["save up","储蓄",0],["sale","促销",0],["ticket","票",0],["manage","管理",0],["sell","卖",0],["jar","罐子",0],["for example","例如",0]],"Unit 5":[["planet","行星",0],["earth","地球",0],["sky","天空",0],["daytime","白天",0],["cloud","云",0],["moon","月亮",0],["star","星星",0],["space","太空",0],["outer space","外层空间",0],["space station","空间站",0],["scene","场景",0],["marble","大理石",0],["satellite","卫星",0],["soil","土壤",0],["alien","外星人",0],["sunrise","日出",0],["rover","漫游者",0],["into","进入",0],["telescope","望远镜",0],["astronaut","宇航员",0],["spaceship","宇宙飞船",0],["month","月",0],["taikonaut","中国宇航员",0],["cloth","布料",0],["toothpaste","牙膏",0],["question","问题",0],["sunset","日落",0],["time","时间",0],["Mars","火星",0]],"Unit 6":[["power","电力",0],["electricity","电",0],["solar","太阳的",0],["type","类型",0],["energy","能量",0],["light","光",0],["head","头",0],["cool","凉爽的",0],["run","使...运转",0],["resource","资源",0],["run out","耗尽",0],["change","变化",0],["quick","快速的",0],["shower","淋浴",0],["unplug","拔掉插头",0],["difference","差异",0],["reduce","减少",0],["air conditioner","空调",0],["drive","驾驶",0],["reuse","再利用",0],["own","自己的",0],["market","市场",0],["bottle","瓶子",0],["top","顶部",0],["useful","有用的",0],["dirty","肮脏的",0],["side","侧面",0]]},"六下":{"Unit 1":[["younger","更年轻的",1],["older","更年长的",1],["taller","更高的",1],["shorter","更矮的",1],["longer","更长的",1],["thinner","更瘦的",1],["heavier","更重的",1],["bigger","更大的",1],["smaller","更小的",1],["stronger","更强壮的",1],["dinosaur","恐龙",0],["hall","大厅",0],["metre","米",0],["than","比",0],["both","两者都",0],["kilogram","千克",0],["countryside","乡村",0],["lower","更低的",0],["shadow","影子",0],["become","变成",0]],"Unit 2":[["cleaned","打扫了",1],["stayed","待了",1],["washed","洗了",1],["watched","看了",1],["had","有；吃",1],["had a cold","感冒了",1],["slept","睡了",1],["read","读了",1],["saw","看见了",1],["last","上一个",1],["yesterday","昨天",1],["before","在...之前",1],["drank","喝了",0],["show","演出",0],["magazine","杂志",0],["better","更好的",0],["faster","更快的",0],["hotel","旅馆",0],["fixed","修理了",0],["broken","破碎的",0],["lamp","台灯",0],["loud","大声的",0],["enjoy","享受",0],["stay","停留",0]],"Unit 3":[["went","去了",1],["camp","露营",1],["went camping","去露营",1],["fish","鱼；钓鱼",1],["went fishing","去钓鱼",1],["rode","骑了",1],["hurt","受伤",1],["ate","吃了",1],["took","拿了",1],["took pictures","拍照",1],["bought","买了",1],["gift","礼物",1],["fell","摔倒",0],["off","离开",0],["mule","骡子",0],["Turpan","吐鲁番",0],["could","可以",0],["till","直到",0],["beach","海滩",0],["laughed","笑了",0]],"Unit 4":[["dining hall","餐厅",1],["grass","草",1],["gym","体育馆",1],["ago","以前",1],["cycling","骑自行车",1],["go cycling","去骑自行车",1],["ice-skate","滑冰",1],["badminton","羽毛球",1],["star","星星",0],["easy","容易的",0],["look up","查阅",0],["Internet","互联网",0],["different","不同的",0],["active","活跃的",0],["race","赛跑",0],["nothing","什么都没有",0],["thought","想",0],["felt","感觉",0],["cheetah","猎豹",0],["trip","绊倒",0],["woke","醒来",0],["dream","梦",0]]}};
+/* ===== VOCAB:END ===== */
+/* ===== SENT:BEGIN (由 sync_exam_data.py 生成，勿手改) ===== */
+const EXAM_SENTS = {"三上":{"Unit 1":[["Hello, I'm Mike Black.","你好，我是迈克·布莱克。"],["Hi! My name is Wu Binbin.","嗨！我的名字是吴彬彬。"],["Nice to meet you.","很高兴认识你。"],["Nice to meet you too.","也很高兴认识你。"],["It's OK, Chen Jie.","没关系，陈杰。"],["Hey, Sarah! We can share.","嘿，莎拉！我们可以分享。"],["Thank you, Chen Jie.","谢谢你，陈杰。"],["I am nice to my friends.","我对朋友很好。"]],"Unit 2":[["This is my grandma.","这是我的奶奶。"],["Look! This is my family.","看！这是我的家人。"],["Is that your brother?","那是你的哥哥吗？"],["Yes, it is. It's my brother.","是的。他是我的哥哥。"],["No, it isn't. It's my uncle.","不，不是。他是我的叔叔。"],["They love each other.","他们彼此相爱。"],["I have a big family.","我有一个大家庭。"]],"Unit 3":[["Good morning, Mike!","早上好，迈克！"],["Good morning! Come in.","早上好！请进。"],["Do you have a pet?","你有宠物吗？"],["No, I don't. I have a dog.","不，我没有。我有一只狗。"],["Yes, I do. I have a cat.","是的，我有。我有一只猫。"],["Let's go to the zoo!","我们去动物园吧！"],["It's a fox.","这是一只狐狸。"],["Miss White, what's that?","怀特小姐，那是什么？"],["It's a red panda.","这是一只小熊猫。"],["I like rabbits.","我喜欢兔子。"]],"Unit 4":[["Mike, do you like apples?","迈克，你喜欢苹果吗？"],["Yes, I do. And you?","是的，我喜欢。你呢？"],["No, I don't. I don't like apples.","不，我不喜欢。我不喜欢苹果。"],["Do you like the farm?","你喜欢农场吗？"],["I like the fresh air.","我喜欢新鲜的空气。"],["We can plant new trees.","我们可以种新树。"],["Plants can give us many things.","植物能给我们很多东西。"],["water the flowers","浇花"],["plant new tree","种新树"],["water the grass","给草浇水"]],"Unit 5":[["What colour is it?","它是什么颜色？"],["Red and blue make purple.","红色和蓝色混合成紫色。"],["What colours do you like?","你喜欢什么颜色？"],["I like red and pink.","我喜欢红色和粉色。"],["Let's draw some purple and brown birds.","让我们画一些紫色和棕色的鸟。"]],"Unit 6":[["How old are you?","你几岁了？"],["I'm five years old.","我五岁了。"],["How many apples?","多少个苹果？"],["Great! Let's go to the shop!","太棒了！我们去商店吧！"],["That's ten yuan, please.","请付十元。"],["Here you are.","给你。"],["It's seven o'clock. Hurry!","七点钟了。快点！"],["Oh, one more cut for the dog.","哦，再给狗切一块。"]]},"三下":{"Unit 1":[["What's your name?","你叫什么名字？"],["My name's Amy Green.","我的名字是艾米·格林。"],["Where are you from?","你来自哪里？"],["I'm from China.","我来自中国。"],["I'm from UK.","我来自英国。"],["I'm from USA.","我来自美国。"],["Who's that girl?","那个女孩是谁？"],["Let me help.","让我来帮忙。"],["That's our new neighbour Amy.","那是我们的新邻居艾米。"]],"Unit 2":[["This dog has a long tail.","这只狗有一条长尾巴。"],["make her gifts","为她做礼物"],["I love you.","我爱你。"],["draw a picture","画一幅画"],["make a card","做一张卡片"],["sing and dance","唱歌跳舞"],["sing a song","唱一首歌"]],"Unit 3":[["Can I use your eraser?","我可以用你的橡皮吗？"],["I can't find my ruler.","我找不到我的尺子。"],["write on paper","在纸上写"],["see and hear","看和听"],["smell with my nose","用我的鼻子闻"],["taste with my tongue","用我的舌头尝"],["see with my eyes","用我的眼睛看"],["hear with my ears","用我的耳朵听"],["touch with my hands","用我的手触摸"],["learn on computer","在电脑上学习"],["learn on book","在书本上学习"]],"Unit 4":[["I'd like some bread.","我想要一些面包。"],["I'd like some eggs.","我想要一些鸡蛋。"],["I'd like some milk.","我想要一些牛奶。"],["I'd like some juice.","我想要一些果汁。"],["I'd like some noodles.","我想要一些面条。"],["I'd like some rice.","我想要一些米饭。"],["I'd like some meat.","我想要一些肉。"],["I'd like some vegetables.","我想要一些蔬菜。"],["I'd like some soup.","我想要一些汤。"],["I'd like some fruit.","我想要一些水果。"],["Would you like some bread?","你想要一些面包吗？"],["Would you like some milk?","你想要一些牛奶吗？"],["Would you like some noodles?","你想要一些面条吗？"],["Would you like some eggs?","你想要一些鸡蛋吗？"]],"Unit 5":[["Do you have old things?","你有旧东西吗？"],["Yes, I do. I have some old books.","是的，我有。我有些旧书。"],["This boat is cool.","这艘船很酷。"],["You can keep it.","你可以保留它。"],["Mum, where is my animal book?","妈妈，我的动物书在哪里？"],["Is it on the shelf?","它在架子上吗？"],["No, it isn't. It's in the box.","不，不在。它在盒子里。"]],"Unit 6":[["How many books do we have?","我们有多少本书？"],["We have fifteen books.","我们有十五本书。"],["How many boxes do we need?","我们需要多少个盒子？"],["How much is this bag?","这个包多少钱？"],["It's twenty yuan.","二十元。"],["Six yuan, or three for seventeen yuan.","六元，或者三个十七元。"],["How about three for sixteen yuan?","三个十六元怎么样？"]]},"四上":{"Unit 1":[["What's your mother's job?","你妈妈的工作是什么？"],["She's a doctor.","她是一名医生。"],["We can do some chores.","我们可以做一些家务。"]],"Unit 2":[["What's your friend's name?","你朋友叫什么名字？"],["His name is Zhang Peng.","他叫张鹏。"],["He's tall and strong.","他又高又壮。"],["He's also kind. He often helps me.","他也很和蔼。他经常帮助我。"],["Who's your best friend?","你最好的朋友是谁？"],["Chen Jie. She's funny. She often makes me smile.","陈杰。她很有趣，经常让我笑。"]],"Unit 3":[["There is a playground. We often play there.","有一个操场。我们经常在那里玩。"],["There is a taijiquan club.","有一个太极拳俱乐部。"],["There are many people.","有很多人。"],["There is a gym too.","也有一个体育馆。"],["Great! Let's do some sports.","太棒了！让我们做运动吧。"],["My favourite place is the museum.","我最喜欢的地方是博物馆。"]],"Unit 4":[["Our neighbour is a firefighter. He often helps people.","我们的邻居是一名消防员。他经常帮助人们。"],["That's an important job too!","那也是一份重要的工作！"],["Chen Jie is making the bed.","陈杰正在整理床铺。"]],"Unit 5":[["Hello! Mark speaking.","你好！我是马克。"],["Well, it's sunny today.","嗯，今天天气晴朗。"],["It's only two degrees in Beijing.","北京只有两度。"],["It's raining now.","现在在下雨。"],["We can't play basketball in the park.","我们不能在公园里打篮球了。"],["It's OK. We can go to the library.","没关系。我们可以去图书馆。"],["It's hot and sunny here.","这里又热又晴朗。"],["Their children swim in the pool.","他们的孩子在游泳池里游泳。"]],"Unit 6":[["Whose sweater is this, Mum?","妈妈，这是谁的毛衣？"],["It's your dad's.","是你爸爸的。"],["Can I wear this new shirt today?","我今天可以穿这件新衬衫吗？"],["Which season do you like?","你喜欢哪个季节？"],["Winter. It snows a lot.","冬天。经常下雪。"],["I like winter too. There are many festivals.","我也喜欢冬天。有很多节日。"],["It's full of life.","它充满生机。"],["And enjoy mooncakes.","还有享受月饼。"],["Then spring comes again.","然后春天又来了。"]]},"四下":{"Unit 1":[["Hurry up! Don't be late for class!","快点！上课不要迟到！"],["I'm ready. Let's go!","我准备好了。我们走吧！"],["Who's on duty today?","今天谁值日？"],["I can put back the desks and chairs.","我能把桌椅放回原处。"]],"Unit 2":[["Mum, can I watch TV?","妈妈，我可以看电视吗？"],["No. You have to do your homework first.","不行。你得先做完作业。"],["Shh. Don't be so loud!","嘘。别这么大声！"],["Be careful, Jack. Don't touch hot things.","小心，杰克。别碰烫的东西。"]],"Unit 3":[["What time is it?","现在几点了？"],["It's 5 o'clock.","五点了。"],["Time to go home, kids.","孩子们，该回家了。"],["It's time for dinner.","该吃晚饭了。"],["It's time to get up.","该起床了。"],["Have a nice day!","祝你今天愉快！"]],"Unit 4":[["Can I buy a new pair?","我可以买一双新的吗？"],["Sure. Let's go to the clothes shop.","当然。我们去服装店吧。"],["You already have too many shorts. Let's buy trousers.","你的短裤已经太多了。我们买长裤吧。"],["Can I help you?","需要我帮忙吗？"],["Yes. I like this pink dress.","好的。我喜欢这条粉色连衣裙。"],["Let's take it.","我们就买它吧。"]],"Unit 5":[["What animals do you have on the farm?","你农场里有哪些动物？"],["I have a lot of animals.","我有很多动物。"],["What are these?","这些是什么？"]],"Unit 6":[["Let's feed the chickens.","我们去喂鸡吧。"],["Can you please pass me the vegetables?","请你把蔬菜递给我好吗？"],["Mike, Amy, would you like a knife and fork?","迈克、埃米，你们想要刀叉吗？"],["No, thank you, Mr Wang. I can use chopsticks.","不用了，谢谢您，王先生。我会用筷子。"],["Don't waste food, please.","请不要浪费食物。"]]},"五上":{"Unit 1":[["What's he like?","他是什么样的？"],["He's tall and strong.","他又高又强壮。"],["Is he good at football?","他足球踢得好吗？"],["Yes, I think he is.","是的，我觉得是。"],["What can you do for the festival?","你能为节日做点什么？"],["I can make a robot.","我会做机器人。"],["Can you make robots, Sarah?","莎拉，你会做机器人吗？"],["No, I can't.","不，我不会。"]],"Unit 2":[["Hi, Mike. You look sad. What's the matter?","嗨，迈克。你看起来很伤心。怎么了？"],["It's about our school project.","是关于我们的学校作业。"],["And we have to finish our project by Monday.","而且我们必须在周一前完成这个项目。"],["So you don't agree with each other?","所以你们意见不一致吗？"],["Why not do both?","为什么不两个都做呢？"],["It's important to listen to each other.","互相倾听很重要。"],["Yes, Miss White. I need to talk to Mike.","好的，怀特老师。我需要和迈克谈谈。"]],"Unit 3":[["What's your favourite day at school, John?","约翰，你在学校最喜欢哪一天？"],["What do you have on Wednesdays?","你星期三有什么课？"],["I have Chinese, maths, music and PE.","我有语文、数学、音乐和体育课。"],["What do you usually do at the weekend, children?","孩子们，你们周末通常做什么？"],["Does your mother work on both Saturdays and Sundays?","你妈妈周六和周日都上班吗？"],["Yes, she does.","是的，她上。"]],"Unit 4":[["How can we all stay healthy?","我们怎样才能都保持健康？"],["We should eat healthy food.","我们应该吃健康的食物。"],["Can I play on Mum's phone?","我可以玩妈妈的手机吗？"],["No. You shouldn't play on a phone so often.","不行。你不应该这么频繁地玩手机。"]],"Unit 5":[["What would you like to eat?","你想吃什么？"],["I'd like beef and rice.","我想吃牛肉和米饭。"],["Would you like some chicken soup too?","你还要一些鸡汤吗？"],["Where does your coconut come from?","你的椰子来自哪里？"]],"Unit 6":[["There are also many rivers in the nature park.","自然公园里也有很多河流。"],["Is there a waterfall in the forest?","森林里有瀑布吗？"],["Yes, there is.","是的，有。"],["Are there any famous mountains in the nature park?","自然公园里有著名的山吗？"],["Yes, there are.","是的，有。"],["There will be heavy rain in the afternoon too.","下午也会有大雨。"]]},"五下":{"Unit 1":[["When do you finish class in the morning?","你们上午的课什么时候结束？"],["We finish class at 1 o'clock.","我们一点钟下课。"],["What do you do on the weekend?","你周末做什么？"],["I often watch TV and play ping-pong with my father.","我经常看电视，和爸爸打乒乓球。"]],"Unit 2":[["Which season do you like best, Miss White?","怀特小姐，你最喜欢哪个季节？"],["Because I like summer vacation!","因为我喜欢暑假！"]],"Unit 3":[["When is the party?","聚会是什么时候？"],["It's in April.","在四月。"],["When is the trip this year?","今年的旅行是什么时候？"],["It's in October. We'll go to the Great Wall.","在十月。我们将去长城。"]],"Unit 4":[["When is the art show?","艺术展是什么时候？"],["It's on May 5th.","在五月五日。"],["When is your birthday?","你的生日是什么时候？"],["My birthday is on April 4th.","我的生日在四月四日。"]],"Unit 5":[["The yellow picture is mine.","那幅黄色的画是我的。"],["Are these all ours?","这些都是我们的吗？"],["Whose is it?","它是谁的？"],["It's Zhang Peng's.","它是张鹏的。"],["Is he drinking water?","他在喝水吗？"],["No, he isn't. He's eating.","不，他没有。他在吃东西。"]],"Unit 6":[["What are they doing?","他们在做什么？"],["They're eating lunch!","他们在吃午餐！"],["What's the little monkey doing?","那只小猴子在做什么？"],["It's playing with its mother!","它在和妈妈玩耍！"],["Shh. Talk quietly.","嘘。小声说话。"],["Keep your desk clean.","保持你的课桌整洁。"]]},"六上":{},"六下":{"Unit 1":[["That's the tallest dinosaur in this hall.","那是这个大厅里最高的恐龙。"],["It's taller than both of us together.","它比我们两个加起来还高。"],["How tall are you?","你有多高？"],["I'm 1.65 metres.","我身高1.65米。"],["What size are your shoes, Mike?","迈克，你穿多大号的鞋？"],["How heavy are you?","你有多重？"],["I'm 48 kilograms.","我重48公斤。"]],"Unit 2":[["How was your weekend?","你周末过得怎么样？"],["It was good, thank you.","很好，谢谢。"],["What did you do?","你做了什么？"],["Did you do anything else?","你还做了其他事吗？"],["Yes, I cleaned my room and washed my clothes.","是的，我打扫了房间并洗了衣服。"],["I want to buy the new film magazine.","我想买那本新的电影杂志。"]],"Unit 3":[["Are you all right?","你还好吗？"],["I'm OK now.","我现在好了。"],["Where did you go?","你去哪里了？"],["It looks like a mule!","它看起来像一头骡子！"],["Did you go to Turpan?","你们去吐鲁番了吗？"],["Yes, we did.","是的，我们去了。"],["How did you go there?","你们怎么去那里的？"],["We went there by plane.","我们坐飞机去的。"]],"Unit 4":[["There was no library in my old school.","我以前的学校没有图书馆。"],["Tell us about your school, please.","请给我们讲讲你的学校。"],["How do you know that?","你怎么知道的？"],["There were no computers or Internet in my time.","在我那时候没有电脑和互联网。"],["Before, I was quiet. Now, I'm very active in class.","以前我很安静。现在我在课堂上很活跃。"]]}};
+/* ===== SENT:END ===== */
+(function () {
+'use strict';
+
+/* ============================================================
+   0. 常量
+   ============================================================ */
+/* 四种题型 —— 每个都对应工具族里一个已有能力：
+   听音选词≈听力练习场、看中文选英文≈单词匹配练习、中英配对≈中英消消乐、句子排序≈句型建筑师。
+   「朗读认读」故意不做：它要麦克风 + 联网语音识别，放在考核里既不公平也不可靠。 */
+var TYPES = [
+  { k: 'listen', ic: '🎧', nm: '听音选词',    ds: '放录音，选它对应的中文' },
+  { k: 'read',   ic: '🔤', nm: '看中文选英文', ds: '给中文，选对应的英文单词' },
+  { k: 'match',  ic: '🔗', nm: '中英配对',    ds: '把英文和中文连成 4 组' },
+  { k: 'order',  ic: '🧩', nm: '句子排序',    ds: '把打乱的词排成句子' }
+];
+var TYPEMAP = {};
+TYPES.forEach(function (t) { TYPEMAP[t.k] = t; });
+
+var BOOKS = ['三上', '三下', '四上', '四下', '五上', '五下', '六上', '六下'];
+var PER_Q_SEC = 30;          // 计时模式下每题秒数
+var MATCH_PAIRS = 4;         // 配对题每组几对
+var SENT_MIN_WORDS = 3;      // 排序题的句子最少几个词（2 个词排起来没有意义）
+var SENT_MAX_WORDS = 10;     // 最多几个词（再多手机上一屏排不下）
+var COUNT_CHOICES = [3, 5, 8];
+
+var LS = {
+  book:  'exam.book',
+  units: 'exam.units',
+  types: 'exam.types',
+  count: 'exam.count',
+  timer: 'exam.timer',
+  glass: 'exam.glassEnabled',
+  sfx:   'exam.sfxOff',
+  wrong: 'exam.wrong'
+};
+/* 大小写别名：听力练习场的 getAudioUrl 是"别名表 || 原词"直接拼名字、没有大小写回退，
+   而 Windows/NTFS 不区分大小写、GitHub Pages（Linux）区分 —— 库里实际存的是 May.mp3。
+   （这条是工具族的老坑，照抄听力练习场的处理。） */
+var AUDIO_ALIAS = { 'may': 'May' };
+
+/* ============================================================
+   1. 基础工具
+   ============================================================ */
+function $(id) { return document.getElementById(id); }
+function lsGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function lsGetJSON(k, d) {
+  try { var v = localStorage.getItem(k); if (!v) return d; var o = JSON.parse(v); return o === null ? d : o; }
+  catch (e) { return d; }
+}
+function lsSetJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+function shuffle(arr) {                       // Fisher–Yates，原地打乱后返回同一个数组
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  }
+  return arr;
+}
+function reorder(arr, idx) { return idx.map(function (i) { return arr[i]; }); }
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+var toastTimer = null;
+function toast(txt, ms) {
+  if (!txt) return;
+  var el = $('toast');
+  el.textContent = txt;
+  el.classList.add('on');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { el.classList.remove('on'); }, ms || 1800);
+}
+function fmtTime(ms) {
+  var s = Math.max(0, Math.round(ms / 1000));
+  var m = Math.floor(s / 60);
+  s = s % 60;
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+/* ============================================================
+   2. 音效（Web Audio 合成，不引音频文件）
+   ============================================================ */
+var sfxOff = lsGet(LS.sfx, '0') === '1';
+var actx = null, lastBeep = 0;
+function beep(freqs, dur, vol, type) {
+  if (sfxOff) return;
+  try {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (!actx) actx = new AC();
+    if (actx.state === 'suspended') actx.resume();
+    var now = actx.currentTime;
+    for (var i = 0; i < freqs.length; i++) {
+      var t = now + i * dur * 0.82;
+      var osc = actx.createOscillator(), g = actx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freqs[i], t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      osc.connect(g); g.connect(actx.destination);
+      osc.start(t); osc.stop(t + dur + 0.02);
+    }
+  } catch (e) {}    // 无音频设备 / 隐私模式下会直接抛，绝不能挡住点击
+}
+function sfxTap()  { var n = Date.now(); if (n - lastBeep < 60) return; lastBeep = n; beep([660], 0.05, 0.1); }
+function sfxOk()   { var n = Date.now(); if (n - lastBeep < 60) return; lastBeep = n; beep([784, 1046], 0.09, 0.14); }
+function sfxBad()  { var n = Date.now(); if (n - lastBeep < 60) return; lastBeep = n; beep([330, 247], 0.1, 0.13); }
+function sfxDone() { var n = Date.now(); if (n - lastBeep < 60) return; lastBeep = n; beep([600, 800, 1000, 1320], 0.1, 0.13); }
+
+/* ============================================================
+   3. 录音播放
+   ------------------------------------------------------------
+   ⚠️ 全站只用一个 <audio>，而且**绝不写 audio.src = ''** ——
+      那会让媒体元素把"当前目录"当成资源重新加载 → 又报 error → 同步递归，
+      实测一次触发 9 万次 error 事件，主线程锁死、只能强杀标签页。
+   ⚠️ 判"这个文件在不在"只认 error（abort / stalled 是换 src 产生的生命周期噪音）。
+      另外用 audioEl.error 是否为 null 挡掉"上一轮迟到的 error"。
+   ============================================================ */
+var audioEl = $('audio');
+var audioErrCount = 0;          // 供回归测试盯：一个缺录音的词，error 次数应当 == 候选数（≤3）
+var playSeq = 0;
+
+function audioCands(word) {
+  var alias = AUDIO_ALIAS[word.toLowerCase()];
+  var base = alias || word;
+  var out = [], seen = {};
+  [base, base.toLowerCase(), cap(base)].forEach(function (w) {
+    if (!seen[w]) { seen[w] = 1; out.push(w); }
+  });
+  return out;
+}
+
+/* onStatus: 'ok' 放出来了 / 'missing' 三个候选都读不到 / 'blocked' 浏览器拦了自动播放
+   onEnd: 播完了（没给就当作播完即结束） */
+function playWord(word, onStatus, onEnd) {
+  var cands = audioCands(word), i = 0, tok = ++playSeq;
+  var settled = false, startTimer = null, safeTimer = null;
+  function clearTimers() { if (startTimer) clearTimeout(startTimer); if (safeTimer) clearTimeout(safeTimer); startTimer = safeTimer = null; }
+
+  function done(status) {
+    if (settled || tok !== playSeq) return;
+    settled = true; clearTimers();
+    audioEl.removeEventListener('error', onErr);
+    audioEl.removeEventListener('playing', onPlaying);
+    audioEl.removeEventListener('ended', onEnded);
+    if (onStatus) onStatus(status);
+  }
+  function onErr() {
+    audioErrCount++;
+    if (!audioEl.error) return;         // 上一轮资源迟到的 error，不算这一次的
+    if (tok !== playSeq || settled) return;
+    tryNext();
+  }
+  function onPlaying() {
+    if (tok !== playSeq || settled) return;
+    clearTimers();
+    if (onStatus) onStatus('ok');
+    // 安全网：万一 ended 收不到（被打断/系统吞事件），也不能把流程卡在这
+    var dur = (isFinite(audioEl.duration) && audioEl.duration > 0) ? audioEl.duration : 3;
+    safeTimer = setTimeout(function () { done('ok'); }, (dur + 8) * 1000);
+  }
+  function onEnded() { if (onEnd) onEnd(); }
+
+  function tryNext() {
+    if (tok !== playSeq || settled) return;
+    if (i >= cands.length) { done('missing'); return; }
+    var name = cands[i++] + '.mp3';
+    clearTimers();
+    audioEl.removeEventListener('error', onErr);
+    audioEl.removeEventListener('playing', onPlaying);
+    audioEl.removeEventListener('ended', onEnded);
+    audioEl.addEventListener('error', onErr);
+    audioEl.addEventListener('playing', onPlaying);
+    audioEl.addEventListener('ended', onEnded);
+    audioEl.src = 'audio/' + encodeURIComponent(name);   // 只设置，永不置空
+    var p = null;
+    try { p = audioEl.play(); } catch (e) { p = null; }
+    if (p && p.catch) {
+      p.catch(function (err) {
+        if (tok !== playSeq || settled) return;
+        var n = (err && err.name) || '';
+        // 自动播放被拦是策略问题、不是缺录音 —— 单独分流（原来的写法会满屏误报"缺少录音"）
+        if (n === 'NotAllowedError') { done('blocked'); return; }
+        tryNext();
+      });
+    }
+    // 起播超时兜底：6 秒还没出声就当这个候选读不到
+    startTimer = setTimeout(function () {
+      if (tok !== playSeq || settled) return;
+      tryNext();
+    }, 6000);
+  }
+  tryNext();
+}
+
+/* ============================================================
+   4. 题库访问
+   ------------------------------------------------------------
+   数据由 sync_exam_data.py 从「听力练习场」和「英语认读系统」派生，与那两个工具同源。
+   本工具**不新增第三份手抄词表**。
+   ============================================================ */
+function bankOf(book) { return EXAM_WORDS[book] || null; }
+
+function unitsOf(book) {
+  var b = bankOf(book);
+  if (!b) return [];
+  return Object.keys(b).sort(function (a, c) {
+    var na = parseInt(String(a).replace(/\D/g, ''), 10) || 0;
+    var nc = parseInt(String(c).replace(/\D/g, ''), 10) || 0;
+    return na - nc;
+  });
+}
+
+function wordsOf(book, unit) {
+  var b = bankOf(book);
+  if (!b || !b[unit]) return [];
+  return b[unit].map(function (x) {
+    return { en: x[0], zh: x[1], bold: !!x[2], book: book, unit: unit };
+  });
+}
+
+/* 已选单元的并集。同 en 只留一条（跨单元重复是常态，考核里不该出两次同样的问题）。 */
+function poolWords() {
+  var out = [], seen = {};
+  S.units.forEach(function (u) {
+    wordsOf(S.book, u).forEach(function (w) {
+      var key = w.en.toLowerCase();
+      if (seen[key]) return;
+      seen[key] = 1; out.push(w);
+    });
+  });
+  return out;
+}
+
+function allWords(book) {          // 整册（干扰项不够时往外扩）
+  var out = [], seen = {};
+  unitsOf(book).forEach(function (u) {
+    wordsOf(book, u).forEach(function (w) {
+      var key = w.en.toLowerCase();
+      if (seen[key]) return;
+      seen[key] = 1; out.push(w);
+    });
+  });
+  return out;
+}
+
+function sentsOf(book, unit) {
+  var b = EXAM_SENTS[book];
+  if (!b || !b[unit]) return [];
+  return b[unit].map(function (x) {
+    return { en: x[0], zh: x[1], book: book, unit: unit };
+  });
+}
+
+function poolSents() {
+  var out = [], seen = {};
+  S.units.forEach(function (u) {
+    sentsOf(S.book, u).forEach(function (s) {
+      var n = s.en.split(/\s+/).length;
+      if (n < SENT_MIN_WORDS || n > SENT_MAX_WORDS) return;
+      if (seen[s.en]) return;
+      seen[s.en] = 1; out.push(s);
+    });
+  });
+  return out;
+}
+
+/* 某册有没有能用来出排序题的句子（决定题型芯片是否可点） */
+function bookHasSents(book) {
+  var b = EXAM_SENTS[book];
+  if (!b) return false;
+  var ok = false;
+  Object.keys(b).forEach(function (u) {
+    b[u].forEach(function (s) {
+      var n = String(s[0]).split(/\s+/).length;
+      if (n >= SENT_MIN_WORDS && n <= SENT_MAX_WORDS) ok = true;
+    });
+  });
+  return ok;
+}
+
+/* ============================================================
+   5. 状态
+   ============================================================ */
+var S = {
+  view: 'setup',
+  book: null,
+  units: [],
+  types: [],
+  count: 5,
+  timed: false,
+  paper: [],
+  idx: 0,
+  records: [],        // [{q, ok, picked, ms}]
+  startedAt: 0,
+  qStartAt: 0,
+  cur: null,          // 当前题运行时（含 UI 状态）
+  locked: false,      // 本题是否已判定
+  clockH: null,
+  left: 0
+};
+
+function restorePrefs() {
+  var b = lsGet(LS.book, '');
+  S.book = (b && bankOf(b)) ? b : null;
+  var u = lsGetJSON(LS.units, null);
+  S.units = (u && Object.prototype.toString.call(u) === '[object Array]') ? u : [];
+  var t = lsGetJSON(LS.types, null);
+  S.types = (t && Object.prototype.toString.call(t) === '[object Array]') ? t : null;
+  var c = parseInt(lsGet(LS.count, '5'), 10);
+  S.count = COUNT_CHOICES.indexOf(c) >= 0 ? c : 5;
+  S.timed = lsGet(LS.timer, '0') === '1';
+  // 单元要按当前册校验 —— 词表更新后已经不存在的单元直接丢掉（照抄听力练习场的纪律）
+  if (S.book) {
+    var us = unitsOf(S.book);
+    S.units = S.units.filter(function (x) { return us.indexOf(x) >= 0; });
+  } else {
+    S.units = [];
+  }
+}
+function savePrefs() {
+  lsSet(LS.book, S.book || '');
+  lsSetJSON(LS.units, S.units);
+  lsSetJSON(LS.types, S.types || []);
+  lsSet(LS.count, String(S.count));
+  lsSet(LS.timer, S.timed ? '1' : '0');
+}
+
+/* ============================================================
+   6. 设置页：芯片
+   ============================================================ */
+function chip(label, opts) {
+  var b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'chip' + (opts && opts.cls ? ' ' + opts.cls : '');
+  b.setAttribute('aria-pressed', opts && opts.on ? 'true' : 'false');
+  if (opts && opts.ic) {
+    var i = document.createElement('span'); i.className = 'ci'; i.textContent = opts.ic;
+    b.appendChild(i);
+  }
+  var t = document.createElement('span'); t.textContent = label;
+  b.appendChild(t);
+  if (opts && opts.disabled) b.disabled = true;
+  if (opts && opts.title) b.title = opts.title;
+  return b;
+}
+
+function paintBooks() {
+  var box = $('bookChips');
+  box.innerHTML = '';
+  BOOKS.forEach(function (bk) {
+    if (!bankOf(bk)) return;
+    var n = unitsOf(bk).length;
+    var b = chip(bk, { on: S.book === bk });
+    b.setAttribute('aria-label', bk + '，共 ' + n + ' 个单元');
+    b.addEventListener('click', function () {
+      if (S.book === bk) return;
+      sfxTap();
+      S.book = bk;
+      S.units = [];              // 换册 = 之前的单元选择一律作废（留着必然对不上）
+      savePrefs();
+      paintAll();
+    });
+    box.appendChild(b);
+  });
+}
+
+function paintUnits() {
+  var box = $('unitChips'), hint = $('unitHint');
+  box.innerHTML = '';
+  if (!S.book) {
+    hint.textContent = '先选上面那一册。';
+    hint.className = 'bhint';
+    return;
+  }
+  var us = unitsOf(S.book);
+  us.forEach(function (u) {
+    var n = wordsOf(S.book, u).length;
+    var b = chip(u, { on: S.units.indexOf(u) >= 0 });
+    b.setAttribute('aria-label', u + '，' + n + ' 个词');
+    b.addEventListener('click', function () {
+      sfxTap();
+      var at = S.units.indexOf(u);
+      if (at >= 0) S.units.splice(at, 1); else S.units.push(u);
+      savePrefs();
+      paintAll();
+    });
+    box.appendChild(b);
+  });
+  var total = 0;
+  S.units.forEach(function (u) { total += wordsOf(S.book, u).length; });
+  if (!S.units.length) {
+    /* 允许"一个都没选"，并把空状态说清楚 —— 空状态一定要可恢复，
+       比"不许空"友好得多（老师报过"默认单元取消不掉"那个死结）。 */
+    hint.textContent = '还没选单元 —— 点上面的单元按钮选，或点「全册」全选。一个都不选不能开始。';
+    hint.className = 'bhint warn';
+  } else {
+    hint.textContent = '已选 ' + S.units.length + ' 个单元 / 共 ' + total + ' 个词。';
+    hint.className = 'bhint';
+  }
+}
+
+function availableTypes() {
+  var out = { listen: true, read: true, match: true, order: false };
+  out.order = bookHasSents(S.book) && poolSents().length > 0;
+  var pool = poolWords();
+  var uniqZh = {}, cnt = 0;
+  pool.forEach(function (w) { if (!uniqZh[w.zh]) { uniqZh[w.zh] = 1; cnt++; } });
+  // 单选题至少要 2 个不同的词才出得来；配对要 2 对以上
+  var enough = pool.length >= 2 && cnt >= 2;
+  out.listen = enough;
+  out.read = pool.length >= 2;
+  out.match = pool.length >= 2;
+  return out;
+}
+
+function paintTypes() {
+  var box = $('typeChips'), hint = $('typeHint');
+  box.innerHTML = '';
+  var av = availableTypes();
+  var blocked = [];
+  TYPES.forEach(function (T) {
+    var ok = av[T.k];
+    var b = chip(T.nm, { ic: T.ic, on: S.types.indexOf(T.k) >= 0, disabled: !ok });
+    b.setAttribute('aria-label', T.nm + '：' + T.ds);
+    b.title = ok ? T.ds : (T.k !== 'order'
+      ? '选中的单元里词太少，出不了这种题'
+      : (bookHasSents(S.book) ? '选中的单元里没有能出排序题的句子'
+                              : '这一册的句子库是空的，出不了排序题'));
+    if (!ok) { blocked.push(T.nm); }
+    if (ok) {
+      b.addEventListener('click', function () {
+        sfxTap();
+        var at = S.types.indexOf(T.k);
+        if (at >= 0) S.types.splice(at, 1); else S.types.push(T.k);
+        savePrefs();
+        paintAll();
+      });
+    }
+    box.appendChild(b);
+  });
+  if (!S.book) { hint.textContent = '先选册和单元，题型会跟着变。'; hint.className = 'bhint'; return; }
+  hint.textContent = blocked.length
+    ? ('当前范围内出不了的题型：' + blocked.join('、') + '。')
+    : '四种题型都能出。';
+  hint.className = 'bhint';
+}
+
+function paintCounts() {
+  var box = $('countChips');
+  box.innerHTML = '';
+  COUNT_CHOICES.forEach(function (c) {
+    var b = chip('每题型 ' + c + ' 题', { on: S.count === c });
+    b.addEventListener('click', function () { sfxTap(); S.count = c; savePrefs(); paintAll(); });
+    box.appendChild(b);
+  });
+}
+
+function paintTimer() {
+  var box = $('timerChips');
+  box.innerHTML = '';
+  [[false, '不限时', '⏱'], [true, '每题 ' + PER_Q_SEC + ' 秒', '⏳']].forEach(function (pair) {
+    var b = chip(pair[1], { ic: pair[2], on: S.timed === pair[0] });
+    b.addEventListener('click', function () { sfxTap(); S.timed = pair[0]; savePrefs(); paintAll(); });
+    box.appendChild(b);
+  });
+}
+
+function paintStart() {
+  var btn = $('startBtn'), hint = $('goHint');
+  var nTypes = S.types.filter(function (k) { return availableTypes()[k]; }).length;
+  var total = nTypes * S.count;
+  var ok = !!S.book && S.units.length > 0 && nTypes > 0;
+  btn.disabled = !ok;
+  if (!S.book) hint.textContent = '先选一册。';
+  else if (!S.units.length) hint.textContent = '再选至少一个单元。';
+  else if (!nTypes) hint.textContent = '再选至少一种题型。';
+  else hint.textContent = '本次共 ' + total + ' 题（' + nTypes + ' 种题型 × ' + S.count + ' 题）' +
+    (S.timed ? '，每题 ' + PER_Q_SEC + ' 秒' : '，不限时');
+}
+
+function paintAll() {
+  pruneTypes();
+  paintBooks(); paintUnits(); paintTypes(); paintCounts(); paintTimer(); paintStart(); paintWrongBadge();
+}
+
+/* 换了册/单元之后，原来勾的题型可能已经出不了了 —— 把它从选择里摘掉，
+   否则芯片会显示成"选中但灰着"，看着像坏了。
+   ⚠️ 没选册时**不能**摘（那时 availableTypes 对 order 恒为 false，会白丢用户的偏好）。 */
+function pruneTypes() {
+  if (!S.book) return;
+  var av = availableTypes();
+  var kept = S.types.filter(function (k) { return av[k]; });
+  if (kept.length !== S.types.length) { S.types = kept; savePrefs(); }
+}
+
+/* ============================================================
+   7. 组卷
+   ------------------------------------------------------------
+   纪律：同一场考核里不出重复题；干扰项优先取自己单元的词（考什么就出什么），
+   不够才往整册、再往整库扩 —— 但**永远排除中文释义相同的词**，
+   否则"听音选词/看中文选英文"会出现两个看着都对的选项，
+   学生点哪个都可能被判错（配对类工具的老坑，见技能文档）。
+   ============================================================ */
+function everyWord() {
+  var out = [];
+  BOOKS.forEach(function (b) { out = out.concat(allWords(b)); });
+  return out;
+}
+
+function choiceKey(kind, w) { return kind + '|' + w.en; }
+function matchKey(pairs) {
+  return 'match|' + pairs.map(function (p) { return p.en; }).sort().join(',');
+}
+
+function pickDistractors(pool, target, kind, need) {
+  if (need <= 0) return [];
+  var out = [], taken = {};
+  var clash = function (w) {
+    if (w.en.toLowerCase() === target.en.toLowerCase()) return true;
+    if (w.zh === target.zh) return true;      // 释义撞了就是两个正确答案
+    return false;
+  };
+  var keyOf = function (w) { return kind === 'listen' ? w.zh : w.en.toLowerCase(); };
+  taken[keyOf(target)] = 1;
+  var sources = [pool, allWords(target.book), everyWord()];
+  for (var s = 0; s < sources.length && out.length < need; s++) {
+    var cands = shuffle(sources[s].slice());
+    for (var i = 0; i < cands.length && out.length < need; i++) {
+      var w = cands[i];
+      if (clash(w)) continue;
+      var k = keyOf(w);
+      if (taken[k]) continue;
+      taken[k] = 1; out.push(w);
+    }
+  }
+  return out;
+}
+
+function makeChoice(kind, pool, used) {
+  var cands = shuffle(pool.slice());
+  var target = null;
+  for (var i = 0; i < cands.length; i++) {
+    if (!used[choiceKey(kind, cands[i])]) { target = cands[i]; break; }
+  }
+  if (!target) return null;
+  var dis = pickDistractors(pool, target, kind, 3);
+  if (dis.length < 1) return null;             // 连一个干扰项都凑不出来，出不了单选题
+  var opts = shuffle([target].concat(dis));
+  var ansIdx = 0;
+  for (var j = 0; j < opts.length; j++) if (opts[j] === target) ansIdx = j;
+  return {
+    t: kind, book: target.book, unit: target.unit,
+    en: target.en, zh: target.zh,
+    texts: opts.map(function (w) { return kind === 'listen' ? w.zh : w.en; }),
+    ansIdx: ansIdx
+  };
+}
+
+function makeMatch(pool, used) {
+  var cands = shuffle(pool.slice());
+  var pairs = [], seenEn = {}, seenZh = {};
+  for (var i = 0; i < cands.length && pairs.length < MATCH_PAIRS; i++) {
+    var w = cands[i];
+    if (seenEn[w.en.toLowerCase()] || seenZh[w.zh]) continue;
+    seenEn[w.en.toLowerCase()] = 1; seenZh[w.zh] = 1;
+    pairs.push({ en: w.en, zh: w.zh });
+  }
+  if (pairs.length < 2) return null;
+  if (used[matchKey(pairs)]) return null;
+  return { t: 'match', book: pairs[0] && cands[0].book, unit: pairs[0] && cands[0].unit, pairs: pairs };
+}
+
+function makeOrder(sents, used) {
+  var cands = shuffle(sents.slice());
+  for (var i = 0; i < cands.length; i++) {
+    var s = cands[i];
+    if (used['order|' + s.en]) continue;
+    var toks = s.en.split(/\s+/);
+    if (toks.length < SENT_MIN_WORDS || toks.length > SENT_MAX_WORDS) continue;
+    // 打乱后必须和正确顺序不同，否则这道题一上来就是对的
+    var mixed = toks.slice();
+    for (var t = 0; t < 12; t++) {
+      mixed = shuffle(toks.slice());
+      if (mixed.join(' ') !== toks.join(' ')) break;
+    }
+    return { t: 'order', book: s.book, unit: s.unit, en: s.en, zh: s.zh, tokens: mixed };
+  }
+  return null;
+}
+
+function interleave(lists) {
+  var out = [], i = 0, more = true;
+  while (more) {
+    more = false;
+    lists.forEach(function (L) { if (L[i] !== undefined) { out.push(L[i]); more = true; } });
+    i++;
+  }
+  return out;
+}
+
+function buildPaper() {
+  var pool = poolWords();
+  var sents = poolSents();
+  var used = {};
+  var lists = [], want = [];
+  // 一次多做几轮尝试：某个题型素材不够时不硬凑，出多少算多少
+  S.types.forEach(function (k) {
+    if (!availableTypes()[k]) return;
+    want.push(k);
+    var L = [];
+    for (var n = 0; n < S.count; n++) {
+      var q = null;
+      if (k === 'order') q = makeOrder(sents, used);
+      else if (k === 'match') q = makeMatch(pool, used);
+      else q = makeChoice(k, pool, used);
+      if (!q) continue;
+      used[k === 'order' ? 'order|' + q.en : (k === 'match' ? matchKey(q.pairs) : choiceKey(k, q))] = 1;
+      L.push(q);
+    }
+    lists.push(L);
+  });
+  return interleave(lists);
+}
+
+function usedKeysExcept(idx) {
+  var used = {};
+  S.paper.forEach(function (q, i) {
+    if (i === idx || !q) return;
+    used[q.t === 'order' ? 'order|' + q.en : (q.t === 'match' ? matchKey(q.pairs) : choiceKey(q.t, q))] = 1;
+  });
+  return used;
+}
+
+/* ============================================================
+   8. 视图切换
+   ============================================================ */
+function setView(v) {
+  S.view = v;
+  ['setup', 'quiz', 'result'].forEach(function (k) {
+    var el = $(k);
+    el.classList.toggle('on', k === v);
+  });
+  window.scrollTo(0, 0);
+}
+
+/* ============================================================
+   9. 做题
+   ============================================================ */
+var missStreak = 0;
+
+function startQuiz(paper, note) {
+  if (!paper || !paper.length) { toast('范围里没有可出的题，换个范围试试', 2400); return; }
+  stopClock();
+  S.paper = paper;
+  S.idx = 0;
+  S.records = [];
+  S.startedAt = Date.now();
+  S.locked = false;
+  missStreak = 0;
+  setView('quiz');
+  if (note) toast(note, 2200);
+  renderQuestion();
+}
+
+function startFromSetup() {
+  var paper = buildPaper();
+  if (!paper.length) { toast('范围里没有可出的题，换个范围试试', 2400); return; }
+  var want = S.types.filter(function (k) { return availableTypes()[k]; }).length * S.count;
+  startQuiz(paper, paper.length < want ? ('题量不够，这次出了 ' + paper.length + ' 题') : '');
+}
+
+function stopClock() {
+  if (S.clockH) { clearInterval(S.clockH); S.clockH = null; }
+  var c = $('qClock');
+  if (c) { c.hidden = true; c.classList.remove('hurry'); }
+}
+
+function startClock() {
+  stopClock();
+  if (!S.timed) return;
+  var c = $('qClock');
+  c.hidden = false;
+  S.left = PER_Q_SEC;
+  c.textContent = S.left + 's';
+  c.classList.remove('hurry');
+  S.clockH = setInterval(function () {
+    if (S.locked) return;
+    S.left--;
+    if (S.left <= 0) {
+      c.textContent = '0s';
+      stopClock();
+      timeUp();
+      return;
+    }
+    c.textContent = S.left + 's';
+    if (S.left <= 5) c.classList.add('hurry'); else c.classList.remove('hurry');
+  }, 1000);
+}
+
+function qPromptHTML(q) {
+  if (q.t === 'listen') return '<p class="qprompt">听一听，它是什么意思？</p>';
+  if (q.t === 'read') return '<p class="qprompt"><span class="zh-word">' + esc(q.zh) + '</span></p>';
+  if (q.t === 'match') {
+    return '<p class="qprompt">把英文和它的中文配成一对</p>' +
+      '<p class="qsub">共 ' + q.pairs.length + ' 组，全部配完就交卷</p>';
+  }
+  return '<p class="qprompt">把下面的词排成一个正确的句子</p>' +
+    '<p class="qsub">' + esc(q.zh) + '</p>';
+}
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function renderQuestion() {
+  var q = S.paper[S.idx];
+  if (!q) { finishQuiz(false); return; }
+  S.locked = false;
+  S.cur = { q: q };
+  try { audioEl.pause(); } catch (e) {}      // 上一题的录音可能还在放（不碰 src，只暂停）
+  var T = TYPEMAP[q.t];
+  $('qType').textContent = T.ic + ' ' + T.nm;
+  $('qNo').textContent = '第 ' + (S.idx + 1) + ' / ' + S.paper.length + ' 题';
+  $('progBar').style.width = ((S.idx / S.paper.length) * 100).toFixed(1) + '%';
+  $('qFoot').innerHTML = '';
+  var body = $('qBody');
+  body.innerHTML = '<div class="qwrap">' + qPromptHTML(q) + '<div id="qZone"></div></div>';
+  var zone = $('qZone');
+
+  if (q.t === 'listen' || q.t === 'read') renderChoice(q, zone);
+  else if (q.t === 'match') renderMatch(q, zone);
+  else renderOrder(q, zone);
+
+  S.qStartAt = Date.now();
+  startClock();
+}
+
+function advanced() { return document.body.classList.contains('advanced'); }
+
+/* 错峰入场：只在高级渲染下加 .enter，动画一结束就摘掉，
+   免得它和后面的 .bad / .done 抢 animation / transform（见 CSS 里那段注释）。 */
+function enterAnim(el, i) {
+  if (!advanced()) return;
+  el.style.setProperty('--i', String(i));
+  el.classList.add('enter');
+  el.addEventListener('animationend', function () { el.classList.remove('enter'); }, { once: true });
+  setTimeout(function () { el.classList.remove('enter'); }, 1400);   // 兜底：animationend 收不到也不能一直挂着
+}
+
+function renderChoice(q, zone) {
+  var html = '';
+  if (q.t === 'listen') {
+    html += '<div class="speaker"><button class="playbtn" id="qPlay" type="button">' +
+      '<span aria-hidden="true">🔊</span><span>播放录音</span></button></div>';
+    html += '<p class="qsub" id="qSub"></p>';
+  }
+  html += '<div class="opts" id="qOpts"></div>';
+  zone.innerHTML = html;
+
+  var box = $('qOpts');
+  q.texts.forEach(function (txt, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'opt';
+    b.textContent = txt;
+    b.dataset.i = String(i);
+    enterAnim(b, i);
+    b.addEventListener('click', function () { pickOption(i, b); });
+    box.appendChild(b);
+  });
+
+  if (q.t === 'listen') {
+    var pb = $('qPlay');
+    pb.addEventListener('click', function () { playCurrent(true); });
+    playCurrent(false);
+  }
+}
+
+/* 听力题的播放 + 缺录音时换题
+   ⚠️ 缺录音必须"自动换一题"，不能让学生卡在一道永远听不到的题上；
+      但连续 3 条都读不到就停下来提示 —— 那基本能断定 audio 文件夹没跟网页在一起。 */
+function playCurrent(manual) {
+  var q = S.paper[S.idx];
+  if (!q || q.t !== 'listen') return;
+  var pb = $('qPlay');
+  if (pb) pb.classList.add('playing');
+  playWord(q.en, function (status) {
+    if (S.view !== 'quiz' || S.paper[S.idx] !== q) return;
+    if (pb) pb.classList.remove('playing');
+    if (status === 'ok') { missStreak = 0; return; }
+    if (status === 'blocked') {
+      var sub = $('qSub');
+      if (sub) { sub.textContent = '浏览器拦了自动播放 —— 点上面的按钮听录音'; sub.className = 'qsub warn'; }
+      return;
+    }
+    // 读不到
+    missStreak++;
+    if (missStreak >= 3) { audioTrouble(); return; }
+    q._miss = true;
+    var repl = makeChoice('listen', poolWords(), usedKeysExcept(S.idx));
+    if (repl) {
+      S.paper[S.idx] = repl;
+      toast('这道题的录音找不到，已换一道题', 2400);
+      renderQuestion();
+    } else if (manual) {
+      toast('这道题的录音找不到', 2400);
+    }
+  }, function () {
+    if (pb) pb.classList.remove('playing');
+  });
+}
+
+function audioTrouble() {
+  stopClock();
+  confirmAsk('⚠️', '读不到录音',
+    '连续几道听力题都放不出声音 —— 这个网页很可能没有和 <b>audio 文件夹</b>放在一起（在站台里用不会有这个问题）。',
+    '跳过听力题继续', '结束考核',
+    function () {          // 跳过：把还没做的听力题从卷子里摘掉，别拿听力去扣学生的分
+      var kept = [];
+      for (var i = 0; i < S.paper.length; i++) {
+        var q = S.paper[i];
+        if (i < S.idx) { kept.push(q); continue; }
+        if (q.t === 'listen') continue;
+        kept.push(q);
+      }
+      var doneCount = Math.min(S.idx, kept.length);
+      S.idx = doneCount;
+      S.paper = kept;
+      missStreak = 0;
+      if (!S.paper.length || S.idx >= S.paper.length) { finishQuiz(false); return; }
+      toast('已跳过听力题', 2000);
+      renderQuestion();
+    },
+    function () { finishQuiz(true); });
+}
+
+function pickOption(i, btn) {
+  if (S.locked) return;
+  var q = S.paper[S.idx];
+  if (!q || (q.t !== 'listen' && q.t !== 'read')) return;
+  if (btn.classList.contains('dim')) return;
+  var ok = (i === q.ansIdx);
+  S.locked = true;
+  stopClock();
+  // 反馈必须落在**已经画出来的**那一层：只改这一张卡的类，不重建选项区
+  // ⚠️ 不要再加 `.pick` —— CSS 里 `.opt.pick` 在 `.opt.good/.bad` 之后，
+  //    同特异性下后者会被压掉，绿/红就显示不出来
+  btn.classList.add(ok ? 'good' : 'bad');
+  var box = $('qOpts');
+  if (box) {
+    Array.prototype.forEach.call(box.querySelectorAll('.opt'), function (o) {
+      if (o === btn) { o.disabled = true; return; }
+      o.disabled = true; o.classList.add('dim');
+    });
+  }
+  if (ok) sfxOk(); else sfxBad();
+  record(q, ok, q.texts[i]);
+  showFeedback(ok, ok ? '答对了！' : '答错了', q.t);
+}
+
+function matchKeyOf(card) { return card.dataset.k + '|' + card.dataset.side; }
+
+function renderMatch(q, zone) {
+  var cards = [];
+  q.pairs.forEach(function (p) {
+    cards.push({ k: p.en, side: 'en', txt: p.en });
+    cards.push({ k: p.en, side: 'zh', txt: p.zh });
+  });
+  shuffle(cards);
+  var html = '<div class="board" id="qBoard"></div>';
+  zone.innerHTML = html;
+  var board = $('qBoard');
+  cards.forEach(function (c, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mcard' + (c.side === 'zh' ? ' zh' : '');
+    b.textContent = c.txt;
+    b.dataset.k = c.k;
+    b.dataset.side = c.side;
+    enterAnim(b, i);
+    b.addEventListener('click', function () { matchClick(b); });
+    board.appendChild(b);
+  });
+  S.cur = { q: q, sel: null, done: 0, mistakes: 0 };
+}
+
+function matchClick(card) {
+  if (S.locked) return;
+  var st = S.cur;
+  if (!st || st.q.t !== 'match') return;
+  if (card.classList.contains('done')) return;
+  if (card.classList.contains('bad')) return;      // 正在红闪，别抢
+  if (st.sel === card) { card.classList.remove('pick'); st.sel = null; return; }
+
+  if (!st.sel) { st.sel = card; card.classList.add('pick'); sfxTap(); return; }
+
+  var a = st.sel;
+  if (a.dataset.k === card.dataset.k && a.dataset.side !== card.dataset.side) {
+    a.classList.remove('pick'); a.classList.add('done');
+    card.classList.add('done');
+    st.sel = null; st.done++;
+    sfxOk();
+    if (st.done >= st.q.pairs.length) {
+      S.locked = true;
+      stopClock();
+      var ok = (st.mistakes === 0);
+      record(st.q, ok, ok ? '全部配对正确' : ('配错 ' + st.mistakes + ' 次'));
+      showFeedback(ok, ok ? '全对！' : '配对了，但中途连错过 ' + st.mistakes + ' 次', 'match');
+    }
+  } else {
+    st.mistakes++;
+    st.sel = null;
+    a.classList.remove('pick');
+    sfxBad();
+    // 只在边框上做红闪，**绝不重建棋盘** —— 重建会把还没画出来的反馈一起销毁
+    [a, card].forEach(function (c) {
+      c.classList.add('bad');
+      setTimeout(function () { c.classList.remove('bad'); }, 460);
+    });
+  }
+}
+
+function renderOrder(q, zone) {
+  var html =
+    '<div class="zone"><p class="qzone-lb">🔤 词卡池（点一下放进下面的句子）</p>' +
+    '<div class="pool" id="qPool"></div></div>' +
+    '<div class="zone"><p class="qzone-lb">✏️ 你排的句子（点一下可以退回去）</p>' +
+    '<div class="answer empty" id="qAns"></div></div>';
+  zone.innerHTML = html;
+  syncOrderZones(q);
+}
+
+function syncOrderZones(q) {
+  var pool = $('qPool'), ans = $('qAns');
+  if (!pool || !ans) return;
+  pool.innerHTML = ''; ans.innerHTML = '';
+  q.tokens.forEach(function (w, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'tok';
+    b.textContent = w;
+    b.dataset.w = w;
+    enterAnim(b, i);
+    b.addEventListener('click', function () { moveToken(b); });
+    pool.appendChild(b);
+  });
+  ans.classList.add('empty');
+  paintOrderFoot();
+}
+
+function moveToken(tok) {
+  if (S.locked) return;
+  var ans = $('qAns');
+  if (!ans || !tok.parentNode) return;
+  sfxTap();
+  if (tok.parentNode.id === 'qPool') {
+    ans.appendChild(tok);
+    tok.classList.add('in');
+  } else {
+    $('qPool').appendChild(tok);
+    tok.classList.remove('in');
+  }
+  ans.classList.toggle('empty', ans.querySelectorAll('.tok').length === 0);
+  paintOrderFoot();
+  ans.classList.remove('checked');
+}
+
+function paintOrderFoot() {
+  var foot = $('qFoot');
+  if (!foot) return;
+  var q = S.paper[S.idx];
+  if (!q || q.t !== 'order') return;
+  var allPlaced = ($('qPool') && $('qPool').querySelectorAll('.tok').length === 0);
+  foot.innerHTML = '';
+  var b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'big';
+  b.id = 'checkBtn';
+  b.textContent = '检查';
+  b.disabled = !allPlaced || S.locked;
+  if (!allPlaced) b.title = '把词卡池里的词都用完才能检查';
+  b.addEventListener('click', checkOrder);
+  foot.appendChild(b);
+}
+
+function checkOrder() {
+  if (S.locked) return;
+  var q = S.paper[S.idx];
+  if (!q || q.t !== 'order') return;
+  var ans = $('qAns');
+  if (!ans) return;
+  var got = Array.prototype.map.call(ans.querySelectorAll('.tok'), function (t) { return t.dataset.w; });
+  var correct = q.en.split(/\s+/);
+  if (got.length !== correct.length) return;
+
+  var wrongAt = 0;
+  Array.prototype.forEach.call(ans.querySelectorAll('.tok'), function (t, i) {
+    t.classList.remove('good', 'bad');
+    if (got[i] === correct[i]) t.classList.add('good');
+    else { t.classList.add('bad'); wrongAt++; }
+  });
+  ans.classList.add('checked');
+  S.locked = true;
+  stopClock();
+  var ok = (wrongAt === 0);
+  if (ok) sfxOk(); else sfxBad();
+  record(q, ok, got.join(' '));
+  showFeedback(ok, ok ? '完全正确！' : ('有 ' + wrongAt + ' 个位置放错了，看成绩页有正确答案'), 'order');
+}
+
+function record(q, ok, picked) {
+  S.records.push({
+    q: q, ok: ok, picked: picked,
+    ms: Date.now() - S.qStartAt
+  });
+  if (!ok) addWrong(q);
+}
+
+function answerText(q) {
+  if (q.t === 'listen') return q.zh;
+  if (q.t === 'read') return q.en;
+  if (q.t === 'order') return q.en;
+  return q.pairs.map(function (p) { return p.en + ' = ' + p.zh; }).join('；');
+}
+function questionText(q) {
+  if (q.t === 'listen') return '听录音选中文（' + q.en + '）';
+  if (q.t === 'read') return q.zh;
+  if (q.t === 'order') return q.zh;
+  return q.pairs.map(function (p) { return p.en; }).join(' / ');
+}
+
+function showFeedback(ok, msg, kind) {
+  var box = $('qBody');
+  if (!box) { nextSoon(); return; }
+  var old = box.querySelector('.fb');
+  if (old) old.remove();
+  var fb = document.createElement('div');
+  fb.className = 'fb ' + (ok ? 'good' : 'bad');
+  fb.innerHTML = '<span class="fbi">' + (ok ? '✓' : '✕') + '</span><span>' + esc(msg) + '</span>';
+  box.appendChild(fb);
+
+  var foot = $('qFoot');
+  foot.innerHTML = '';
+  var b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'big';
+  b.id = 'nextBtn';
+  var last = (S.idx >= S.paper.length - 1);
+  b.textContent = last ? '看成绩 →' : '下一题 →';
+  b.addEventListener('click', nextQuestion);
+  foot.appendChild(b);
+}
+
+function nextSoon() { setTimeout(nextQuestion, 700); }
+
+function nextQuestion() {
+  if (S.idx >= S.paper.length - 1) { finishQuiz(false); return; }
+  S.idx++;
+  renderQuestion();
+}
+
+function timeUp() {
+  if (S.locked) return;
+  var q = S.paper[S.idx];
+  if (!q) return;
+  S.locked = true;
+  sfxBad();
+  record(q, false, null);
+  var box = $('qOpts') || $('qBoard') || $('qAns');
+  if (box) {
+    Array.prototype.forEach.call(box.querySelectorAll('button'), function (o) { o.disabled = true; });
+  }
+  showFeedback(false, '时间到', q.t);
+}
+
+/* ============================================================
+   10. 成绩
+   ============================================================ */
+function finishQuiz(quit) {
+  stopClock();
+  S.locked = true;
+  try { audioEl.pause(); } catch (e) {}
+  var total = S.paper.length;
+  var right = 0, wrong = 0;
+  S.records.forEach(function (r) { if (r.ok) right++; else wrong++; });
+  var score = total ? Math.round((right / total) * 100) : 0;
+  var used = Date.now() - S.startedAt;
+
+  $('scNum').innerHTML = score + '<small> 分</small>';
+  var badge = $('scBadge');
+  if (score >= 100) { badge.textContent = '满分！太棒了'; badge.className = 'sc-badge'; }
+  else if (score >= 90) { badge.textContent = '优秀'; badge.className = 'sc-badge'; }
+  else if (score >= 75) { badge.textContent = '良好'; badge.className = 'sc-badge soso'; }
+  else if (score >= 60) { badge.textContent = '及格，再练练'; badge.className = 'sc-badge soso'; }
+  else { badge.textContent = '继续加油'; badge.className = 'sc-badge low'; }
+  $('scRight').textContent = String(right);
+  $('scTotal').textContent = String(total);
+  $('scTime').textContent = fmtTime(used);
+  $('scWrong').textContent = String(total - right);
+
+  var list = $('detailList');
+  list.innerHTML = '';
+  var done = {};
+  S.records.forEach(function (r) { done[S.paper.indexOf(r.q)] = r; });
+  S.paper.forEach(function (q, i) {
+    var r = done[i];
+    var row = document.createElement('div');
+    row.className = 'drow' + (r && r.ok ? '' : ' bad');
+    var your = r ? (r.picked ? esc(r.picked) : '未作答') : '未作答';
+    var mark = r ? (r.ok ? '✓' : '✕') : '–';
+    row.innerHTML =
+      '<span class="dno">' + (i + 1) + '</span>' +
+      '<span class="dmain">' +
+        '<span class="dtag">' + TYPEMAP[q.t].ic + ' ' + TYPEMAP[q.t].nm +
+          (q.unit ? ' · ' + esc(q.book || '') + ' ' + esc(q.unit) : '') + '</span>' +
+        '<span class="dq">' + esc(questionText(q)) + '</span>' +
+        '<span class="da">你答：' + (r && r.ok ? '<b>' + your + '</b>' : '<s>' + your + '</s>') +
+          '　正确答案：<b>' + esc(answerText(q)) + '</b></span>' +
+      '</span>' +
+      '<span class="dmark">' + mark + '</span>';
+    list.appendChild(row);
+  });
+  $('detailBox').open = false;
+
+  setView('result');
+  if (quit) toast('已结束考核', 2000); else sfxDone();
+  paintWrongBadge();
+}
+
+/* ============================================================
+   11. 错题本
+   ============================================================ */
+function loadWrong() {
+  var a = lsGetJSON(LS.wrong, []);
+  return (Object.prototype.toString.call(a) === '[object Array]') ? a : [];
+}
+function saveWrong(a) { lsSetJSON(LS.wrong, a.slice(0, 400)); }
+
+function addWrong(q) {
+  var rec = {
+    t: q.t, en: q.en || '', zh: q.zh || '', book: q.book || '', unit: q.unit || '',
+    key: q.t + '|' + (q.t === 'match' ? matchKey(q.pairs) : (q.en || '')),
+    ts: Date.now()
+  };
+  if (q.t === 'order') rec.sentence = q.en;
+  if (q.t === 'match') rec.pairs = q.pairs;
+  var a = loadWrong();
+  for (var i = 0; i < a.length; i++) if (a[i].key === rec.key) { a.splice(i, 1); break; }
+  a.unshift(rec);
+  saveWrong(a);
+  paintWrongBadge();          // 顶栏那个数字要当场变，不能等做完才刷（否则看着像没入库）
+}
+
+function agoText(ts) {
+  var d = Date.now() - (ts || 0);
+  if (d < 60000) return '刚刚';
+  if (d < 3600000) return Math.floor(d / 60000) + ' 分钟前';
+  if (d < 86400000) return Math.floor(d / 3600000) + ' 小时前';
+  return Math.floor(d / 86400000) + ' 天前';
+}
+
+function paintWrongBadge() {
+  var n = loadWrong().length;
+  var b = $('wrongBadge');
+  b.hidden = n === 0;
+  b.textContent = String(n);
+}
+
+function paintWrongSheet() {
+  var a = loadWrong();
+  var body = $('wsBody');
+  body.innerHTML = '';
+  $('wsRedoBtn').disabled = a.length === 0;
+  $('wsClearBtn').disabled = a.length === 0;
+  if (!a.length) {
+    body.innerHTML = '<div class="empty"><span class="eico">🎉</span>错题本还是空的 —— 做错的题会自动收进来。</div>';
+    return;
+  }
+  a.forEach(function (r) {
+    var T = TYPEMAP[r.t] || { ic: '❓', nm: r.t };
+    var row = document.createElement('div');
+    row.className = 'wrow';
+    var q = r.t === 'order' ? (r.sentence || r.en) : (r.t === 'match'
+      ? (r.pairs || []).map(function (p) { return p.en; }).join(' / ')
+      : (r.t === 'read' ? r.zh : r.en));
+    var ans = r.t === 'match'
+      ? (r.pairs || []).map(function (p) { return p.en + ' = ' + p.zh; }).join('；')
+      : (r.t === 'listen' ? r.zh : (r.t === 'read' ? r.en : (r.sentence || r.en)));
+    row.innerHTML =
+      '<span class="wmain">' +
+        '<span class="wt">' + T.ic + ' ' + T.nm + (r.book ? ' · ' + esc(r.book) + ' ' + esc(r.unit) : '') + '</span>' +
+        '<span class="wq">' + esc(q) + '</span>' +
+        '<span class="wa">正确答案：' + esc(ans) + '</span>' +
+      '</span>' +
+      '<span class="wtime">' + agoText(r.ts) + '</span>';
+    body.appendChild(row);
+  });
+}
+
+/* 把错题记录还原成一道题（重考用）。
+   ⚠️ 单选类要重新生成选项 —— 原选项没存（存了也没意义，重考就是再认一次）。 */
+function questionFromRecord(r) {
+  if (r.t === 'match') {
+    var pairs = r.pairs || [];
+    if (pairs.length < 2) return null;
+    return { t: 'match', book: r.book, unit: r.unit, pairs: pairs, en: pairs[0].en };
+  }
+  if (r.t === 'order') {
+    var toks = String(r.sentence || r.en || '').split(/\s+/);
+    if (toks.length < SENT_MIN_WORDS) return null;
+    var mixed = toks.slice();
+    for (var i = 0; i < 12; i++) { mixed = shuffle(toks.slice()); if (mixed.join(' ') !== toks.join(' ')) break; }
+    return { t: 'order', book: r.book, unit: r.unit, en: r.sentence || r.en, zh: r.zh, tokens: mixed };
+  }
+  var pool = allWords(r.book);
+  if (!pool.length) pool = everyWord();
+  var target = null;
+  for (var j = 0; j < pool.length; j++) if (pool[j].en === r.en) { target = pool[j]; break; }
+  if (!target) target = { en: r.en, zh: r.zh, book: r.book, unit: r.unit };
+  var kind = (r.t === 'read') ? 'read' : 'listen';
+  var dis = pickDistractors(pool, target, kind, 3);
+  if (dis.length < 1) return null;
+  var opts = shuffle([target].concat(dis));
+  var ansIdx = 0;
+  for (var k = 0; k < opts.length; k++) if (opts[k] === target) ansIdx = k;
+  return {
+    t: kind, book: target.book, unit: target.unit, en: target.en, zh: target.zh,
+    texts: opts.map(function (w) { return kind === 'listen' ? w.zh : w.en; }),
+    ansIdx: ansIdx
+  };
+}
+
+function startWrongQuiz() {
+  var a = loadWrong();
+  if (!a.length) { toast('错题本是空的', 1800); return; }
+  var paper = [];
+  a.forEach(function (r) {
+    var q = questionFromRecord(r);
+    if (q) paper.push(q);
+  });
+  if (!paper.length) { toast('这些错题暂时出不成考卷', 2200); return; }
+  closeSheet();
+  startQuiz(paper, '重考 ' + paper.length + ' 道错题');
+}
+
+/* ============================================================
+   12. 面板 / 确认框
+   ============================================================ */
+var openSheets = [];
+function openSheet(id) {
+  var el = $(id);
+  el.classList.add('on');
+  el.setAttribute('aria-hidden', 'false');
+  $('sheetMask').classList.add('on');
+  if (openSheets.indexOf(id) < 0) openSheets.push(id);
+}
+function closeSheet() {
+  openSheets.forEach(function (id) {
+    var el = $(id);
+    el.classList.remove('on');
+    el.setAttribute('aria-hidden', 'true');
+  });
+  openSheets = [];
+  $('sheetMask').classList.remove('on');
+}
+
+var cfYes = null, cfNo = null;
+function confirmAsk(icon, title, body, yesLabel, noLabel, onYes, onNo) {
+  $('cfIcon').textContent = icon;
+  $('cfH').textContent = title;
+  $('cfP').innerHTML = body;
+  $('cfYes').textContent = yesLabel;
+  $('cfNo').textContent = noLabel;
+  cfYes = onYes; cfNo = onNo;
+  openSheet('confirmSheet');
+}
+
+/* ============================================================
+   13. 高级渲染 / 音效开关
+   ============================================================ */
+function paintAdvanced() {
+  var on = document.body.classList.contains('advanced');
+  var b = $('glassToggleBtn');
+  b.classList.toggle('active', on);
+  b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  b.title = on ? '高级渲染已开启，点击关闭' : '高级渲染已关闭，点击开启';
+  b.setAttribute('aria-label', b.title);
+}
+function setAdvanced(on) {
+  document.body.classList.toggle('advanced', on);
+  lsSet(LS.glass, on ? 'true' : 'false');     // 与工具族其它成员取值一致（'true'/'false'）
+  paintAdvanced();
+}
+function paintSfx() {
+  var b = $('sfxBtn');
+  b.textContent = sfxOff ? '🔇' : '🔊';
+  b.setAttribute('aria-pressed', sfxOff ? 'false' : 'true');
+  b.title = sfxOff ? '音效已关闭，点击开启' : '音效已开启，点击关闭';
+  b.setAttribute('aria-label', b.title);
+}
+
+/* 点击水波（只在高级渲染下）。用事件委托，不在每个按钮上各绑一套。
+   只挂在本来就 position:relative + overflow:hidden 的三个主按钮上 ——
+   选项/卡片没这两个属性，水波会以别的定位祖先为基准、溢出出去。 */
+function bindWave() {
+  document.addEventListener('pointerdown', function (e) {
+    if (!advanced()) return;
+    var btn = e.target && e.target.closest ? e.target.closest('.big,.playbtn,.tbtn') : null;
+    if (!btn || btn.disabled) return;
+    var r = btn.getBoundingClientRect();
+    var d = Math.max(r.width, r.height);
+    var s = document.createElement('span');
+    s.className = 'wave';
+    s.style.width = s.style.height = d + 'px';
+    s.style.left = (e.clientX - r.left - d / 2) + 'px';
+    s.style.top = (e.clientY - r.top - d / 2) + 'px';
+    btn.appendChild(s);
+    setTimeout(function () { s.remove(); }, 520);
+  }, { passive: true });
+}
+
+/* ============================================================
+   14. 绑定与启动
+   ============================================================ */
+function bind() {
+  $('unitAll').addEventListener('click', function () {
+    if (!S.book) { toast('先选一册', 1600); return; }
+    sfxTap();
+    S.units = unitsOf(S.book);
+    savePrefs(); paintAll();
+  });
+  $('unitNone').addEventListener('click', function () {
+    sfxTap();
+    S.units = [];
+    savePrefs(); paintAll();
+  });
+  $('startBtn').addEventListener('click', function () { sfxTap(); startFromSetup(); });
+  $('againBtn').addEventListener('click', function () { sfxTap(); startFromSetup(); });
+  $('backSetupBtn').addEventListener('click', function () { sfxTap(); setView('setup'); paintAll(); });
+  $('wrongRedoBtn').addEventListener('click', function () { sfxTap(); startWrongQuiz(); });
+
+  $('quitBtn').addEventListener('click', function () {
+    backTap();
+    var left = S.paper.length - S.records.length;
+    confirmAsk('⚠️', '结束这次考核？',
+      left > 0 ? ('还有 ' + left + ' 题没做，没做的题按错算分。') : '卷子已经做完了。',
+      '结束考核', '继续做',
+      function () { closeSheet(); finishQuiz(true); },
+      function () { closeSheet(); });
+  });
+
+  $('wrongBtn').addEventListener('click', function () {
+    if (S.view === 'quiz') { toast('考核中不能看错题本，先做完这一场', 2200); return; }
+    sfxTap(); paintWrongSheet(); openSheet('wrongSheet');
+  });
+  $('wsClose').addEventListener('click', function () { backTap(); closeSheet(); });
+  $('wsRedoBtn').addEventListener('click', function () { sfxTap(); startWrongQuiz(); });
+  /* 清空错题本 = 破坏性操作：放在面板底部最右、体积小于主按钮，并且要**点两次**确认 */
+  var clearArmed = false, clearTimer = null;
+  function disarmClear() {
+    clearArmed = false;
+    if (clearTimer) clearTimeout(clearTimer);
+    $('wsClearBtn').textContent = '清空错题本';
+    $('wsClearBtn').classList.remove('armed');
+  }
+  $('wsClearBtn').addEventListener('click', function () {
+    if (!clearArmed) {
+      clearArmed = true;
+      $('wsClearBtn').textContent = '⚠️ 再点一次';
+      clearTimer = setTimeout(disarmClear, 5000);
+      return;
+    }
+    disarmClear();
+    saveWrong([]);
+    paintWrongBadge(); paintWrongSheet();
+    toast('错题本已清空', 1800);
+  });
+
+  $('helpBtn').addEventListener('click', function () { sfxTap(); openSheet('helpSheet'); });
+  $('hsClose').addEventListener('click', function () { backTap(); closeSheet(); });
+  $('hsOk').addEventListener('click', function () { backTap(); closeSheet(); });
+  $('sheetMask').addEventListener('click', function () { backTap(); closeSheet(); });
+
+  $('cfYes').addEventListener('click', function () { tap(); var f = cfYes; cfYes = cfNo = null; if (f) f(); });
+  $('cfNo').addEventListener('click', function () { backTap(); var f = cfNo; cfYes = cfNo = null; if (f) f(); else closeSheet(); });
+
+  $('glassToggleBtn').addEventListener('click', function () {
+    var on = !document.body.classList.contains('advanced');
+    sfxTap();
+    setAdvanced(on);
+  });
+  $('sfxBtn') && $('sfxBtn').addEventListener('click', function () {
+    sfxOff = !sfxOff;
+    lsSet(LS.sfx, sfxOff ? '1' : '0');
+    paintSfx();
+    if (!sfxOff) sfxTap();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' && e.key !== 'Esc') return;
+    if (openSheets.length) { backTap(); closeSheet(); }
+  });
+}
+function tap() { sfxTap(); }
+function backTap() { var n = Date.now(); if (n - lastBeep < 60) return; lastBeep = n; beep([520, 400], 0.06, 0.1); }
+
+/* 只读诊断钩子：验收脚本靠它知道"当前这道题的正确答案是什么"。
+   否则只能盲点，验出来的东西没意义（工具族其它成员也有同类探针，如 __hubPerfProbe）。 */
+window.__examProbe = function () {
+  return {
+    view: S.view, idx: S.idx, count: S.paper.length,
+    locked: S.locked, cur: S.paper[S.idx] || null,
+    plan: S.paper.map(function (q) { return q.t; }),
+    records: S.records.map(function (r) { return { t: r.q.t, ok: r.ok }; }),
+    wrong: loadWrong().length,
+    settings: { book: S.book, units: S.units.slice(), types: S.types.slice(), count: S.count, timed: S.timed }
+  };
+};
+
+function init() {  // 站点设置里的「高级渲染」总开关会先写好这个键，再靠点按钮回正 —— 启动时必须读它
+  var g = lsGet(LS.glass, 'false');
+  document.body.classList.toggle('advanced', g === 'true' || g === '1');
+  restorePrefs();
+  // 题型没存过（首次打开）就默认全选可用的那几种
+  if (!S.types) {
+    var av = availableTypes();
+    S.types = TYPES.filter(function (T) { return av[T.k]; }).map(function (T) { return T.k; });
+    savePrefs();
+  }
+  bind();
+  bindWave();
+  paintAdvanced();
+  paintSfx();
+  paintAll();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+
+})();
+</script>
+</body>
+</html>
+</template>
 <script>/* ============================================================
    来自太空的英语站台 —— 外壳脚本
    要点：
@@ -22374,7 +24463,7 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
      离开时从存档里读回**他真正的偏好**，所以"在工具里自己按过音乐按钮"
      这个动作不会被误解（那个动作会写存档）。
      ================================================================ */
-  var QUIET_TOOLS = ["listen"];
+  var QUIET_TOOLS = ["listen", "exam"];
   var quietKey = null;          // 当前正被临时静音的工具
   var quietResume = false;      // 静音之前音乐是不是在放
 
@@ -22636,7 +24725,7 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
      ⚠️ 单词喊麦王根本没有高级渲染开关（backdrop-filter 是写死的），
         表里没有它，联动会跳过 —— 这是事实，别给它造一个。
      ================================================================ */
-  var QUALITY = {"xxl": {"sel": "#glassToggle", "cls": "active", "key": "glassMode", "on": "1", "off": "0"}, "pattern": {"sel": "#glassToggle", "cls": "on", "key": "patternBuilder.glassEnabled", "on": "1", "off": "0"}, "listen": {"sel": "#glassToggleBtn", "aria": "aria-pressed", "key": "listen.glassEnabled", "on": "true", "off": "false"}, "read": {"sel": "#advancedToggleHeader", "cls": "active"}, "match": {"sel": "#glassToggleBtn", "cls": "active", "key": "match.glassEnabled", "on": "true", "off": "false"}};
+  var QUALITY = {"xxl": {"sel": "#glassToggle", "cls": "active", "key": "glassMode", "on": "1", "off": "0"}, "pattern": {"sel": "#glassToggle", "cls": "on", "key": "patternBuilder.glassEnabled", "on": "1", "off": "0"}, "listen": {"sel": "#glassToggleBtn", "aria": "aria-pressed", "key": "listen.glassEnabled", "on": "true", "off": "false"}, "read": {"sel": "#advancedToggleHeader", "cls": "active"}, "match": {"sel": "#glassToggleBtn", "cls": "active", "key": "match.glassEnabled", "on": "true", "off": "false"}, "exam": {"sel": "#glassToggleBtn", "aria": "aria-pressed", "key": "exam.glassEnabled", "on": "true", "off": "false"}};
 
   function qualityKeys(on) {
     Object.keys(QUALITY).forEach(function (k) {
@@ -22960,15 +25049,21 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
      ================================================================ */
   var GUIDE = [
     { ico: '🚀', h: '欢迎来到「来自太空的英语站台」',
-      p: '这里一共有 <b>6 种英语练习</b>：中英消消乐、句型建筑师、听力练习场、英语认读系统、单词喊麦王、单词匹配练习。' +
+      p: '这里一共有 <b>6 种英语练习</b>：中英消消乐、句型建筑师、听力练习场、英语认读系统、单词喊麦王、单词匹配练习；' +
+         '另外还有一块 <b>📝 考核</b>（给老师考学生用的，见第 4 步）。' +
          '练习随时能换，不用重开页面，也不用记网址。' },
     { ico: '🎯', h: '左上角这个靶子按钮，管着一切',
       p: '看屏幕<b>左上角</b>那个 <b>🎯</b> 按钮 —— 站台的所有功能都收在它里面（切换练习、音效、音乐）。' +
          '它平时是半透明的，不会挡住练习内容。',
       spot: true },
     { ico: '📂', h: '点它，左边的抽屉就滑出来了',
-      p: '抽屉里有 <b>🏠 目录</b> 和 <b>6 个练习</b>，点哪个就切到哪个；想回目录就点「🏠 目录」。',
+      p: '抽屉里有 <b>🏠 目录</b> 和 <b>6 个练习</b>，最下面单独一块是 <b>📝 考核</b>；' +
+         '点哪个就切到哪个，想回目录就点「🏠 目录」。',
       spot: true },
+    { ico: '📝', h: '目录最后一块是「考核」',
+      p: '它不是练习，是<b>考学生</b>用的：先选<b>册和单元</b>，再选<b>题型</b>和<b>每种题型几题</b>，' +
+         '点「开始考核」就<b>随机组卷</b>（每次的题都不一样）；做完当场给<b>百分制成绩</b>和逐题明细，' +
+         '做错的题自动进<b>错题本</b>，以后可以只重考错题。' },
     { ico: '🎵', h: '抽屉底下有一排开关',
       p: '先看头两个：<b>音效</b>控制点击时的"啵"声；<b>音乐</b>默认 <b>5%</b> 音量 —— ' +
          '点它停止、再点继续播放，右边那条可以拖动调音量。',
