@@ -22274,7 +22274,7 @@ body.advanced::before,body.advanced::after{opacity:1;visibility:visible}
 .tnames{display:flex;flex-direction:column;min-width:0}
 .tnames b{font-size:1.3rem;letter-spacing:.4px}
 .tnames i{font-size:.8rem;font-style:normal;color:#4a6389}
-.top-r{display:flex;gap:8px;flex-wrap:wrap}
+.top-r{display:flex;gap:8px;flex-wrap:wrap;flex:0 0 auto}
 .tbtn{
   display:inline-flex;align-items:center;gap:6px;
   min-height:44px;padding:0 13px;border-radius:12px;cursor:pointer;
@@ -22407,7 +22407,11 @@ body.advanced::before,body.advanced::after{opacity:1;visibility:visible}
   background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.95);
   border-radius:18px;padding:16px;margin:13px 0 0;
   box-shadow:0 4px 18px rgba(44,84,140,.09);
-  min-height:230px;
+  /* 一道题的内容本来就少（一行题干 + 4 个选项 / 8 张配对小卡）。
+     不居中、不撑高的话，950px 的投影屏上下面 60% 全是空白，看着像没做完。
+     用 vh 夹住：手机上是 240px（够放下），大屏上长到 470px 并把内容放到视觉中心。 */
+  min-height:clamp(240px,46vh,470px);
+  display:flex;flex-direction:column;justify-content:center;
 }
 .qprompt{text-align:center;font-size:1.1rem;font-weight:700;line-height:1.55;margin:0 0 6px}
 .qprompt .big-word{font-size:clamp(1.7rem,7vw,2.5rem);letter-spacing:1px;display:block;margin-bottom:2px}
@@ -22522,7 +22526,8 @@ body.advanced::before,body.advanced::after{opacity:1;visibility:visible}
 
 /* ===== 成绩页 ===== */
 .scorecard{
-  background:rgba(255,255,255,.92);border-radius:20px;padding:20px 16px;text-align:center;
+  background:rgba(255,255,255,.92);border-radius:20px;text-align:center;
+  padding:clamp(20px,4vh,44px) 16px;
   box-shadow:0 5px 22px rgba(44,84,140,.12);border:1px solid rgba(255,255,255,.95);
 }
 .sc-num{font-size:clamp(2.9rem,13vw,4.2rem);font-weight:900;line-height:1;
