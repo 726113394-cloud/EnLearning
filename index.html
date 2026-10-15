@@ -22710,8 +22710,8 @@ body.advanced::before,body.advanced::after{opacity:1;visibility:visible}
 
       <div class="blk two">
         <div class="sub-blk">
-          <div class="bhd"><span class="bno">④</span><span class="bt">每种题型几题</span></div>
-          <div class="chips" id="countChips" role="group" aria-label="每种题型的题量"></div>
+          <div class="bhd"><span class="bno">④</span><span class="bt">每个词考几遍</span></div>
+          <div class="chips" id="countChips" role="group" aria-label="每个单词考几遍"></div>
         </div>
         <div class="sub-blk">
           <div class="bhd"><span class="bno">⑤</span><span class="bt">计时</span></div>
@@ -22854,18 +22854,19 @@ TYPES.forEach(function (t) { TYPEMAP[t.k] = t; });
 /* ★ 老师要求「考核固定全部功能都要考」—— 题型不再是可选项，四种每次都要考。
    所以 S.types 恒等于这个常量，界面上那四个芯片是**锁定的已选**，不是开关。 */
 var ALL_TYPES = TYPES.map(function (t) { return t.k; });
+var ROUND_CHOICES = [1, 2, 3];        // 「每个词考几遍」——题量不再手选，由**词数**决定
+var MATCH_PER_BOARD = 4;              // 一组配对题消耗 4 个词
 
 var BOOKS = ['三上', '三下', '四上', '四下', '五上', '五下', '六上', '六下'];
 var PER_Q_SEC = 30;          // 计时模式下每题秒数
 var MATCH_PAIRS = 4;         // 配对题每组几对
 var SENT_MIN_WORDS = 3;      // 排序题的句子最少几个词（2 个词排起来没有意义）
 var SENT_MAX_WORDS = 10;     // 最多几个词（再多手机上一屏排不下）
-var COUNT_CHOICES = [3, 5, 8];
 
 var LS = {
   book:  'exam.book',
   units: 'exam.units',
-  count: 'exam.count',
+  rounds: 'exam.rounds',
   timer: 'exam.timer',
   glass: 'exam.glassEnabled',
   sfx:   'exam.sfxOff',
@@ -22957,6 +22958,17 @@ function sfxDone() { var n = Date.now(); if (n - lastBeep < 60) return; lastBeep
 var audioEl = $('audio');
 var audioErrCount = 0;          // 供回归测试盯：一个缺录音的词，error 次数应当 == 候选数（≤3）
 var playSeq = 0;
+var audioCleanup = null;        // 当前这次播放尝试的收尾函数
+/* 换题 / 收卷时把**还没跑完的播放尝试作废**。
+   ⚠️ 不加这个，旧那次的"起播 6 秒超时"会在切到下一题之后才触发，
+   于是它继续去试下一个大小写候选 —— 在 Pages（Linux，区分大小写）上就是一串 404。
+   实测线上验收就是这么抓到 audio/Office worker.mp3、Together.mp3 那些 404 的。
+   顺便把它的监听器也摘下来，否则每换一题就多留一套。 */
+function stopAudioAttempt() {
+  playSeq++;
+  if (audioCleanup) audioCleanup();
+  if (audioEl) { try { audioEl.pause(); } catch (e) {} }
+}
 
 function audioCands(word) {
   var alias = AUDIO_ALIAS[word.toLowerCase()];
@@ -22975,12 +22987,18 @@ function playWord(word, onStatus, onEnd) {
   var settled = false, startTimer = null, safeTimer = null;
   function clearTimers() { if (startTimer) clearTimeout(startTimer); if (safeTimer) clearTimeout(safeTimer); startTimer = safeTimer = null; }
 
-  function done(status) {
-    if (settled || tok !== playSeq) return;
-    settled = true; clearTimers();
+  function detach() {
+    clearTimers();
     audioEl.removeEventListener('error', onErr);
     audioEl.removeEventListener('playing', onPlaying);
     audioEl.removeEventListener('ended', onEnded);
+    if (audioCleanup === detach) audioCleanup = null;
+  }
+  audioCleanup = detach;
+
+  function done(status) {
+    if (settled || tok !== playSeq) return;
+    settled = true; detach();
     if (onStatus) onStatus(status);
   }
   function onErr() {
@@ -22997,7 +23015,7 @@ function playWord(word, onStatus, onEnd) {
     var dur = (isFinite(audioEl.duration) && audioEl.duration > 0) ? audioEl.duration : 3;
     safeTimer = setTimeout(function () { done('ok'); }, (dur + 8) * 1000);
   }
-  function onEnded() { if (onEnd) onEnd(); }
+  function onEnded() { if (tok !== playSeq || settled) return; if (onEnd) onEnd(); }
 
   function tryNext() {
     if (tok !== playSeq || settled) return;
@@ -23125,7 +23143,7 @@ var S = {
   book: null,
   units: [],
   types: ALL_TYPES.slice(),   // 固定四种全考，见 ALL_TYPES 的说明
-  count: 5,
+  rounds: 1,                  // 每个词考几遍（题量由词数决定，不手选）
   timed: false,
   paper: [],
   idx: 0,
@@ -23144,8 +23162,8 @@ function restorePrefs() {
   S.book = (b && bankOf(b)) ? b : null;
   var u = lsGetJSON(LS.units, null);
   S.units = (u && Object.prototype.toString.call(u) === '[object Array]') ? u : [];
-  var c = parseInt(lsGet(LS.count, '5'), 10);
-  S.count = COUNT_CHOICES.indexOf(c) >= 0 ? c : 5;
+  var rd = parseInt(lsGet(LS.rounds, '1'), 10);
+  S.rounds = ROUND_CHOICES.indexOf(rd) >= 0 ? rd : 1;
   S.timed = lsGet(LS.timer, '0') === '1';
   // 单元要按当前册校验 —— 词表更新后已经不存在的单元直接丢掉（照抄听力练习场的纪律）
   if (S.book) {
@@ -23160,8 +23178,10 @@ function restorePrefs() {
 function savePrefs() {
   lsSet(LS.book, S.book || '');
   lsSetJSON(LS.units, S.units);
-  lsSet(LS.count, String(S.count));
+  lsSet(LS.rounds, String(S.rounds));
   lsSet(LS.timer, S.timed ? '1' : '0');
+  // 题量改成"由词数决定"了，老存档里那个 exam.count 清掉，别留着让人以为还能选
+  try { localStorage.removeItem('exam.count'); } catch (e) {}
 }
 
 /* ============================================================
@@ -23225,15 +23245,20 @@ function paintUnits() {
     });
     box.appendChild(b);
   });
-  var total = 0;
-  S.units.forEach(function (u) { total += wordsOf(S.book, u).length; });
+  /* ⚠️ 报的是**去重后**的词数，不是条数：
+     六上满共 144 条，但有 1 个词在两个单元里都出现 —— 考试只考一次，
+     提示里就得说 143，否则老师会发现"说好覆盖全量却少了一个。 */
+  var raw = 0;
+  S.units.forEach(function (u) { raw += wordsOf(S.book, u).length; });
+  var total = poolWords().length;
   if (!S.units.length) {
     /* 允许"一个都没选"，并把空状态说清楚 —— 空状态一定要可恢复，
        比"不许空"友好得多（老师报过"默认单元取消不掉"那个死结）。 */
     hint.textContent = '还没选单元 —— 点上面的单元按钮选，或点「全册」全选。一个都不选不能开始。';
     hint.className = 'bhint warn';
   } else {
-    hint.textContent = '已选 ' + S.units.length + ' 个单元 / 共 ' + total + ' 个词。';
+    hint.textContent = '已选 ' + S.units.length + ' 个单元 / 共 ' + total + ' 个词'
+      + (total === raw ? '' : ('（' + raw + ' 条，跨单元重复的按一个算）')) + '。';
     hint.className = 'bhint';
   }
 }
@@ -23278,12 +23303,15 @@ function paintTypes() {
   }
 }
 
-function paintCounts() {
+function paintRounds() {
   var box = $('countChips');
   box.innerHTML = '';
-  COUNT_CHOICES.forEach(function (c) {
-    var b = chip('每题型 ' + c + ' 题', { on: S.count === c });
-    b.addEventListener('click', function () { sfxTap(); S.count = c; savePrefs(); paintAll(); });
+  /* ★ 老师反馈"一个单元的考题很多都只是部分单词"之后，题量不再手选：
+     里改成"每个词考几遍"。 */
+  ROUND_CHOICES.forEach(function (r) {
+    var b = chip('每个词 ' + r + ' 遍', { on: S.rounds === r });
+    b.setAttribute('aria-label', '每个单词考 ' + r + ' 遍');
+    b.addEventListener('click', function () { sfxTap(); S.rounds = r; savePrefs(); paintAll(); });
     box.appendChild(b);
   });
 }
@@ -23305,18 +23333,23 @@ function paintStart() {
      （老师的要求是"全部功能都要考"）。目前八册都能出全，这条是数据回退时的保险。 */
   var av = availableTypes();
   var missing = TYPES.filter(function (T) { return !av[T.k]; }).map(function (T) { return T.nm; });
-  var total = ALL_TYPES.length * S.count;
   var ok = !!S.book && S.units.length > 0 && missing.length === 0;
   btn.disabled = !ok;
   if (!S.book) hint.textContent = '先选一册。';
   else if (!S.units.length) hint.textContent = '再选至少一个单元。';
   else if (missing.length) hint.textContent = '这个范围出不了：' + missing.join('、') + ' —— 换一个册或单元。';
-  else hint.textContent = '本次共 ' + total + ' 题（4 种题型 × ' + S.count + ' 题，四种都要考）' +
-    (S.timed ? '，每题 ' + PER_Q_SEC + ' 秒' : '，不限时');
+  else {
+    // 说清"考多少题、覆盖多少词"，题量是**由词数算出来的**，不是老师选的
+    var pl = planPaper();
+    hint.textContent = '本次共 ' + (pl.total * S.rounds) + ' 题 · 覆盖 ' + pl.W + ' 个单词'
+      + (S.rounds > 1 ? ('（每个词考 ' + S.rounds + ' 遍，每遍重新组卷）')
+                      : '（每个词考一遍）')
+      + ' · ' + (S.timed ? ('每题 ' + PER_Q_SEC + ' 秒') : '不限时');
+  }
 }
 
 function paintAll() {
-  paintBooks(); paintUnits(); paintTypes(); paintCounts(); paintTimer(); paintStart(); paintWrongBadge();
+  paintBooks(); paintUnits(); paintTypes(); paintRounds(); paintTimer(); paintStart(); paintWrongBadge();
 }
 
 /* ============================================================
@@ -23333,7 +23366,6 @@ function everyWord() {
   return out;
 }
 
-function choiceKey(kind, w) { return kind + '|' + w.en; }
 function matchKey(pairs) {
   return 'match|' + pairs.map(function (p) { return p.en; }).sort().join(',');
 }
@@ -23362,12 +23394,8 @@ function pickDistractors(pool, target, kind, need) {
   return out;
 }
 
-function makeChoice(kind, pool, used) {
-  var cands = shuffle(pool.slice());
-  var target = null;
-  for (var i = 0; i < cands.length; i++) {
-    if (!used[choiceKey(kind, cands[i])]) { target = cands[i]; break; }
-  }
+/* 给**指定的那个词**出一道单选（不再自己随机挑目标 —— 覆盖优先靠外面排好顺序） */
+function makeChoiceFor(kind, target, pool) {
   if (!target) return null;
   var dis = pickDistractors(pool, target, kind, 3);
   if (dis.length < 1) return null;             // 连一个干扰项都凑不出来，出不了单选题
@@ -23382,18 +23410,18 @@ function makeChoice(kind, pool, used) {
   };
 }
 
-function makeMatch(pool, used) {
-  var cands = shuffle(pool.slice());
+/* 用**指定的这几个词**拼一块配对板（同样是为了覆盖） */
+function makeMatchFrom(words) {
   var pairs = [], seenEn = {}, seenZh = {};
-  for (var i = 0; i < cands.length && pairs.length < MATCH_PAIRS; i++) {
-    var w = cands[i];
-    if (seenEn[w.en.toLowerCase()] || seenZh[w.zh]) continue;
+  words.forEach(function (w) {
+    if (!w) return;
+    if (seenEn[w.en.toLowerCase()] || seenZh[w.zh]) return;   // 释义撞了配对会出两个正确答案
     seenEn[w.en.toLowerCase()] = 1; seenZh[w.zh] = 1;
     pairs.push({ en: w.en, zh: w.zh });
-  }
+  });
   if (pairs.length < 2) return null;
-  if (used[matchKey(pairs)]) return null;
-  return { t: 'match', book: pairs[0] && cands[0].book, unit: pairs[0] && cands[0].unit, pairs: pairs };
+  var src = words.filter(Boolean)[0] || {};
+  return { t: 'match', book: src.book, unit: src.unit, pairs: pairs };
 }
 
 function makeOrder(sents, used) {
@@ -23424,37 +23452,108 @@ function interleave(lists) {
   return out;
 }
 
-function buildPaper() {
-  var pool = poolWords();
-  var sents = poolSents();
-  var used = {};
-  var lists = [], want = [];
-  // 一次多做几轮尝试：某个题型素材不够时不硬凑，出多少算多少
-  S.types.forEach(function (k) {
-    if (!availableTypes()[k]) return;
-    want.push(k);
-    var L = [];
-    for (var n = 0; n < S.count; n++) {
-      var q = null;
-      if (k === 'order') q = makeOrder(sents, used);
-      else if (k === 'match') q = makeMatch(pool, used);
-      else q = makeChoice(k, pool, used);
-      if (!q) continue;
-      used[k === 'order' ? 'order|' + q.en : (k === 'match' ? matchKey(q.pairs) : choiceKey(k, q))] = 1;
-      L.push(q);
-    }
-    lists.push(L);
-  });
-  return interleave(lists);
+/* ============================================================
+   组卷：★ 覆盖优先（2026-10 老师反馈后重做）
+   ------------------------------------------------------------
+   老师原话："考察内容太容易重复了，来来回回我发现一个单元的考题很多都只是
+   部分单词而不是全量单词。" —— 原来每个题型各随即抽 N 题，词池里就会**只碰到一部分词**，
+   而且同一个词可能在一个题型里出现好几次、另一些词一次都不考。
+
+   现在改成：把所选范围的词**全部**排进卷子，每种题型分摊，**每个词在一遍里只考一次**。
+     · 中英配对：一组消耗 4 个词，承担约一半（组数 = min(词数/4, round(词数/8))）
+     · 听音选词 / 看中文选英文：把剩下的词对半劈
+     · 句子排序：不消耗词（它考的是句子），题量与词数相称、封顶 6 题
+   「每个词考几遍」>1 时整卷再来一遍，而且**轮与轮之间换题型**
+   （第一遍当听力考的，第二遍当看中文选英文考），这样复习才有意义。
+   题量因此不再由老师手选 —— 它由词数决定，界面上直接写明"共 X 题 / 覆盖 N 个词"。
+   ============================================================ */
+function planPaper() {
+  var W = poolWords().length;
+  var g = Math.min(Math.floor(W / MATCH_PAIRS), Math.max(1, Math.round(W / (MATCH_PAIRS * 2))));
+  if (g < 1) g = 0;
+  var rest = W - g * MATCH_PAIRS;
+  var nListen = Math.ceil(rest / 2);
+  var nRead = rest - nListen;
+  var sents = poolSents().length;
+  var nOrder = sents ? Math.max(1, Math.min(6, Math.round(W / 6), sents)) : 0;
+  return {
+    W: W, match: g, listen: nListen, read: nRead, order: nOrder,
+    total: g + nListen + nRead + nOrder
+  };
 }
 
-function usedKeysExcept(idx) {
+function buildPaper() {
+  var plan = planPaper();
+  var rounds = Math.max(1, S.rounds);
+  var sents = poolSents();
   var used = {};
-  S.paper.forEach(function (q, i) {
-    if (i === idx || !q) return;
-    used[q.t === 'order' ? 'order|' + q.en : (q.t === 'match' ? matchKey(q.pairs) : choiceKey(q.t, q))] = 1;
+  var lists = { listen: [], read: [], match: [], order: [] };
+  // 三段词块（配对 / 听音 / 看中文）——轮次之间整体转一位，等于给每个词换个考法
+  var blocks = [['match', plan.match * MATCH_PAIRS], ['listen', plan.listen], ['read', plan.read]];
+  for (var r = 0; r < rounds; r++) {
+    var rot = r % blocks.length;
+    var ordered = blocks.slice(rot).concat(blocks.slice(0, rot));
+    var words = shuffle(poolWords().slice());       // 每一遍都重新打乱，位置不会一样
+    var at = 0;
+    ordered.forEach(function (blk) {
+      var kind = blk[0], n = blk[1];
+      if (kind === 'match') {
+        for (var i = 0; i + MATCH_PAIRS <= n; i += MATCH_PAIRS) {
+          var qm = makeMatchFrom(words.slice(at, at + MATCH_PAIRS));
+          at += MATCH_PAIRS;
+          if (qm) lists.match.push(qm);
+        }
+      } else {
+        for (var j = 0; j < n && at < words.length; j++, at++) {
+          var qc = makeChoiceFor(kind, words[at], poolWords());
+          if (qc) lists[kind].push(qc);
+        }
+      }
+    });
+    for (var s = 0; s < plan.order; s++) {
+      var qo = makeOrder(sents, used);
+      if (!qo) break;
+      used['order|' + qo.en] = 1;
+      lists.order.push(qo);
+    }
+  }
+
+  /* ★ 覆盖兖底："每个词都要考到"是硬要求，
+     但配对板会因为**释义撞车**把某个词踢出去（同一组里两个词都译"秋天"那种），
+     实测六上 144 个词里就这样漏了 1 个。
+     所以最后扫一遍：没进卷子的词全部补成单选题（听音 / 看中文轮着来）。 */
+  var seen = {};
+  ['listen', 'read'].forEach(function (k) {
+    lists[k].forEach(function (q) { seen[q.en.toLowerCase()] = 1; });
   });
-  return used;
+  lists.match.forEach(function (q) {
+    q.pairs.forEach(function (x) { seen[x.en.toLowerCase()] = 1; });
+  });
+  var missed = poolWords().filter(function (w) { return !seen[w.en.toLowerCase()]; });
+  if (missed.length) {
+    missed.forEach(function (w, i) {
+      var kind = (i % 2) ? 'read' : 'listen';
+      var q = makeChoiceFor(kind, w, poolWords());
+      if (!q) q = makeChoiceFor(kind === 'listen' ? 'read' : 'listen', w, poolWords());
+      if (q) lists[q.t].push(q);
+    });
+  }
+  return interleave([lists.listen, lists.read, lists.match, lists.order]);
+}
+
+/* 某道听力题读不到录音时找替补：从词池里挑一个**这场还没考过**的词 */
+function replacementChoice(kind, notIn) {
+  var pool = poolWords();
+  var used = {};
+  (notIn || []).forEach(function (q) {
+    if (q && q.en) used[q.en.toLowerCase()] = 1;
+  });
+  var cands = shuffle(pool.filter(function (w) { return !used[w.en.toLowerCase()]; }));
+  for (var i = 0; i < cands.length; i++) {
+    var q = makeChoiceFor(kind, cands[i], pool);
+    if (q) return q;
+  }
+  return null;
 }
 
 /* ============================================================
@@ -23491,7 +23590,15 @@ function startQuiz(paper, note, mode) {
     mode: mode || 'exam',
     book: S.book, units: S.units.slice(),
     allTypes: mode !== 'wrong',
-    types: kinds, count: S.count, timed: S.timed, total: paper.length
+    types: kinds, rounds: S.rounds, timed: S.timed, total: paper.length,
+    covered: (function () {
+      var m = {};
+      paper.forEach(function (q) {
+        if (q.t === 'match') { q.pairs.forEach(function (x) { m[x.en.toLowerCase()] = 1; }); }
+        else if (q.t !== 'order' && q.en) { m[q.en.toLowerCase()] = 1; }
+      });
+      return Object.keys(m).length;
+    })()
   };
   setView('quiz');
   if (note) toast(note, 2200);
@@ -23501,8 +23608,7 @@ function startQuiz(paper, note, mode) {
 function startFromSetup() {
   var paper = buildPaper();
   if (!paper.length) { toast('范围里没有可出的题，换个范围试试', 2400); return; }
-  var want = ALL_TYPES.length * S.count;
-  startQuiz(paper, paper.length < want ? ('题量不够，这次出了 ' + paper.length + ' 题') : '', 'exam');
+  startQuiz(paper, '', 'exam');
 }
 
 function stopClock() {
@@ -23555,7 +23661,7 @@ function renderQuestion() {
   if (!q) { finishQuiz(false); return; }
   S.locked = false;
   S.cur = { q: q };
-  try { audioEl.pause(); } catch (e) {}      // 上一题的录音可能还在放（不碰 src，只暂停）
+  stopAudioAttempt();          // 上一题的播放尝试作废（不碰 src）
   var T = TYPEMAP[q.t];
   $('qType').textContent = T.ic + ' ' + T.nm;
   $('qNo').textContent = '第 ' + (S.idx + 1) + ' / ' + S.paper.length + ' 题';
@@ -23635,7 +23741,7 @@ function playCurrent(manual) {
     missStreak++;
     if (missStreak >= 3) { audioTrouble(); return; }
     q._miss = true;
-    var repl = makeChoice('listen', poolWords(), usedKeysExcept(S.idx));
+    var repl = replacementChoice('listen', S.paper);
     if (repl) {
       S.paper[S.idx] = repl;
       toast('这道题的录音找不到，已换一道题', 2400);
@@ -23937,7 +24043,8 @@ function paintSettings() {
   } else {
     rows.push(['考核范围', esc((s.book || '—') + ' · ' + (s.units.length ? s.units.join('、') : '—'))]);
     rows.push(['题型', esc(typeNames(ALL_TYPES)) + ' <span class="sm">（四种全部，固定要考）</span>']);
-    rows.push(['题量', '每题型 ' + s.count + ' 题，共 ' + s.total + ' 题']);
+    rows.push(['题量', '共 ' + s.total + ' 题，覆盖 ' + s.covered + ' 个单词'
+      + (s.rounds > 1 ? ('（每个词考 ' + s.rounds + ' 遍）') : '')]);
   }
   rows.push(['计时', s.timed ? ('每题 ' + PER_Q_SEC + ' 秒') : '不限时']);
   rows.forEach(function (r) {
@@ -23953,7 +24060,7 @@ function paintSettings() {
 function finishQuiz(quit) {
   stopClock();
   S.locked = true;
-  try { audioEl.pause(); } catch (e) {}
+  stopAudioAttempt();
   var total = S.paper.length;
   var right = 0, wrong = 0;
   S.records.forEach(function (r) { if (r.ok) right++; else wrong++; });
@@ -24286,10 +24393,19 @@ window.__examProbe = function () {
     view: S.view, idx: S.idx, count: S.paper.length,
     locked: S.locked, cur: S.paper[S.idx] || null,
     plan: S.paper.map(function (q) { return q.t; }),
+    // 每道题碰到哪些词（配对题是 4 个；排序题不消耗词，给 null）
+    // —— 验收脚本靠它验"覆盖全量且不重复"
+    planWords: S.paper.map(function (q) {
+      if (q.t === 'match') return q.pairs.map(function (p) { return p.en; });
+      if (q.t === 'order') return null;
+      return [q.en];
+    }),
     records: S.records.map(function (r) { return { t: r.q.t, ok: r.ok }; }),
     wrong: loadWrong().length,
+    // 当前范围的词池（验收脚本靠它算"还有哪些词没考到"）
+    pool: poolWords().map(function (w) { return w.en; }),
     snap: S.snap,
-    settings: { book: S.book, units: S.units.slice(), types: S.types.slice(), count: S.count, timed: S.timed }
+    settings: { book: S.book, units: S.units.slice(), types: S.types.slice(), rounds: S.rounds, timed: S.timed }
   };
 };
 
