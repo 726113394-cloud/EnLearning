@@ -22314,6 +22314,12 @@ body.advanced::before,body.advanced::after{opacity:1;visibility:visible}
   font-size:.8rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;
 }
 .bt{font-weight:700;font-size:1rem}
+/* "固定"小徽章：告诉老师这块没有可选项，不是他漏看了 */
+.bfix{
+  margin-left:2px;padding:2px 9px;border-radius:20px;
+  font-size:.72rem;font-weight:800;letter-spacing:.5px;
+  color:#fff;background:linear-gradient(135deg,#5b7396,#8b6f9c);
+}
 .bact{margin-left:auto;display:flex;gap:7px}
 /* ⚠️ 小按钮也是**能点的控件**，一样要 ≥44px（工具族的硬规矩，触屏上 36px 点不准）。
    曾经写成 36px，被 verify_exam.js 的 O 段当场抓出来。 */
@@ -22703,18 +22709,18 @@ body.advanced::before,body.advanced::after{opacity:1;visibility:visible}
       </div>
 
       <div class="blk">
-        <div class="bhd"><span class="bno">③</span><span class="bt">考哪几种题型</span></div>
+        <div class="bhd"><span class="bno">③</span><span class="bt">考哪几种题型</span><span class="bfix">固定</span></div>
         <div class="chips" id="typeChips" role="group" aria-label="选择题型"></div>
         <p class="bhint" id="typeHint"></p>
       </div>
 
       <div class="blk two">
         <div class="sub-blk">
-          <div class="bhd"><span class="bno">④</span><span class="bt">每个词考几遍</span></div>
+          <div class="bhd"><span class="bno">④</span><span class="bt">每个词考几遍</span><span class="bfix">固定</span></div>
           <div class="chips" id="countChips" role="group" aria-label="每个单词考几遍"></div>
         </div>
         <div class="sub-blk">
-          <div class="bhd"><span class="bno">⑤</span><span class="bt">计时</span></div>
+          <div class="bhd"><span class="bno">⑤</span><span class="bt">计时</span><span class="bfix">固定</span></div>
           <div class="chips" id="timerChips" role="group" aria-label="是否计时"></div>
         </div>
       </div>
@@ -22794,9 +22800,9 @@ body.advanced::before,body.advanced::after{opacity:1;visibility:visible}
   </div>
   <div class="sh-bd">
     <ul class="helplist">
-      <li><span class="hn">1</span><span><b>老师设范围</b>：选一册 → 勾要考的单元（可多选）→ 选每种题型几题、要不要计时。点「开始考核」。</span></li>
-      <li><span class="hn">2</span><span><b>四种题型固定全考</b>：听音选词、看中文选英文、中英配对、句子排序 —— 每次都要考，不用选，也不能少。</span></li>
-      <li><span class="hn">3</span><span><b>系统随机组卷</b>：每次考的题都不一样，同一场里不会重复出题。</span></li>
+      <li><span class="hn">1</span><span><b>老师只选范围</b>：选一册 → 勾要考的单元（可多选）→ 点「开始考核」。其余配置都是固定的。</span></li>
+      <li><span class="hn">2</span><span><b>固定配置</b>：四种题型全考、<b>每个词考 3 遍</b>（三遍换三种题型）、<b>每题 30 秒</b>。都不用选，也不能改。</span></li>
+      <li><span class="hn">3</span><span><b>系统随机组卷</b>：每次考的题都不一样；每个单词考 3 遍，三遍换三种题型，同一遍里不会重复。</span></li>
       <li><span class="hn">4</span><span><b>做完就出成绩</b>：百分制分数 + <b>本次考核设置</b> + 逐题明细（含正确答案）；做错的题自动进<b>错题本</b>。</span></li>
       <li><span class="hn">5</span><span><b>错题可以重考</b>：右上角 📕，点「重考错题」只考错的那些题。</span></li>
       <li><span class="hn">6</span><span><b>听力题没声音？</b>说明这个网页没有和 <b>audio 文件夹</b>放在一起（在站台里用不会有这个问题）。</span></li>
@@ -22854,7 +22860,13 @@ TYPES.forEach(function (t) { TYPEMAP[t.k] = t; });
 /* ★ 老师要求「考核固定全部功能都要考」—— 题型不再是可选项，四种每次都要考。
    所以 S.types 恒等于这个常量，界面上那四个芯片是**锁定的已选**，不是开关。 */
 var ALL_TYPES = TYPES.map(function (t) { return t.k; });
-var ROUND_CHOICES = [1, 2, 3];        // 「每个词考几遍」——题量不再手选，由**词数**决定
+/* ★ 2026-10 老师又一次定调：「默认直接每次考三次一个单词…不再给用户选择，
+   每题计时不可选，这些配置显示出来给用户看」——
+   所以「每个词考几遍」和「计时」两处都不再是开关，而是**写死的配置**，
+   界面上照样画出来（锁定的芯片 + 一句说明），成绩页也照写。 */
+var FIXED_ROUNDS = 3;                 // 每个单词考 3 遍（分成 3 道题，且三遍换三种题型）
+var FIXED_TIMED = true;               // 每题计时（不可选）
+var WORD_TYPES = ['listen', 'read', 'match'];   // 消耗单词的三种题型（排序题不消耗词）
 var MATCH_PER_BOARD = 4;              // 一组配对题消耗 4 个词
 
 var BOOKS = ['三上', '三下', '四上', '四下', '五上', '五下', '六上', '六下'];
@@ -22867,7 +22879,6 @@ var LS = {
   book:  'exam.book',
   units: 'exam.units',
   rounds: 'exam.rounds',
-  timer: 'exam.timer',
   glass: 'exam.glassEnabled',
   sfx:   'exam.sfxOff',
   wrong: 'exam.wrong'
@@ -23143,8 +23154,8 @@ var S = {
   book: null,
   units: [],
   types: ALL_TYPES.slice(),   // 固定四种全考，见 ALL_TYPES 的说明
-  rounds: 1,                  // 每个词考几遍（题量由词数决定，不手选）
-  timed: false,
+  rounds: FIXED_ROUNDS,       // 写死：每个词考 3 遍（不给用户选）
+  timed: FIXED_TIMED,         // 写死：每题 30 秒（不给用户选）
   paper: [],
   idx: 0,
   records: [],        // [{q, ok, picked, ms}]
@@ -23162,9 +23173,8 @@ function restorePrefs() {
   S.book = (b && bankOf(b)) ? b : null;
   var u = lsGetJSON(LS.units, null);
   S.units = (u && Object.prototype.toString.call(u) === '[object Array]') ? u : [];
-  var rd = parseInt(lsGet(LS.rounds, '1'), 10);
-  S.rounds = ROUND_CHOICES.indexOf(rd) >= 0 ? rd : 1;
-  S.timed = lsGet(LS.timer, '0') === '1';
+  S.rounds = FIXED_ROUNDS;          // 固定，不读存档
+  S.timed = FIXED_TIMED;
   // 单元要按当前册校验 —— 词表更新后已经不存在的单元直接丢掉（照抄听力练习场的纪律）
   if (S.book) {
     var us = unitsOf(S.book);
@@ -23178,10 +23188,12 @@ function restorePrefs() {
 function savePrefs() {
   lsSet(LS.book, S.book || '');
   lsSetJSON(LS.units, S.units);
-  lsSet(LS.rounds, String(S.rounds));
-  lsSet(LS.timer, S.timed ? '1' : '0');
-  // 题量改成"由词数决定"了，老存档里那个 exam.count 清掉，别留着让人以为还能选
-  try { localStorage.removeItem('exam.count'); } catch (e) {}
+  // 每个词考几遍 / 计时 都改成写死的了，老存档里这几个键清掉
+  try {
+    localStorage.removeItem('exam.count');
+    localStorage.removeItem('exam.rounds');
+    localStorage.removeItem('exam.timer');
+  } catch (e) {}
 }
 
 /* ============================================================
@@ -23306,24 +23318,24 @@ function paintTypes() {
 function paintRounds() {
   var box = $('countChips');
   box.innerHTML = '';
-  /* ★ 老师反馈"一个单元的考题很多都只是部分单词"之后，题量不再手选：
-     里改成"每个词考几遍"。 */
-  ROUND_CHOICES.forEach(function (r) {
-    var b = chip('每个词 ' + r + ' 遍', { on: S.rounds === r });
-    b.setAttribute('aria-label', '每个单词考 ' + r + ' 遍');
-    b.addEventListener('click', function () { sfxTap(); S.rounds = r; savePrefs(); paintAll(); });
-    box.appendChild(b);
-  });
+  /* ★ 写死的配置（老师："默认直接每次考三次一个单词…不再给用户选择"）——
+     照样画出来，但是锁定的：点它不会有任何反应。 */
+  var b = chip('每个词 ' + FIXED_ROUNDS + ' 遍', { on: true, cls: 'locked', disabled: true });
+  b.id = 'roundChip';
+  b.setAttribute('aria-label', '每个单词固定考 ' + FIXED_ROUNDS + ' 遍');
+  b.title = '固定配置：每个单词考 ' + FIXED_ROUNDS + ' 遍，三遍换三种题型';
+  box.appendChild(b);
 }
 
 function paintTimer() {
   var box = $('timerChips');
   box.innerHTML = '';
-  [[false, '不限时', '⏱'], [true, '每题 ' + PER_Q_SEC + ' 秒', '⏳']].forEach(function (pair) {
-    var b = chip(pair[1], { ic: pair[2], on: S.timed === pair[0] });
-    b.addEventListener('click', function () { sfxTap(); S.timed = pair[0]; savePrefs(); paintAll(); });
-    box.appendChild(b);
-  });
+  /* 写死的配置：每题计时，不给用户选（老师："每题计时不可选"）。 */
+  var b = chip('每题 ' + PER_Q_SEC + ' 秒', { ic: '⏳', on: true, cls: 'locked', disabled: true });
+  b.id = 'timerChip';
+  b.setAttribute('aria-label', '每题计时 ' + PER_Q_SEC + ' 秒（固定）');
+  b.title = '固定配置：每题 ' + PER_Q_SEC + ' 秒';
+  box.appendChild(b);
 }
 
 function paintStart() {
@@ -23340,11 +23352,11 @@ function paintStart() {
   else if (missing.length) hint.textContent = '这个范围出不了：' + missing.join('、') + ' —— 换一个册或单元。';
   else {
     // 说清"考多少题、覆盖多少词"，题量是**由词数算出来的**，不是老师选的
+    // 把固定配置一并告诉老师：这些是写死的，不是他漏了设
     var pl = planPaper();
-    hint.textContent = '本次共 ' + (pl.total * S.rounds) + ' 题 · 覆盖 ' + pl.W + ' 个单词'
-      + (S.rounds > 1 ? ('（每个词考 ' + S.rounds + ' 遍，每遍重新组卷）')
-                      : '（每个词考一遍）')
-      + ' · ' + (S.timed ? ('每题 ' + PER_Q_SEC + ' 秒') : '不限时');
+    hint.textContent = '本次共 ' + pl.total + ' 题 · 覆盖 ' + pl.W + ' 个单词 · '
+      + '每个词考 ' + pl.passes + ' 遍（三遍换三种题型）· '
+      + '每题 ' + PER_Q_SEC + ' 秒';
   }
 }
 
@@ -23467,50 +23479,85 @@ function interleave(lists) {
    （第一遍当听力考的，第二遍当看中文选英文考），这样复习才有意义。
    题量因此不再由老师手选 —— 它由词数决定，界面上直接写明"共 X 题 / 覆盖 N 个词"。
    ============================================================ */
+/* 一组配对题里该放几个词（每块 2~4 个）。
+   ⚠️ 不能只用"4 个一块 + 度数丢给兜底"：那样那几个词在**这一遍**就没考到，
+   实测 19 个词的单元里有 3 个词只考到了 2 遍（老师要的是每个词 3 遍）。
+   5 个词 → 3+2，6 个 → 3+3，7 个 → 4+3，都能成牌。 */
+function matchChunks(n) {
+  var out = [], rem = n;
+  while (rem >= 4) { out.push(4); rem -= 4; }
+  if (rem === 3) out.push(3);
+  else if (rem === 2) out.push(2);
+  else if (rem === 1) {
+    if (out.length) { out[out.length - 1] -= 1; out.push(2); }   // 4+1 → 3+2
+    else out.push(0);                                            // 只剩 1 个词，成不了牌
+  }
+  return out.filter(function (x) { return x >= 2; });
+}
+
+/* 算出这场卷子的规模（三遍合计）。
+   ⚠️ 必须**跟 buildPaper 同一套算法**，否则界面报的题数和实际对不上
+   （第一版就是这样：界面说 48 题、实际 45 题）。 */
 function planPaper() {
   var W = poolWords().length;
-  var g = Math.min(Math.floor(W / MATCH_PAIRS), Math.max(1, Math.round(W / (MATCH_PAIRS * 2))));
-  if (g < 1) g = 0;
-  var rest = W - g * MATCH_PAIRS;
-  var nListen = Math.ceil(rest / 2);
-  var nRead = rest - nListen;
+  var passes = Math.max(1, S.rounds);
+  var nMatch = Math.min(W, MATCH_PAIRS * Math.max(1, Math.round(W / (MATCH_PAIRS * 2))));
+  var rest = W - nMatch;
+  var nL = Math.ceil(rest / 2), nR = rest - nL;
+  var sizes = [nL, nR, nMatch];          // 对应 WORD_TYPES 里 listen / read / match 的"基础组"
+  var boards = 0, choices = 0;
+  for (var r = 0; r < passes; r++) {
+    for (var bi = 0; bi < 3; bi++) {
+      var kind = WORD_TYPES[(bi + r) % WORD_TYPES.length], n = sizes[bi];
+      if (kind === 'match') boards += matchChunks(n).length;
+      else choices += n;
+    }
+  }
   var sents = poolSents().length;
-  var nOrder = sents ? Math.max(1, Math.min(6, Math.round(W / 6), sents)) : 0;
-  return {
-    W: W, match: g, listen: nListen, read: nRead, order: nOrder,
-    total: g + nListen + nRead + nOrder
-  };
+  var perPass = sents ? Math.max(1, Math.min(6, Math.round(W / 6), sents)) : 0;
+  var order = Math.min(perPass * passes, sents);
+  return { W: W, passes: passes, boards: boards, choices: choices, order: order,
+           total: boards + choices + order };
 }
 
 function buildPaper() {
   var plan = planPaper();
   var rounds = Math.max(1, S.rounds);
+  var pool = poolWords();
   var sents = poolSents();
   var used = {};
   var lists = { listen: [], read: [], match: [], order: [] };
-  // 三段词块（配对 / 听音 / 看中文）——轮次之间整体转一位，等于给每个词换个考法
-  var blocks = [['match', plan.match * MATCH_PAIRS], ['listen', plan.listen], ['read', plan.read]];
+  var words = shuffle(pool.slice());
+  var nMatch = plan.match * MATCH_PAIRS;
+  /* ★ 给每个词定一个"**起始考法**"：前 nMatch 个走中英配对，剩下的听音 / 看中文交替。
+     之后**每多考一遍就把考法轮换一位** —— 于是同一个词的三遍一定是
+     配对 / 听音 / 看中文各一次（这才是"每个词考三次"的意义），
+     而且每一遍里每个词仍然只出现一次、四种题型也都在。
+     （旧版是"每遍重新打乱"，实测 19 个词里有 5 个两遍题型相同 —— 那就白考了。） */
+  var base = words.map(function (w, i) {
+    return i < nMatch ? 2 : (i % 2);
+  });
   for (var r = 0; r < rounds; r++) {
-    var rot = r % blocks.length;
-    var ordered = blocks.slice(rot).concat(blocks.slice(0, rot));
-    var words = shuffle(poolWords().slice());       // 每一遍都重新打乱，位置不会一样
-    var at = 0;
-    ordered.forEach(function (blk) {
-      var kind = blk[0], n = blk[1];
-      if (kind === 'match') {
-        for (var i = 0; i + MATCH_PAIRS <= n; i += MATCH_PAIRS) {
-          var qm = makeMatchFrom(words.slice(at, at + MATCH_PAIRS));
-          at += MATCH_PAIRS;
-          if (qm) lists.match.push(qm);
-        }
-      } else {
-        for (var j = 0; j < n && at < words.length; j++, at++) {
-          var qc = makeChoiceFor(kind, words[at], poolWords());
-          if (qc) lists[kind].push(qc);
-        }
-      }
+    var byType = { listen: [], read: [], match: [] };
+    words.forEach(function (w, i) {
+      byType[WORD_TYPES[(base[i] + r) % WORD_TYPES.length]].push(w);
     });
-    for (var s = 0; s < plan.order; s++) {
+    var at = 0;
+    matchChunks(byType.match.length).forEach(function (size) {
+      var qm = makeMatchFrom(byType.match.slice(at, at + size));
+      at += size;
+      if (qm) lists.match.push(qm);
+    });
+    ['listen', 'read'].forEach(function (k) {
+      byType[k].forEach(function (w) {
+        var q = makeChoiceFor(k, w, pool);
+        if (q) lists[k].push(q);
+      });
+    });
+    // 每一遍都要有排序题（——四种题型固定全考），
+    // 但可用句子数不够时后面的遍就只能少几题
+    var perPass = plan.passes ? Math.round(plan.order / plan.passes) : 0;
+    for (var t = 0; t < perPass; t++) {
       var qo = makeOrder(sents, used);
       if (!qo) break;
       used['order|' + qo.en] = 1;
@@ -23518,9 +23565,9 @@ function buildPaper() {
     }
   }
 
-  /* ★ 覆盖兖底："每个词都要考到"是硬要求，
+  /* ★ 覆盖兜底："每个词都要考到"是硬要求，
      但配对板会因为**释义撞车**把某个词踢出去（同一组里两个词都译"秋天"那种），
-     实测六上 144 个词里就这样漏了 1 个。
+     实测六上 144 条里就这样漏了 1 个。
      所以最后扫一遍：没进卷子的词全部补成单选题（听音 / 看中文轮着来）。 */
   var seen = {};
   ['listen', 'read'].forEach(function (k) {
@@ -23529,15 +23576,12 @@ function buildPaper() {
   lists.match.forEach(function (q) {
     q.pairs.forEach(function (x) { seen[x.en.toLowerCase()] = 1; });
   });
-  var missed = poolWords().filter(function (w) { return !seen[w.en.toLowerCase()]; });
-  if (missed.length) {
-    missed.forEach(function (w, i) {
+  pool.filter(function (w) { return !seen[w.en.toLowerCase()]; })
+    .forEach(function (w, i) {
       var kind = (i % 2) ? 'read' : 'listen';
-      var q = makeChoiceFor(kind, w, poolWords());
-      if (!q) q = makeChoiceFor(kind === 'listen' ? 'read' : 'listen', w, poolWords());
+      var q = makeChoiceFor(kind, w, pool) || makeChoiceFor(kind === 'listen' ? 'read' : 'listen', w, pool);
       if (q) lists[q.t].push(q);
     });
-  }
   return interleave([lists.listen, lists.read, lists.match, lists.order]);
 }
 
@@ -24044,9 +24088,11 @@ function paintSettings() {
     rows.push(['考核范围', esc((s.book || '—') + ' · ' + (s.units.length ? s.units.join('、') : '—'))]);
     rows.push(['题型', esc(typeNames(ALL_TYPES)) + ' <span class="sm">（四种全部，固定要考）</span>']);
     rows.push(['题量', '共 ' + s.total + ' 题，覆盖 ' + s.covered + ' 个单词'
-      + (s.rounds > 1 ? ('（每个词考 ' + s.rounds + ' 遍）') : '')]);
+      + '（每个词考 ' + s.rounds + ' 遍）']);
   }
-  rows.push(['计时', s.timed ? ('每题 ' + PER_Q_SEC + ' 秒') : '不限时']);
+  rows.push(['计时', '每题 ' + PER_Q_SEC + ' 秒']);
+  rows.push(['固定配置', '四种题型全考 · 每个词考 ' + s.rounds
+    + ' 遍（三遍换三种题型）· 每题 ' + PER_Q_SEC + ' 秒']);
   rows.forEach(function (r) {
     var dt = document.createElement('dt');
     dt.textContent = r[0];
