@@ -129,14 +129,20 @@ body.liquid .scrim{backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
      ⚠️ 曲线不能带过冲（y 不能 >1）：到位是 translateX(0)，往右冲会露出左边一条缝。 */
   visibility:hidden;
   transition:transform .44s cubic-bezier(.16,1,.3,1),visibility 0s linear .44s;
+  display:flex;flex-direction:column;gap:7px;overflow:hidden;
+}
+/* 列表段：装不下时自己滚，别把"站台设置"顶出去 */
+.pnav{
+  flex:1 1 auto;min-height:0;
   display:flex;flex-direction:column;gap:7px;overflow-y:auto;
-  /* 内容已压到装得下（见 .sbar / .mbar 的说明）。这里再把滚动条本身去掉：
-     极矮的窗口（横屏手机、小笔电）仍会溢出，那时也**不要那条竖条** ——
-     它压在抽屉的圆角边上很难看，也跟液态玻璃的观感冲突。
-     ⚠️ 只隐藏滚动条，滚轮和触摸滚动照旧可用。 */
   scrollbar-width:none;-ms-overflow-style:none;
 }
-.panel::-webkit-scrollbar{width:0;height:0}
+.pnav::-webkit-scrollbar{width:0;height:0}
+/* 设置段：永远贴在抽屉底部（老师在小比例手机上的要求） */
+.pfoot{
+  flex:0 0 auto;display:flex;flex-direction:column;gap:7px;
+  padding-top:2px;
+}
 .panel.on{
   transform:none;visibility:visible;
   transition:transform .44s cubic-bezier(.16,1,.3,1),visibility 0s;
@@ -393,11 +399,13 @@ body.liquid .guide-card{
      所以矮屏直接改成**两列网格**：触控尺寸一个不降（条目仍 48px），
      行数从 9 行变 5 行。宽屏大屏（高 >768）一个像素不动。 */
   .panel{
-    display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;
-    grid-auto-rows:max-content;align-content:start;
     padding:7px 12px calc(7px + env(safe-area-inset-bottom,0px));
   }
-  .panel > .brand,.panel > .panel-sec,.panel > .sbar,.panel > .mbar{grid-column:1 / -1}
+  .pnav{
+    display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;
+    grid-auto-rows:max-content;align-content:start;
+  }
+  .pnav > .panel-sec{grid-column:1 / -1}
   /* ★ 品牌卡只收 2px 内边距（96 → 92.5）：verify_contrast.py 用「≥90」判它没被压扁，
      把高度从这里省会直接触发那条断言。要省就从间距（gap / panel-sec 外边距）里省。 */
   .brand{padding:9px;margin:0 0 2px}
@@ -439,10 +447,12 @@ body.liquid .guide-card{
   .panel{
     width:100vw;border-radius:0;
     padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));
+  }
+  .pnav{
     display:grid;grid-template-columns:repeat(3,1fr);gap:5px 8px;
     grid-auto-rows:max-content;align-content:start;
   }
-  .panel > .brand,.panel > .panel-sec,.panel > .sbar,.panel > .mbar{grid-column:1 / -1}
+  .pnav > .panel-sec{grid-column:1 / -1}
   .sec-set{margin-top:4px}
   .brand-au{margin-top:6px;padding-top:6px}
   /* 铺满后这两条别跟着拉得太宽，右边留白比拉长好看 */
@@ -452,9 +462,57 @@ body.liquid .guide-card{
   /* ★ 9 个条目了，4 列要排 3 行（横屏手机 390 高溢出 30px）。
      够宽就改 5 列，两行装完（844 宽时每格 164px，放得下「中英消消乐 + ›」）。 */
   @media (min-width:700px){
-    .panel{grid-template-columns:repeat(5,1fr)}
+    .pnav{grid-template-columns:repeat(5,1fr)}
   }
   .mbar{max-width:620px}
+}
+
+/* ============================================================
+   窄窗口 / 小比例手机（宽 ≤600px）
+   实测问题（老师截图 2026-10-26）：窗口一窄，抽屉会被上面那条
+   max-height:768 的规则改成**两列网格** —— 每格只剩 ~150px，
+   「中英消消乐」折成「中英消消 / 乐」、「句型建筑师」折成
+   「句型建筑 / 师」，站台设置那排也被挤到中间。
+   窄屏和矮屏是两回事：矮屏横向还有空间，窄屏没有。
+   所以窄屏一律**单列竖排**，站台设置贴到抽屉底部。
+   ============================================================ */
+@media (max-width:600px){
+  .panel{
+    width:min(320px,88vw);
+    gap:5px;
+  }
+  /* 单列竖排：把矮屏那套两列网格压回一列 */
+  .pnav{
+    display:flex;flex-direction:column;gap:5px;
+    overflow-y:auto;
+  }
+  .pnav > .panel-sec{grid-column:auto}
+  .pfoot{gap:5px}
+  /* 条目名不许折行（单列宽度放得下最长的「单词匹配练习」6 字） */
+  .pitem .plb{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sbar{flex-wrap:wrap}
+  .sbtn{flex:1 1 0;min-width:54px}
+
+  /* ---- 引导：窄屏卡片贴底，别整块压在聚光灯上 ---- */
+  .guide-mask{
+    align-items:flex-end;
+    padding:12px 10px calc(10px + env(safe-area-inset-bottom,0px));
+  }
+  .guide-mask.holes{justify-content:center;padding-right:10px}
+  .guide-card{
+    width:100%;max-height:46vh;overflow-y:auto;
+    padding:16px;border-radius:18px;
+    animation:none;
+  }
+  .guide-body{min-height:0}
+  .guide-ico{font-size:2.1rem;margin-bottom:4px}
+  .guide-h{font-size:1.04rem;margin-bottom:6px}
+  .guide-p{font-size:.86rem;line-height:1.62}
+  .guide-foot{margin-top:12px;gap:8px}
+  .guide-btn{min-height:44px;padding:0 14px;font-size:.86rem}
+  .guide-dots{display:none}   /* 空间紧，「第 n 步 / 共 7 步」已经写在上面一行了 */
+  /* 浮标在抽屉打开时退场，引导里它还要当"被讲解的对象"，保持在角上 */
+  .guide-callout{left:66px;top:20px;font-size:.74rem}
 }
 
 /* 这里原先有个 @keyframes eq，给抽屉里那个跳动小条用的；
@@ -983,6 +1041,34 @@ body.liquid .resume button{backdrop-filter:blur(14px) saturate(160%);
 .home-tut button:hover{transform:translateY(-1px);filter:brightness(1.06)}
 .home-tut button:active{transform:scale(.98)}
 @media (max-width:820px){.home-tut{margin:-4px 0 14px}}
+
+/* ============================================================
+   窄屏收口：9 个条目 + 品牌卡 + 设置段要在一屏里装下
+   500x700 实测：5 个开关挤成 4+1 两行，白吃 48px，结果
+   「分类大师 / 考核中心」被底部的设置段挡掉了（截图里看着像列表就 7 条）。
+   省法只有两处不破触控规矩：① 开关挤成一行 ② 条目 gap 5→4。
+   ⚠️ 360x640 这种小机器仍装不下（9×48 是硬底线），那时就靠列表自己滚；
+      下面那条分界线就是为了让"被裁掉"看得出来，不会误以为列表到此为止。
+   ============================================================ */
+@media (max-width:600px){
+  .pnav{gap:4px}
+  .sbar{gap:6px;flex-wrap:nowrap}
+  .sbtn{flex:1 1 0;min-width:0;padding:0 2px;gap:1px}
+  .sbtn .slb{font-size:.68rem}
+  .sbtn .chint{font-size:.58rem}
+  .pfoot{
+    padding-top:7px;margin-top:2px;
+    border-top:1px solid rgba(47,93,158,.14);
+  }
+  .glass-mode .pfoot{border-top-color:rgba(255,255,255,.22)}
+  .pfoot .sec-set{margin-top:0}
+}
+@media (max-width:600px){
+  /* 「切换练习」这个小标题在窄屏没有信息量（下面全是练习），占掉的 20px
+     正好是第 9 条「考核中心」差的那一点。收掉它 + gap 再收 1px。 */
+  .pnav > .panel-sec{display:none}
+  .pnav{gap:3px}
+}
 </style>
 </head>
 <body>
@@ -1011,6 +1097,7 @@ body.liquid .resume button{backdrop-filter:blur(14px) saturate(160%);
         </span>
       </div>
     </div>
+    <div class="pnav" id="pnav">
     <div class="panel-sec anim-in" style="--i:0">切换练习</div>
       <button class="pitem anim-in" style="--i:0"><span class="pico">🏠</span><span class="plb">目录</span><span class="pgo">›</span></button>
       <button class="pitem anim-in" style="--i:1" data-tool="xxl"><span class="pico">🌈</span><span class="plb">中英消消乐</span><span class="pgo">›</span></button>
@@ -1021,6 +1108,8 @@ body.liquid .resume button{backdrop-filter:blur(14px) saturate(160%);
       <button class="pitem anim-in" style="--i:6" data-tool="match"><span class="pico">🔗</span><span class="plb">单词匹配练习</span><span class="pgo">›</span></button>
       <button class="pitem anim-in" style="--i:7" data-tool="cat"><span class="pico">🗂️</span><span class="plb">分类大师</span><span class="pgo">›</span></button>
       <button class="pitem anim-in exam" style="--i:8" data-tool="exam"><span class="pico">📝</span><span class="plb">考核中心</span><span class="pgo">›</span></button>
+    </div>
+    <div class="pfoot" id="pfoot">
     <div class="panel-sec anim-in sec-set" style="--i:9">站台设置</div>
     <div class="sbar anim-in" style="--i:10">
       <button class="sbtn" id="soundBtn" type="button"><span class="cico">🔊</span><span class="slb">音效</span><span class="chint" id="soundHint">已开启</span></button>
@@ -1035,6 +1124,7 @@ body.liquid .resume button{backdrop-filter:blur(14px) saturate(160%);
       <button class="mnav" id="musicNext" type="button" aria-label="下一首">⏭</button>
       <input type="range" id="musicVol" min="0" max="100" step="1" value="5" aria-label="音乐音量">
       <span class="vlab" id="volLab">5%</span>
+    </div>
     </div>
   </aside>
   <!-- 首次使用引导：必须一步步走完才能关（没有关闭按钮） -->
@@ -21604,6 +21694,7 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     //  单人模式
     // ================================================================
     function refreshSingleQuestion() {
+        cancelAutoNext();          // 换题前先把上一次的自动翻页掐掉，否则会连跳两题
         const item = getNextSingleQuestion();
         if (!item) {
             questionDisplay.innerText = '⚠️ 暂无单词，请检查设置';
@@ -21666,6 +21757,28 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
         replayAnim(feedbackDiv, 'fb-pop');
         answered = true;
         document.querySelectorAll('.option').forEach(opt => opt.style.pointerEvents = 'none');
+        // 答对了自动翻下一题（答错不翻：要留给学生看正确答案）
+        if (isCorrect) armAutoNext();
+    }
+
+    /* ============================================================
+       答对自动下一题（2026-10-26 老师要求）
+       · 只对答对生效；答错停住，等学生看完正确答案自己点「下一题」
+       · 等 900ms 再翻：反馈条、+1 浮标、连击这些动画得让人看见
+       · 三处都要能取消，否则会跳题：手动点「下一题」、重置、换题
+       ============================================================ */
+    var autoNextTimer = null;
+    function cancelAutoNext() {
+        if (autoNextTimer) { clearTimeout(autoNextTimer); autoNextTimer = null; }
+    }
+    function armAutoNext() {
+        cancelAutoNext();
+        autoNextTimer = setTimeout(function () {
+            autoNextTimer = null;
+            // 这段时间里可能已经手动翻过题 / 重置了 —— answered 会被重置，那就不再动
+            if (!answered || !currentQuestionObj) return;
+            nextSingle({ silent: true });
+        }, 900);
     }
 
     function updateSingleStats() {
@@ -21673,16 +21786,18 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
         answeredSpan.innerText = answeredCount;
     }
 
-    function nextSingle() {
+    function nextSingle(opts) {
+        cancelAutoNext();
         if (!answered && currentQuestionObj) {
             feedbackDiv.innerHTML = '⚠️ 请先回答当前题目再继续～';
             return;
         }
-        sfx.playNext();
+        if (!(opts && opts.silent)) sfx.playNext();
         refreshSingleQuestion();
     }
 
     function resetSingle() {
+        cancelAutoNext();
         score = 0; answeredCount = 0; sfx.resetStreak(); updateSingleStats();
         buildSingleQueue();
         refreshSingleQuestion();
@@ -24573,6 +24688,126 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
 
 
 
+/* ============================================================
+   横屏 / 矮屏适配（老师反馈："分类大师没有横屏适配"）
+   实测 844x390（站台点「🔄 横屏」后 iframe 就是这个尺寸）：
+     header 46 + settings 56 + 棋盘 180 + status 60 + 边距 → bodyScroll 398 > 390（溢出）
+     而棋盘只剩 180px，单个类别框就要 86px —— 框和卡挤在一起，没法拖。
+   740x360 更糟：settings 折成两行 103px，棋盘只剩 103px。
+   所以矮屏必须：① 容器铺满（94vh→100dvh，省掉圆角留白和边距）
+                 ② 设置栏压成一行（放不下就横向滚，别折行吃高度）
+                 ③ 类别框和词卡各收一档，但都不破"能点准"的尺寸
+   ============================================================ */
+@media (max-height: 520px) {
+    .game-container {
+        width: 100vw;
+        max-width: none;
+        height: 100dvh;
+        max-height: none;
+        border-radius: 0;
+        padding: 6px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    }
+    .header { margin-bottom: 4px; gap: 4px 8px; }
+    .header h1 { font-size: 15px; gap: 5px; }
+    .header-left { gap: 6px; }
+
+    /* 设置栏一行：放不下就横向滚（滚条藏掉），绝不折行吃高度 */
+    .settings {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 4px 8px;
+        padding: 4px 10px;
+        margin-bottom: 4px;
+        border-radius: 22px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .settings::-webkit-scrollbar { width: 0; height: 0; }
+    .settings-group { flex: 0 0 auto; gap: 4px; }
+    .settings-group label { font-size: .7rem; }
+    .settings-group select { font-size: .74rem; padding: 2px 6px; }
+    .unit-btn { font-size: .74rem; padding: 0 9px; max-width: 140px; }
+    .opt-chip { font-size: .72rem; padding: 0 9px; min-height: 28px; }
+    .settings .btn { padding: 0 12px; font-size: .78rem; min-height: 32px; }
+
+    .game-board-wrapper { margin-bottom: 4px; border-radius: 16px; }
+    .game-board.classify { padding: 6px; gap: 6px; }
+    .cat-bar { gap: 6px; }
+    .cbox {
+        min-height: 46px;
+        padding: 4px 8px;
+        border-radius: 12px;
+    }
+    .cbox .cb-ico { display: none; }
+    .cbox .cb-name { font-size: .84rem; }
+    .cbox .cb-count { font-size: .66rem; }
+    .pool { gap: 6px; }
+    .wcard {
+        min-width: 64px;
+        min-height: 38px;
+        font-size: .88rem;
+        padding: 4px 10px;
+        border-radius: 10px;
+    }
+    .status-bar { padding: 4px 10px; border-radius: 22px; gap: 3px 8px; }
+    .status-bar .info { gap: 3px 10px; }
+    .status-bar .info-item { font-size: .72rem; }
+    .status-bar .info-item .num { font-size: .84rem; }
+    .status-bar .btn { padding: 0 12px; font-size: .76rem; min-height: 32px; }
+    .status-bar .actions { gap: 6px; }
+    /* 浮字在矮屏别糊一脸 */
+    .bonus-popup { top: 18%; padding: 10px 18px; font-size: 16px; border-radius: 18px; }
+    .bonus-popup .sub { font-size: 12px; }
+    .toast { top: 60px; font-size: .78rem; padding: 8px 14px; }
+    /* PK 在矮屏：玩家卡变小、问题字变小 */
+    .pk-q .qw { font-size: 1.35rem; }
+    .pk-q { padding: 2px 0 0; }
+    .pcard { flex: 1 1 150px; min-width: 140px; padding: 6px 8px; }
+    .pcard .po button { min-height: 30px; font-size: .74rem; }
+    .padd input { min-height: 30px; }
+    .padd button { min-height: 30px; }
+}
+
+/* 窄屏竖屏（手机）：设置栏更紧凑，别占掉四分之一屏 */
+@media (max-width: 520px) and (min-height: 521px) {
+    .settings { gap: 4px 8px; padding: 6px 10px; }
+    .settings-group { gap: 4px; }
+    .settings-group label { font-size: .72rem; }
+    .settings-group select { font-size: .76rem; padding: 2px 6px; }
+    .unit-btn { font-size: .74rem; padding: 0 9px; max-width: 150px; }
+    .opt-chip { font-size: .72rem; padding: 0 9px; }
+    .cbox { min-height: 66px; }
+    .cbox .cb-name { font-size: .86rem; }
+}
+@media (max-height: 520px) {
+    /* body 自带 8px padding，矮屏时把它一起去掉，否则整页多出 16px 会拖出滚动条 */
+    body { padding: 0 !important; height: 100dvh !important; }
+
+    /* ★「开始」按钮常驻设置栏右端：设置栏矮屏是横向滚动的，
+       不 sticky 的话它会被滚到看不见的地方 —— 而那是唯一能开局的按钮。 */
+    .settings > .settings-group:last-child {
+        position: sticky;
+        right: 0;
+        padding-left: 12px;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .96) 22%);
+    }
+    .glass-mode .settings > .settings-group:last-child {
+        background: linear-gradient(90deg, rgba(20, 26, 40, 0), rgba(20, 26, 40, .9) 22%);
+    }
+
+    /* toast 别压在「开始」上：挪到棋盘上方的空白处居中 */
+    .toast {
+        top: 118px;
+        left: 50%;
+        right: auto;
+        transform: translate(-50%, -8px);
+        max-width: min(300px, 76vw);
+        font-size: .78rem;
+        padding: 7px 13px;
+    }
+    .toast.on { transform: translate(-50%, 0); }
+}
+
 </style>
 </head>
 <body>
@@ -25162,8 +25397,35 @@ function onBoxClick(cat) {
   judgeDrop(st, cat, box);
 }
 
-/* ---------------- 7. 拖动（Pointer Events + 幽灵卡） ---------------- */
-var drag = null, pending = null, ghostRaf = null, gx = 0, gy = 0;
+/* ---------------- 7. 拖动（Pointer Events + 幽灵卡） ----------------
+   ⚠️ 老师实测到的坑（2026-10-26）：几根手指一起摸屏幕时，
+      幽灵卡会留下不消失，之后**任何卡片都拖不动**，只能点重玩。
+   原因：拖动状态全押在"能收到 pointerup"上。
+      多手指按下去时，后续那根手指的 pointerdown 被 `if (drag || pending) return`
+      挡掉，但**没有 preventDefault** → 浏览器把手势当滚动/缩放 → 给正在拖的
+      那根 pointer 发 pointercancel，甚至干脆吞掉它的 pointerup。
+      于是 drag / pending 永远是"忙"，幽灵卡也永远留在 DOM 里。
+   修法三层（缺一层都还会锁死）：
+      ① 看门狗：拖动中超过 DRAG_IDLE_MS 既没有 move 也没有 up → 判定指针流断了，清场
+      ② onDown 先验尸：drag 还在但早已没动静 → 先清场再接受这根手指
+      ③ pointercancel 只要 pid 对上 drag 或 pending 就清场（不只认 pending）
+   ⚠️ 千万别改成"数手指"：某次 pointerup 收不到就永久锁死，那是老师最烦的
+      "卡住只能刷新"。抢占式（谁先越过阈值谁拖，其余放弃）必须保留。 */
+var drag = null, pending = null, ghostRaf = null, gx = 0, gy = 0, dragWatch = null;
+// 「多久没动静就认定指针流断了」。不能太短：学生按住卡片想一下再拖是常态，
+// 0.9 秒会把这种慢拖当成断流清掉（卡会自己弹回去）。1.8 秒既救得回来，又不误杀。
+var DRAG_IDLE_MS = 1800;
+
+function stopDragWatch() {
+  if (dragWatch) { clearInterval(dragWatch); dragWatch = null; }
+}
+function beginDragWatch() {
+  stopDragWatch();
+  dragWatch = setInterval(function () {
+    if (!drag) { stopDragWatch(); return; }
+    if (Date.now() - (drag.lastT || 0) > DRAG_IDLE_MS) clearStrayGhosts();
+  }, 350);
+}
 
 function removeGhosts() {
   var gs = document.querySelectorAll('.drag-ghost');
@@ -25171,6 +25433,7 @@ function removeGhosts() {
 }
 function clearStrayGhosts() {
   removeGhosts();
+  stopDragWatch();
   var cards = document.querySelectorAll('.wcard.dragging');
   for (var i = 0; i < cards.length; i++) cards[i].classList.remove('dragging');
   drag = null; pending = null;
@@ -25183,12 +25446,16 @@ function onDown(e) {
   if (!S.playing || S.mode !== 'solo') return;
   var card = e.target && e.target.closest ? e.target.closest('.wcard') : null;
   if (!card) return;
-  if (drag || pending) return;                   // 已经有一根手指在忙 → 这根直接不参与
+  // ② 上一轮拖动的指针流可能已经断了（多手指 / 切后台 / 系统吃掉 up）。
+  //    卡住超过 DRAG_IDLE_MS 就先清场，别让这一整局都拖不动。
+  if (drag && Date.now() - (drag.lastT || 0) > DRAG_IDLE_MS) clearStrayGhosts();
+  if (drag || pending) return;                   // 真的还有一根手指在忙 → 这根不参与
   var idx = parseInt(card.dataset.i, 10);
   var st = S.cards[idx];
   if (!st || st.settled) return;
   pending = { card: card, idx: idx, pid: e.pointerId, x0: e.clientX, y0: e.clientY,
-              didDrag: false, gaveUp: false, ghost: null, offX: 0, offY: 0 };
+              didDrag: false, gaveUp: false, ghost: null, offX: 0, offY: 0,
+              lastT: Date.now() };
   try { card.setPointerCapture(e.pointerId); } catch (err) {}
   if (e.cancelable) e.preventDefault();          // 触摸拖拽时别让页面跟着滚
 }
@@ -25204,17 +25471,21 @@ function startDrag(d, e) {
   d.ghost = g;
   d.offX = d.x0 - r.left;
   d.offY = d.y0 - r.top;
+  d.lastT = Date.now();
   drag = d;
   d.card.classList.add('dragging');
   document.body.classList.add('dragging');
+  beginDragWatch();                 // ① 指针流断了也能自己收场
   moveGhost(e.clientX, e.clientY);
 }
 function moveGhost(x, y) {
   gx = x; gy = y;
+  if (drag) drag.lastT = Date.now();
   if (ghostRaf !== null) return;
   ghostRaf = requestAnimationFrame(function () {
     ghostRaf = null;
     if (!drag || !drag.ghost) return;
+    drag.lastT = Date.now();
     drag.ghost.style.left = '0px';
     drag.ghost.style.top = '0px';
     drag.ghost.style.transform = 'translate3d(' + (gx - drag.offX) + 'px,' + (gy - drag.offY) + 'px,0)';
@@ -25265,6 +25536,7 @@ function onUp(e) {
 }
 function commitDrag(d, box) {
   drag = null;
+  stopDragWatch();
   document.body.classList.remove('dragging');
   if (d.ghost) { d.ghost.remove(); d.ghost = null; }
   if (d.card) d.card.classList.remove('dragging');
@@ -25816,15 +26088,19 @@ function bind() {
   document.addEventListener('pointerdown', onDown, { passive: false });
   document.addEventListener('pointermove', onMove, { passive: false });
   document.addEventListener('pointerup', onUp, { passive: true });
+  // ③ 指针被系统取消（多手指、手势识别、来电）→ 只要是我们跟的那根就整块清场。
+  //    以前只认 pending，但拖动中 drag 和 pending 是同一个对象、
+  //    而"取消"往往发生在已经起拖之后，只清 pending 会留下幽灵卡和锁死的 drag。
   document.addEventListener('pointercancel', function (e) {
-    var d = pending;
+    var d = drag || pending;
     if (!d || e.pointerId !== d.pid) return;
-    pending = null;
-    if (d.card) d.card.classList.remove('dragging');
-    if (d.ghost) { d.ghost.remove(); d.ghost = null; }
-    drag = null;
-    document.body.classList.remove('dragging');
+    clearStrayGhosts();
   }, { passive: true });
+  // 切后台 / 失焦：指针流一定断，回来时不能还挂着半次拖动
+  window.addEventListener('blur', clearStrayGhosts);
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) clearStrayGhosts();
+  });
 
   window.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' || e.key === 'Esc') {
@@ -30102,7 +30378,7 @@ else init();
   var gSpot = document.getElementById('guideSpot');
   var gSpotTimer = null;
 
-  function gPlaceSpot() {
+  function gPlaceSpot(afterScroll) {
     if (!gMask) return;
     var st = GUIDE[gIdx];
     // 选择器可以写逗号分隔的多个（"分类大师 + 考核中心"这种一步讲两样）
@@ -30110,6 +30386,15 @@ else init();
     if (!els.length || !gSpot) {
       if (gSpot) gSpot.classList.remove('on');
       gMask.classList.remove('holes');
+      return;
+    }
+    // ★ 窄屏：讲解卡贴在屏幕底部，所以目标要是也在下半屏就会被卡片压住
+    //   （抽屉里 9 个条目 + 设置排，最后几步讲的东西全在下面）。
+    //   先把目标滚到抽屉中间再量位置 —— 只滚这一次，避免和"重试"互相打架。
+    var narrow = window.matchMedia && window.matchMedia('(max-width:600px)').matches;
+    if (narrow && !afterScroll && els[0] !== panel && panel.contains(els[0])) {
+      try { els[0].scrollIntoView({ block: 'center' }); } catch (e) {}
+      gSpotTimer = setTimeout(function () { gPlaceSpot(true); }, 140);
       return;
     }
     var L0 = Infinity, T0 = Infinity, R0 = -Infinity, B0 = -Infinity, seen = false;
@@ -30121,7 +30406,7 @@ else init();
       R0 = Math.max(R0, q.right); B0 = Math.max(B0, q.bottom);
     });
     if (!seen) {                              // 元素还没排好（抽屉在滑），下次重试
-      gSpotTimer = setTimeout(gPlaceSpot, 120);
+      gSpotTimer = setTimeout(function () { gPlaceSpot(afterScroll); }, 120);
       return;
     }
     gMask.classList.add('holes');
@@ -30130,6 +30415,12 @@ else init();
     var L = Math.max(0, L0 - pad), T = Math.max(0, T0 - pad);
     var W = Math.min(window.innerWidth - L, (R0 - L0) + pad * 2);
     var H = Math.min(window.innerHeight - T, (B0 - T0) + pad * 2);
+    // 窄屏的讲解卡占住底部 46vh：聚光灯的洞高别跨进卡片里，
+    // 否则"亮着的地方"正被卡片盖着，看着就是卡住不动
+    if (narrow) {
+      var cardTop = window.innerHeight * 0.54;
+      if (T + H > cardTop) H = Math.max(44, cardTop - T - 6);
+    }
     gSpot.style.left = L + 'px';
     gSpot.style.top = T + 'px';
     gSpot.style.width = W + 'px';
