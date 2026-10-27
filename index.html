@@ -28584,7 +28584,31 @@ function setView(v) {
     var el = $(k);
     el.classList.toggle('on', k === v);
   });
+  forceCloseOverlays();
   window.scrollTo(0, 0);
+}
+
+/* 兜底：换页时如果还有浮层挂着，就关掉它。
+   ⚠️ 老师报过"结束之后除了靶标点不动任何按钮" —— 那就是某个遮罩
+      （.sheet-mask / .tut-mask）没关，整页的点击都被它吃了。
+      这里给一次自愈，别让状态残留把整页锁死。
+   ⚠️ 教学进行中不能碰 tutMask（讲解卡还开着的时候，遮罩是它的一部分）。 */
+function forceCloseOverlays() {
+  var sm = document.getElementById('sheetMask');
+  if (sm) sm.classList.remove('on');
+  ['confirmSheet', 'wrongSheet', 'helpSheet'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('on');
+    el.setAttribute('aria-hidden', 'true');
+  });
+  var tc = document.getElementById('tutCard');
+  var tm = document.getElementById('tutMask');
+  if (tm && tc && !tc.classList.contains('on')) {
+    tm.classList.remove('on');
+    var ts = document.getElementById('tutSpot');
+    if (ts) ts.classList.remove('on');
+  }
 }
 
 /* ============================================================
@@ -29379,7 +29403,20 @@ function bind() {
     toast('错题本已清空', 1800);
   });
 
-  $('tutBtn').addEventListener('click', function () { sfxTap(); setView('setup'); tutShow(); });
+  /* ⚠️ 以前这里无条件 setView('setup') —— 老师正在答题时手滑点了「🎬 教学」，
+     视图立刻被切回设置页，看起来就是"考核莫名其妙退出"（卷子其实还在，
+     但人已经不在那一页了，而且后面收尾还会把卷子真的退掉）。
+     教学讲的是设置流程，答题中本来也没法看，所以直接在答题页拒掉。 */
+  $('tutBtn').addEventListener('click', function () {
+    sfxTap();
+    if ($('quiz') && $('quiz').classList.contains('on')) {
+      toast('正在考核中，先点「结束考核」再看教学', 2400);
+      return;
+    }
+    if ($('result') && $('result').classList.contains('on') && $('backSetupBtn')) $('backSetupBtn').click();
+    setView('setup');
+    tutShow();
+  });
   $('tutNext').addEventListener('click', function () { tutNext(); });
   $('tutClose').addEventListener('click', function () { tutHide(); });
   tutMask.addEventListener('click', function (e) { if (e.target === tutMask) tutHide(); });
@@ -29443,12 +29480,18 @@ var tutMask = $('tutMask'), tutSpot = $('tutSpot'), tutCard = $('tutCard');
 function tutShow() {
   TUT.running = true;
   TUT.i = 0;
+  // 记下"开始教学时是不是已经在答题" —— 收尾时只退教学自己开的那一局，
+  // 老师本来就在考试中的话，关掉教学绝不能把他的卷子退掉。
+  TUT.wasQuiz = !!($('quiz') && $('quiz').classList.contains('on'));
   tutMask.classList.add('on');
   tutSpot.classList.add('on');
   tutCard.classList.add('on');
   tutStep();
 }
 function tutHide() {
+  // 教学没在跑就什么都别做。否则 tutClose 这种按钮一旦被误触（教学已经关了、
+  // 或者根本没开），下面的收尾逻辑会把正在进行的考核当成"教学开的局"退掉。
+  if (!TUT.running) return;
   TUT.running = false;
   if (TUT.timer) { clearTimeout(TUT.timer); TUT.timer = null; }
   tutMask.classList.remove('on');
@@ -29457,17 +29500,27 @@ function tutHide() {
   var taps = document.querySelectorAll('.tut-tap');
   for (var i = 0; i < taps.length; i++) taps[i].remove();
   try { lsSet(TUT_KEY, '1'); } catch (e) {}
-  // 收尾：把界面还原到设置页，别把老师丢在半场游戏里
+  // 收尾：只退**教学自己点开的那一局**。
+  // ⚠️ 以前这里是"只要现在在答题页就退掉" —— 老师正在考试时手滑点了「🎬 教学」，
+  //    关掉教学卷子就被莫名退了（他报的"考核莫名其妙退出"就是这个）。
+  //    wasQuiz 在 tutShow 时记下，进来时已在答题的，一律不动。
+  var inQuiz = !!($('quiz') && $('quiz').classList.contains('on'));
+  var selfStarted = inQuiz && !TUT.wasQuiz;
   try {
-    if ($('quiz') && $('quiz').classList.contains('on') && $('quitBtn')) {
+    if (selfStarted && $('quitBtn')) {
       $('quitBtn').click();
       setTimeout(function () { try { if ($('cfYes')) $('cfYes').click(); } catch (e) {} }, 120);
     }
   } catch (e) {}
-  try { if ($('result') && $('result').classList.contains('on')) $('backSetupBtn').click(); } catch (e) {}
-  setTimeout(function () {
-    try { if ($('setup') && !$('setup').classList.contains('on') && $('backSetupBtn')) $('backSetupBtn').click(); } catch (e) {}
-  }, 120);
+  if (selfStarted) {
+    try { if ($('result') && $('result').classList.contains('on')) $('backSetupBtn').click(); } catch (e) {}
+    setTimeout(function () {
+      try { if ($('setup') && !$('setup').classList.contains('on') && $('backSetupBtn')) $('backSetupBtn').click(); } catch (e) {}
+    }, 140);
+  }
+  // 兜底：面板全关掉。老师说的"结束之后除了靶标点不动"就是某层遮罩残留。
+  setTimeout(forceCloseOverlays, 260);
+  TUT.wasQuiz = false;
 }
 function tutTapAt(el) {
   if (!el) return;
