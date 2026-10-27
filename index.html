@@ -24808,6 +24808,38 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     .toast.on { transform: translate(-50%, 0); }
 }
 
+
+/* ---------- 判定完的卡片：留在原位当"对错记录" ----------
+   绿 = 放对、红 = 放错，第二行写它真正的分类 / 词性。
+   （以前判定完 260ms 就把卡删掉，学生回头看不出自己放错了哪些词） */
+.wcard.settled {
+    flex-direction: column;
+    gap: 0;
+    min-width: auto;
+    padding: 4px 11px;
+    line-height: 1.14;
+    cursor: default;
+    pointer-events: none;
+}
+.wcard.settled .wt {
+    font-size: .96em;
+    font-weight: 800;
+}
+.wcard.settled .wc {
+    margin-top: 1px;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+    opacity: .94;
+    white-space: nowrap;
+}
+.glass-mode .wcard.settled .wc { opacity: .9; }
+@media (max-height: 520px) {
+    .wcard.settled { padding: 2px 9px; }
+    .wcard.settled .wt { font-size: .9em; }
+    .wcard.settled .wc { font-size: .62rem; }
+}
+
 </style>
 </head>
 <body>
@@ -25547,13 +25579,45 @@ function commitDrag(d, box) {
   judgeDrop(st, box.dataset.cat, box);
 }
 
+/* 词性的中文名：题库里存的是 n. / v. / adj. 这种记号，小学生看不出来 */
+var POS_CN = {
+  'n.': '名词', 'v.': '动词', 'adj.': '形容词', 'adv.': '副词',
+  'pron.': '代词', 'num.': '数词', 'prep.': '介词', 'conj.': '连词',
+  '主语': '主语', '名词所有格': '名词所有格'
+};
+/* 这张卡"应该放哪" —— 给判完的卡片上写的那行小字 */
+function catLabelOf(w) {
+  var cs = catsOf(w);
+  if (!cs.length) return '';
+  if (S.optPos) {
+    return cs.map(function (c) { return POS_CN[c] ? (POS_CN[c] + ' ' + c) : c; }).join(' / ');
+  }
+  return cs.join(' / ');
+}
+
 function judgeDrop(st, cat, box) {
   if (!box) return;
   var ok = catsOf(st.w).indexOf(cat) >= 0;
   st.settled = true; st.ok = ok; S.settled++;
+  /* ★ 卡片**留在原位**变成一张对错记录（老师 2026-10-26 要求）：
+     以前判定完 260ms 就把卡删了，学生只看到它闪一下，回头看不出
+     自己哪些词放对、哪些放错，更看不到那个词到底该归哪一类。
+     现在：绿卡 = 放对，红卡 = 放错；卡上第二行写它真正的分类 / 词性。 */
   if (st.el) {
     st.el.classList.add(ok ? 'done-ok' : 'done-no');
-    setTimeout(function () { if (st.el && st.el.parentNode) st.el.remove(); }, ok ? 260 : 520);
+    st.el.classList.add('settled');
+    st.el.setAttribute('aria-label',
+      st.w.en + '（' + (ok ? '放对：' : '放错，应属：') + catLabelOf(st.w) + '）');
+    st.el.textContent = '';
+    var wt = document.createElement('span');
+    wt.className = 'wt';
+    wt.textContent = st.w.en;
+    var wc = document.createElement('span');
+    wc.className = 'wc';
+    var label = catLabelOf(st.w);
+    wc.textContent = ok ? label : ('应属 ' + label);
+    st.el.appendChild(wt);
+    st.el.appendChild(wc);
   }
   if (ok) {
     S.score += SCORE_OK; S.hit++; sfxOk();
@@ -25577,12 +25641,13 @@ function judgeDrop(st, cat, box) {
   }
   updateStatus();
   if (S.settled >= S.cards.length) {
+    // 整轮都放完了：留一会儿让学生把 6 张对错卡扫一眼，再翻下一轮
     setTimeout(function () {
       if (!S.playing) return;
       S.roundIdx++;
       if (S.roundIdx >= S.rounds.length) finishSolo();
       else renderRound();
-    }, 800);
+    }, 1300);
   }
 }
 
