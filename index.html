@@ -29424,14 +29424,19 @@ function paintUnits() {
   }
 }
 
-/* 这一版教材里根本不存在的题型（不是"出了但灰掉"）：
-   · 卷面题：内容是人教四上的
-   · 句子排序：接力版没有句子语料
-   隐藏掉，也不参与「题型必须全考」的判定 —— 否则一选接力版就永远开不了考。 */
-function typeHidden(T) {
-  if (T.paper) return !paperSupported();
-  if (T.k === 'order' && S.publisher === 'jieli') return true;
-  return false;
+/* 当前范围里用不了的题型 → 返回**原因**（null = 能用）。
+   ⚠️ 用不了的照样画出来（画成锁死的灰芯片），只是不参与「题型必须全考」的判定。
+      第一版是直接隐藏，老师选了非四上就看不见卷面题，看起来像"根本没做" ——
+      「默认关着/隐藏 = 老师以为你没做」这条纪律又踩了一次。 */
+function typeUnavailable(T) {
+  if (T.paper) {
+    if (S.publisher === 'jieli') return '接力版没有卷面题';
+    if (!S.book) return null;                       // 还没选册，先别下结论
+    if (!EXAM_PAPER[S.book]) return '卷面题只有四年级上册有';
+    return null;
+  }
+  if (T.k === 'order' && S.publisher === 'jieli') return '接力版没有句子语料';
+  return null;
 }
 
 function availableTypes() {
@@ -29446,13 +29451,11 @@ function availableTypes() {
   out.read = pool.length >= 2;
   out.match = pool.length >= 2;
   // 卷面题只有四上有题库；其余册一律**不出现**这四个题型（不是"出了但灰掉"）
-  var pb = paperBlocks();
-  var hasPaper = paperSupported() &&
-    (pb.cloze.length + pb.words.length + pb.dialog.length + pb.tf.length > 0);
-  out.cloze = hasPaper && pb.cloze.length > 0;
-  out.words = hasPaper && pb.words.length > 0;
-  out.dialog = hasPaper && pb.dialog.length > 0;
-  out.tf = hasPaper && pb.tf.length > 0;
+  // 只要这一版有卷面题库就算"能出"（具体抽几道由所勾单元决定）
+  out.cloze = paperSupported();
+  out.words = paperSupported();
+  out.dialog = paperSupported();
+  out.tf = paperSupported();
   return out;
 }
 
@@ -29462,21 +29465,23 @@ function paintTypes() {
   var av = availableTypes();
   var blocked = [];
   TYPES.forEach(function (T) {
-    // 这一版教材里没有的题型：压根不画出来（灰芯片会被当成"出错了"）
-    if (typeHidden(T)) return;
-    var ok = av[T.k];
+    var why = typeUnavailable(T);
+    var ok = av[T.k] && !why;
     /* ★ 四种题型是**固定的**（老师要求"全部功能都要考"），所以这里画成"锁定的已选"：
        满色 + 一把小锁 + disabled。点它不会有任何反应，也不该有反应 ——
        ⚠️ 别用 .chip[disabled] 那套"灰掉"，那看起来像"不许选"，而不是"已固定"。 */
     var b = chip(T.nm, { ic: T.ic, on: true, cls: ok ? 'locked' : 'locked dead', disabled: true });
-    b.setAttribute('aria-label', T.nm + '（固定要考）：' + T.ds);
-    b.title = T.ds;
-    if (!ok) { blocked.push(T.nm); }
+    var note = why ? ('这次不考：' + why) : '固定要考';
+    b.setAttribute('aria-label', T.nm + '（' + note + '）：' + T.ds);
+    b.title = T.ds + '　—— ' + note;
+    b.dataset.note = why ? why : '';
+    if (why) blocked.push(T.nm + '（' + why + '）');
+    else if (!ok) blocked.push(T.nm);
     box.appendChild(b);
   });
   if (!S.book) { hint.textContent = '先选册和单元，题型会跟着变。'; hint.className = 'bhint'; return; }
   if (blocked.length) {
-    hint.textContent = '⚠️ 当前范围里出不了这几种题：' + blocked.join('、') + ' —— 换一个册或单元。';
+    hint.textContent = '本次不考：' + blocked.join('；') + '。其余题型固定全考，不用选。';
     hint.className = 'bhint warn';
   } else {
     hint.textContent = (paperSupported() ? '单词四种 + 卷面四种' : '四种单词题')
@@ -29515,7 +29520,7 @@ function paintStart() {
      （老师的要求是"全部功能都要考"）。目前八册都能出全，这条是数据回退时的保险。 */
   var av = availableTypes();
   var missing = TYPES.filter(function (T) {
-    if (typeHidden(T)) return false;
+    if (typeUnavailable(T)) return false;      // 这一版本来就考不了的，不算"缺"
     return !av[T.k];
   }).map(function (T) { return T.nm; });
   var ok = !!S.book && S.units.length > 0 && missing.length === 0;
