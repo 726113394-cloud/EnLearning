@@ -24034,7 +24034,7 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
         .glass-mode .card:hover .card-shine { opacity: 0; }
     }
 
-/* ============================================================
+﻿/* ============================================================
    分类大师（在「中英消消乐」骨架上改）
    · 棋盘从"两张卡配对"换成"词卡 → 类别框"
    · 配色统一站台的蓝→粉；不开高级渲染时是扁平的实色块，
@@ -24840,6 +24840,52 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     .wcard.settled .wc { font-size: .62rem; }
 }
 
+/* ⚠️ 横屏下必须给屏幕左右留一条"安全边"。
+   站台点「🔄 横屏」是把 #stage 转 90°，所以工具坐标系里的**上下**
+   就是手机的**左右**边 —— 而现在这些位置放的是 header 的按钮和底部的
+   类别框，学生拖着卡从边上经过就会触发系统的返回手势。
+   给 body 加 16px 上下内边距，等于在手机左右各让出 16px。 */
+@media (max-height: 520px) {
+    body {
+        padding: 24px 0 !important;
+        height: 100dvh !important;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+    /* 容器跟着 body 的内容区算（100dvh 减去那 32px 安全边），否则会溢出 */
+    .game-container {
+        height: 100%;
+        padding: 4px 8px;
+    }
+}
+
+/* ---------- PK / 抢答的版面差异 ----------
+   题面在顶部中央，浮字按 solo 的位置（top:26%）正好压住那个单词；
+   底部那三个数字（剩余/对/错）在抢答里没有意义，留着只会误导。 */
+body.pk-mode .bonus-popup {
+    top: auto;
+    bottom: 118px;
+}
+body.pk-mode .status-bar {
+    justify-content: flex-end;
+}
+body.pk-mode .status-bar .info {
+    display: none;
+}
+@media (max-height: 520px) {
+    body.pk-mode .bonus-popup {
+        bottom: 74px;
+        font-size: 15px;
+        padding: 8px 16px;
+    }
+}
+
+/* 揭晓后没被选中的选项也要看得出来"点不了了" */
+.pcard .po button[disabled]:not(.good):not(.bad) {
+    opacity: .48;
+    cursor: default;
+}
+
 </style>
 </head>
 <body>
@@ -24964,8 +25010,8 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
             <p class="pk-sub">分类大师 · 人教版小学英语</p>
             <div class="pk-sec">🖐 大屏拖拽</div>
             <p class="pk-sub" style="margin-bottom:8px;">把单词卡拖进它属于的类别框（水果 / 动物 / 颜色…）。放对 <b>+10</b>，放错 <b>−5</b>。一轮 6 张卡、3 个类别框，共 3 轮。</p>
-            <div class="pk-sec">⚔️ 多人 PK</div>
-            <p class="pk-sub" style="margin-bottom:8px;">题目区显示一个单词，每个玩家在自己那张卡上选 A/B/C/D。对 <b>+2</b>、错 <b>−1</b>，所有人都答完就揭晓。</p>
+            <div class="pk-sec">⚔️ 多人抢答</div>
+            <p class="pk-sub" style="margin-bottom:8px;">题目区显示一个单词，几个学生抢着点自己卡上的 A/B/C/D。<br><b>谁先选对谁得分（+2），这题立刻结束</b>，慢的人就没机会了；抢错扣 1 分，且这题不能再答。</p>
             <div class="pk-sec">⚡ 两个进阶开关</div>
             <p class="pk-sub" style="margin-bottom:8px;"><b>按词性分类</b>：类别改成名词 / 动词 / 形容词这些，练语法。<br><b>题库扩到已学全部</b>：题目从三年级到所选单元学过的所有词里抽（复习用）。</p>
             <div class="pk-sec">💡 一个词可能属于几类</div>
@@ -25297,6 +25343,7 @@ function renderRound() {
   S.settled = 0;
   S.boxes = {};
 
+  document.body.classList.remove('pk-mode');
   var board = $('gameBoard');
   board.innerHTML = '';
   board.classList.remove('idle');
@@ -25702,6 +25749,12 @@ function startPk() {
 function renderPk() {
   var q = S.pkQs[S.pkIdx];
   if (!q) { finishPk(); return; }
+  // 每题开抢前把"已被抢到"清掉（换题时这题一定是新的，属于保险）
+  q.solved = false;
+  q.winner = null;
+  // PK 版面和 solo 不一样：浮字要挪到下面（题面在上方，popup 居中会挡住单词），
+  // 底部那三个数字（剩余/对/错）在抢答里也没有意义
+  document.body.classList.add('pk-mode');
   S.players.forEach(function (p) { p.pick = null; p.locked = false; });
 
   var board = $('gameBoard');
@@ -25715,7 +25768,7 @@ function renderPk() {
   var head = document.createElement('div');
   head.className = 'pk-head';
   var l = document.createElement('span');
-  l.textContent = '⚔️ 多人 PK';
+  l.textContent = '⚔️ 抢答 · 谁快谁得分';
   var r = document.createElement('span');
   r.innerHTML = '第 <b id="pkNo">' + (S.pkIdx + 1) + '</b> / <b id="pkAll">' + S.pkQs.length + '</b> 题';
   head.appendChild(l); head.appendChild(r);
@@ -25788,10 +25841,11 @@ function removePlayer(id) {
   afterPlayersChange();
 }
 
-/* 删完玩家后：如果剩下的人都已经答完，得立刻揭晓，否则界面会卡在"等所有人" */
+/* 删玩家 / 抢到之后：只要这题已经有结果，或者剩下的全 locked，就揭晓 */
 function afterPlayersChange() {
   var q = S.pkQs[S.pkIdx];
   if (!q || !S.players.length) return;
+  if (q.solved) { revealPk(); return; }
   var allDone = S.players.every(function (p) { return p.locked; });
   if (allDone) revealPk();
 }
@@ -25840,7 +25894,8 @@ function paintPlayers() {
       b.type = 'button';
       b.textContent = 'ABCD'.charAt(i) + ' ' + opt;
       b.dataset.opt = opt;
-      if (p.locked) b.disabled = true;
+      // 抢到了（q.solved）之后谁都不能再点 —— 这题已经结束
+      if (p.locked || q.solved) b.disabled = true;
       if (p.pick === opt) {
         b.classList.add(p.locked ? (q.correctList.indexOf(opt) >= 0 ? 'good' : 'bad') : 'pick');
       }
@@ -25852,13 +25907,27 @@ function paintPlayers() {
   });
 }
 
+/* ---------- 抢答：谁先选对，这题就归他 ----------
+   ⚠️ 这不是"每人各答一遍再一起揭晓"（老师 2026-10-26 明确要求抢答）。
+   q.solved 一旦置真，这一题就锁了：慢的人按钮直接 disabled，点不动。
+   抢错的人扣 1 分并失去这一题的作答权（locked），剩下的人还能接着抢；
+   全员都抢错才揭晓答案，那题没人得分。 */
 function answerPk(p, opt) {
-  if (p.locked) return;
+  if (!p || p.locked) return;
   var q = S.pkQs[S.pkIdx];
-  p.pick = opt; p.locked = true;
+  if (!q || q.solved) return;              // 已经有人抢到了
   var ok = q.correctList.indexOf(opt) >= 0;
-  p.score += ok ? PK_OK : PK_BAD;
-  if (ok) sfxOk(); else sfxBad();
+  p.pick = opt; p.locked = true;
+  if (ok) {
+    p.score += PK_OK;
+    q.solved = true;
+    q.winner = p;
+    sfxOk();
+    showPopup('🏆 ' + p.name + ' 抢到！+' + PK_OK, '正确答案：' + catIcon(q.correctList[0]) + ' ' + q.correctList[0]);
+  } else {
+    p.score += PK_BAD;
+    sfxBad();
+  }
   paintPlayers();
   afterPlayersChange();
 }
@@ -25867,19 +25936,21 @@ function revealPk() {
   var q = S.pkQs[S.pkIdx];
   var slot = $('pkSlot');
   if (!slot || slot.querySelector('.pk-reveal')) return;
-  var allRight = S.players.length && S.players.every(function (p) {
-    return q.correctList.indexOf(p.pick) >= 0;
-  });
   var bar = document.createElement('div');
   bar.className = 'pk-reveal';
+
   var tx = document.createElement('span');
-  tx.className = allRight ? 'pr-good' : 'pr-bad';
-  tx.textContent = allRight ? '✅ 全对！' : '正确答案：';
+  tx.className = q.solved ? 'pr-good' : 'pr-bad';
+  tx.textContent = q.solved
+    ? ('🏆 ' + q.winner.name + ' 抢到！+' + PK_OK)
+    : '没人抢对';
   bar.appendChild(tx);
+
   var ans = document.createElement('b');
   ans.textContent = catIcon(q.correctList[0]) + ' ' + q.correctList[0] +
     (q.correctList.length > 1 ? '（' + q.correctList.slice(1).join(' / ') + ' 也算对）' : '');
   bar.appendChild(ans);
+
   var nb = document.createElement('button');
   nb.type = 'button';
   nb.id = 'pkNextBtn';
@@ -26041,6 +26112,7 @@ function resetAll() {
   S.rounds = []; S.roundIdx = 0; S.cards = []; S.boxes = {}; S.settled = 0;
   S.score = 0; S.hit = 0; S.miss = 0; S.total = 0; S.elapsed = 0;
   S.pkQs = []; S.pkIdx = 0;
+  document.body.classList.remove('pk-mode');
   var board = $('gameBoard');
   board.classList.remove('idle');
   renderIdle();
@@ -26714,7 +26786,8 @@ window.__catAPI = {
 
         { ico: '🎮', h: '两种玩法随便挑', sel: '#modeSelect', loopMs: 0,
           p: '<b>🖐 大屏拖拽</b>：一个人或全班一起，把单词拖进类别框。<br>' +
-            '<b>⚔️ 多人 PK</b>：一个单词、几个学生抢答，每人一张卡上选 A/B/C/D，所有人答完就揭晓。',
+            '<b>⚔️ 多人抢答</b>：一个单词亮出来，几个学生抢着选自己卡上的 A/B/C/D —— ' +
+            '<b>谁先选对谁得分，这题立刻结束</b>；抢错扣分，且这题不能再答。',
           run: function () { spotOn([byId('modeSelect')], 8); } },
 
         { ico: '🚀', h: '点开始，棋盘就出来了', sel: '#startBtn', loopMs: 2600,
