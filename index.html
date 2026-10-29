@@ -29836,13 +29836,48 @@ function activeTypeKeys() {
 
 function askPassword(then) {
   if (pwFresh()) { then(); return; }
-  var v = window.prompt('老师口令（输对后 30 秒内不用再输）');
-  if (v === null) return;                       // 取消
-  if (String(v).trim() !== PW_CODE) { toast('口令不对，再试一次', 2200); sfxBad(); return; }
-  pwOkAt = Date.now();
-  sfxOk();
-  toast('已解锁，30 秒内不用再输口令', 2000);
-  then();
+  var host = $('pwRow');
+  if (!host) {
+    // 输入行直接挂在题型区下面：不遮页面、不是弹层，浏览器也不会拦
+    var box = $('typeChips');
+    if (!box || !box.parentNode) { then(); return; }
+    host = document.createElement('div');
+    host.id = 'pwRow';
+    host.style.cssText = 'display:flex;gap:8px;align-items:center;flex-wrap:wrap;' +
+      'margin-top:10px;padding:8px 10px;border-radius:12px;' +
+      'background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.25)';
+    host.innerHTML = '<span style="font-size:.92rem">🔒 改题型要老师口令</span>' +
+      '<input id="pwInline" type="tel" inputmode="numeric" maxlength="8" autocomplete="off" ' +
+      'aria-label="老师口令" style="width:110px;min-height:44px;text-align:center;' +
+      'letter-spacing:.3em;font-size:1.05rem;border-radius:10px;' +
+      'border:1px solid rgba(20,40,70,.25);background:#fff;color:#1d3354">' +
+      '<button class="mini" id="pwGo" type="button">确定</button>' +
+      '<button class="mini" id="pwCancel" type="button">取消</button>' +
+      '<span id="pwMsg" style="font-size:.85rem;color:#b91c1c"></span>';
+    box.parentNode.appendChild(host);
+    var close = function () { if (host.parentNode) host.parentNode.removeChild(host); };
+    var verify = function () {
+      var inp = $('pwInline'), msg = $('pwMsg');
+      if (!inp) return;
+      if (inp.value.trim() !== PW_CODE) {
+        if (msg) msg.textContent = '口令不对';
+        sfxBad();
+        return;
+      }
+      pwOkAt = Date.now();
+      sfxOk();
+      toast('已解锁，30 秒内不用再输口令', 2000);
+      close();
+      try { then(); } catch (e) { console.error(e); }
+    };
+    $('pwGo').addEventListener('click', verify);
+    $('pwCancel').addEventListener('click', function () { sfxTap(); close(); });
+    $('pwInline').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); verify(); }
+    });
+  }
+  var i2 = $('pwInline');
+  if (i2) { try { i2.focus(); } catch (e) {} }
 }
 
 function availableTypes() {
@@ -29911,7 +29946,7 @@ function toggleType(k) {
       sfxTap();
     } else {
       if (WORD_TYPES.indexOf(k) >= 0 && activeWordTypes().length <= 1) {
-        toast('单词题型至少要留一种', 2600);
+        toast('单词题型得留至少一种：先打开听音选词或中英配对，再取消这个', 3200);
         sfxBad();
         return;
       }
@@ -30824,6 +30859,7 @@ function paintSettings() {
 }
 
 function finishQuiz(quit) {
+  forceCloseOverlays();          // 先收浮层，保证成绩页可见、可点
   stopClock();
   S.locked = true;
   stopAudioAttempt();
@@ -31013,6 +31049,7 @@ function openSheet(id) {
 function closeSheet() {
   openSheets.forEach(function (id) {
     var el = $(id);
+    if (!el) return;              // 残留的旧 id 不能把"关浮层"整个打断
     el.classList.remove('on');
     el.setAttribute('aria-hidden', 'true');
   });
@@ -31158,8 +31195,21 @@ function bind() {
   $('hsOk').addEventListener('click', function () { backTap(); closeSheet(); });
   $('sheetMask').addEventListener('click', function () { backTap(); closeSheet(); });
 
-  $('cfYes').addEventListener('click', function () { tap(); var f = cfYes; cfYes = cfNo = null; if (f) f(); });
-  $('cfNo').addEventListener('click', function () { backTap(); var f = cfNo; cfYes = cfNo = null; if (f) f(); else closeSheet(); });
+  $('cfYes').addEventListener('click', function () {
+    tap(); var f = cfYes; cfYes = cfNo = null;
+    try {
+      if (f) f();
+    } catch (e) {
+      // 老师报过「点结束考核后整页被遮罩盖住、点不动」：回调里一抛错，浮层就可能收不干净。
+      forceCloseOverlays();
+      toast('这一步出错了：' + (e && e.message ? e.message : e), 4000);
+      console.error(e);
+    }
+  });
+  $('cfNo').addEventListener('click', function () {
+    backTap(); var f = cfNo; cfYes = cfNo = null;
+    try { if (f) f(); else closeSheet(); } catch (e) { forceCloseOverlays(); console.error(e); }
+  });
 
   $('glassToggleBtn').addEventListener('click', function () {
     var on = !document.body.classList.contains('advanced');
