@@ -1069,6 +1069,45 @@ body.liquid .resume button{backdrop-filter:blur(14px) saturate(160%);
   .pnav > .panel-sec{display:none}
   .pnav{gap:3px}
 }
+
+/* ===== 进工具时的加载遮罩（只盖工具区） ===== */
+.tool-loading{
+  position:absolute; inset:0; z-index:40;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(248,250,253,.86);
+  -webkit-backdrop-filter:saturate(120%); backdrop-filter:saturate(120%);
+  opacity:0; pointer-events:none; transition:opacity .28s ease;
+}
+.tool-loading.on{opacity:1; pointer-events:auto}
+.tl-card{
+  display:flex; flex-direction:column; align-items:center; gap:12px;
+  padding:22px 28px; border-radius:18px; max-width:78%;
+  background:rgba(255,255,255,.92); border:1px solid rgba(20,40,70,.08);
+  box-shadow:0 18px 40px -18px rgba(20,40,70,.35);
+  color:#1d3354; text-align:center;
+}
+.tl-card b{font-size:1.05rem; font-weight:700}
+.tl-card small{font-size:.82rem; color:#5b708f; line-height:1.5}
+.tl-dot{
+  width:34px; height:34px; border-radius:50%;
+  border:3px solid rgba(37,99,235,.18); border-top-color:#2563eb;
+  animation:tl-spin .9s linear infinite;
+}
+.tl-bar{
+  position:relative; display:block; width:200px; height:6px; border-radius:99px;
+  background:rgba(37,99,235,.14); overflow:hidden;
+}
+.tl-bar em{
+  position:absolute; top:0; left:-40%; width:40%; height:100%; border-radius:99px;
+  background:linear-gradient(90deg,#3b82f6,#60a5fa);
+  animation:tl-slide 1.15s ease-in-out infinite;
+}
+@keyframes tl-spin{to{transform:rotate(360deg)}}
+@keyframes tl-slide{0%{left:-40%}60%{left:60%}100%{left:100%}}
+@media (prefers-reduced-motion: reduce){
+  .tl-dot{animation:none}
+  .tl-bar em{animation:none; left:0; width:100%; opacity:.65}
+}
 </style>
 </head>
 <body>
@@ -32063,6 +32102,25 @@ else init();
       '<scr' + 'ipt>window.__REAL_PROTOCOL__=' + JSON.stringify(REAL_PROTOCOL) + ';<\/scr' + 'ipt>' +
       tpl.innerHTML;
     stage.appendChild(el);
+    /* ★ 进工具时的加载遮罩（只盖工具区：抽屉 / 返回 / 靶标都在 stage 之外，照常可点）
+       老师反馈「进工具会卡一下，不知道在干嘛」。源码是整份写进 iframe 的 srcdoc
+       重新解析，那一下没有提示就像死机。装完（load）自动撤，另有兜底超时。 */
+    var veil = document.createElement('div');
+    veil.className = 'tool-loading on';
+    veil.setAttribute('role', 'status');
+    veil.setAttribute('aria-live', 'polite');
+    veil.innerHTML = '<div class=tl-card><span class=tl-dot></span>' +
+      '<b>正在准备工具…</b><i class=tl-bar><em></em></i>' +
+      '<small>首次进入要解析这个工具的整份代码，稍等一下</small></div>';
+    stage.appendChild(veil);
+    var veilOff = function () {
+      if (!veil || veil._off) return;
+      veil._off = true;
+      veil.classList.remove('on');
+      setTimeout(function () { if (veil.parentNode) veil.parentNode.removeChild(veil); }, 320);
+    };
+    el.addEventListener('load', function () { setTimeout(veilOff, 60); });
+    setTimeout(veilOff, 6000);            // 兜底：load 没触发也不能一直挡着
     // 工具载入后让它的高级渲染对齐总开关。
     // 先写键能覆盖大部分工具（它们启动时自己会读）；但句型建筑师在低配机上
     // 会**拒绝**自动恢复高级渲染，认读系统更是把状态存在 JSON 里 ——
