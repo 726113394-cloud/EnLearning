@@ -29065,7 +29065,7 @@ body.advanced .tbtn.active,body.advanced .mbtn.active{
   <div class="sh-bd">
     <ul class="helplist">
       <li><span class="hn">1</span><span><b>老师只选范围</b>：选一册 → 勾要考的单元（可多选）→ 点「开始考核」。其余配置都是固定的。</span></li>
-      <li><span class="hn">2</span><span><b>固定配置</b>：单词四种题型全考（四上再加卷面四题：句子填空 / 方框选词 / 补全对话 / 阅读判断）、<b>每个词考 3 遍</b>（三遍换三种题型）、<b>每题 30 秒</b>。都不用选，也不能改。</span></li>
+      <li><span class="hn">2</span><span><b>固定配置</b>：单词四种题型全考（四上再加卷面四题：句子填空 / 方框选词 / 补全对话 / 阅读判断）、<b>每个词考 3 遍</b>（三遍换三种题型）、<b>倒计时按题型给（20～150 秒）</b>。都不用选，也不能改。</span></li>
       <li><span class="hn">3</span><span><b>系统随机组卷</b>：每次考的题都不一样；每个单词考 3 遍，三遍换三种题型，同一遍里不会重复。</span></li>
       <li><span class="hn">4</span><span><b>做完就出成绩</b>：百分制分数 + <b>本次考核设置</b> + 逐题明细（含正确答案）；做错的题自动进<b>错题本</b>。</span></li>
       <li><span class="hn">5</span><span><b>错题可以重考</b>：右上角 📕，点「重考错题」只考错的那些题。</span></li>
@@ -29073,27 +29073,6 @@ body.advanced .tbtn.active,body.advanced .mbtn.active{
     </ul>
   </div>
   <div class="sh-ft"><span class="spacer"></span><button class="big" id="hsOk" type="button">知道了</button></div>
-</div>
-
-<!-- 口令框（只有"取消题型"才要，口令 1229） -->
-<div class="sheet" id="pwSheet" role="dialog" aria-modal="true" aria-labelledby="pwH" aria-hidden="true">
-  <div class="sh-bd cf">
-    <div class="cficon">🔒</div>
-    <h3 id="pwH">老师口令</h3>
-    <p>改动题型要老师确认。输入口令后 30 秒内不用再输。</p>
-    <p style="margin-top:10px">
-      <input id="pwInput" type="tel" inputmode="numeric" autocomplete="off" maxlength="8"
-             aria-label="老师口令"
-             style="font-size:1.4rem;letter-spacing:.3em;text-align:center;width:60%;min-height:52px;
-                    border-radius:12px;border:2px solid currentColor;background:transparent;color:inherit">
-    </p>
-    <p id="pwErr" class="bhint warn" style="min-height:1.2em"></p>
-  </div>
-  <div class="sh-ft">
-    <span class="spacer"></span>
-    <button class="mini" id="pwNo" type="button">取消</button>
-    <button class="big" id="pwYes" type="button">确定</button>
-  </div>
 </div>
 
 <!-- 确认框 -->
@@ -29818,24 +29797,13 @@ function activeTypeKeys() {
 
 function askPassword(then) {
   if (pwFresh()) { then(); return; }
-  var inp = $('pwInput'), err = $('pwErr');
-  if (!inp) { then(); return; }
-  inp.value = '';
-  if (err) { err.textContent = ''; }
-  openSheet('pwSheet');
-  setTimeout(function () { try { inp.focus(); } catch (e) {} }, 60);
-  pwPending = function () {
-    if (inp.value.trim() !== PW_CODE) {
-      if (err) err.textContent = '口令不对，再试一次';
-      sfxBad();
-      return;
-    }
-    pwOkAt = Date.now();
-    closeSheet();
-    sfxOk();
-    toast('已解锁，30 秒内不用再输口令', 2200);
-    then();
-  };
+  var v = window.prompt('老师口令（输对后 30 秒内不用再输）');
+  if (v === null) return;                       // 取消
+  if (String(v).trim() !== PW_CODE) { toast('口令不对，再试一次', 2200); sfxBad(); return; }
+  pwOkAt = Date.now();
+  sfxOk();
+  toast('已解锁，30 秒内不用再输口令', 2000);
+  then();
 }
 
 function availableTypes() {
@@ -31083,12 +31051,6 @@ function bind() {
     S.units = [];
     savePrefs(); paintAll();
   });
-  var pwYes = $('pwYes'), pwNo = $('pwNo'), pwInp = $('pwInput');
-  if (pwYes) pwYes.addEventListener('click', function () { if (pwPending) pwPending(); });
-  if (pwNo) pwNo.addEventListener('click', function () { pwPending = null; closeSheet(); sfxTap(); });
-  if (pwInp) pwInp.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && pwPending) { e.preventDefault(); pwPending(); }
-  });
   $('startBtn').addEventListener('click', function () { sfxTap(); startFromSetup(); });
   $('againBtn').addEventListener('click', function () { sfxTap(); startFromSetup(); });
   $('backSetupBtn').addEventListener('click', function () { sfxTap(); setView('setup'); paintAll(); });
@@ -31341,7 +31303,7 @@ var TUT_STEPS = [
     p: '听音选词 / 看中文选英文 / 中英配对 / 句子排序 —— <b>每次都考这四种，不用选</b>，也不能少。',
     wait: 4200 },
   { sel: '#countChips', h: '题量和计时也是固定的',
-    p: '<b>每个词考 3 遍</b>（三遍换三种题型：听一遍、看一遍、配对一遍），<b>每题 30 秒</b>。<br>题量由词数自动算，开始时上方会写出「共几题 · 覆盖几个词」。',
+    p: '<b>每个词考 3 遍</b>（三遍换三种题型：听一遍、看一遍、配对一遍），<b>倒计时按题型给（20～150 秒）</b>。<br>题量由词数自动算，开始时上方会写出「共几题 · 覆盖几个词」。',
     wait: 4600 },
   { sel: '#startBtn', h: '第三步：开始考核',
     p: '点它，系统<b>随机组卷</b>，一条龙做完直接出成绩。',
