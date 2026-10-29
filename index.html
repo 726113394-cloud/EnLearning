@@ -2942,6 +2942,57 @@ body.liquid .resume button{backdrop-filter:blur(14px) saturate(160%);
         //     「附 · 词组」是书上「附：」那一栏（全书词组），单独一组，别混进单元。
         // ================================================================
         const JIELI_BANK = {
+            "三上": {
+                "Unit 1": [
+                    { en: "hello", zh: "你好" }, { en: "hi", zh: "你好" }, { en: "I", zh: "我" }, { en: "am", zh: "是" },
+                    { en: "yes", zh: "是；是的" }, { en: "no", zh: "不；不是" }, { en: "good", zh: "好的" }, { en: "morning", zh: "早晨；上午" },
+                    { en: "dad", zh: "爸爸" }, { en: "goodbye", zh: "再见" }, { en: "mom", zh: "妈妈" }, { en: "Miss", zh: "小姐；女士" },
+                    { en: "bye", zh: "再见" }
+                ],
+                "Unit 2": [
+                    { en: "a", zh: "一；一个" }, { en: "teacher", zh: "教师；老师" }, { en: "student", zh: "学生" }, { en: "stand", zh: "站立" },
+                    { en: "up", zh: "向上" }, { en: "sit", zh: "坐" }, { en: "down", zh: "向下" }, { en: "please", zh: "请" },
+                    { en: "and", zh: "和" }, { en: "go", zh: "去；走" }, { en: "stop", zh: "停止" }, { en: "are", zh: "是" },
+                    { en: "you", zh: "你；你们" }, { en: "girl", zh: "女孩" }, { en: "boy", zh: "男孩" }
+                ],
+                "Unit 3": [
+                    { en: "this", zh: "这；这个" }, { en: "is", zh: "是" }, { en: "box", zh: "盒；箱" }, { en: "ball", zh: "球" },
+                    { en: "bag", zh: "包；袋" }, { en: "cat", zh: "猫" }, { en: "book", zh: "书" }, { en: "an", zh: "一；一个" },
+                    { en: "apple", zh: "苹果" }, { en: "it", zh: "它" }, { en: "ruler", zh: "尺子" }, { en: "pencil", zh: "铅笔" },
+                    { en: "pen", zh: "钢笔" }, { en: "tree", zh: "树" }
+                ],
+                "Unit 4": [
+                    { en: "what", zh: "什么" }, { en: "car", zh: "小汽车" }, { en: "taxi", zh: "出租车" }, { en: "train", zh: "火车" },
+                    { en: "bus", zh: "公共汽车" }, { en: "dog", zh: "狗" }, { en: "door", zh: "门" }, { en: "chair", zh: "椅子" },
+                    { en: "banana", zh: "香蕉" }, { en: "orange", zh: "橙子；橙红色的" }, { en: "green", zh: "绿色的" }, { en: "blue", zh: "蓝色的" },
+                    { en: "black", zh: "黑色的" }, { en: "white", zh: "白色的" }, { en: "panda", zh: "大熊猫" }, { en: "show", zh: "展示" },
+                    { en: "me", zh: "我" }, { en: "have", zh: "有" }, { en: "two", zh: "二" }, { en: "three", zh: "三" },
+                    { en: "one", zh: "一" }, { en: "four", zh: "四" }, { en: "five", zh: "五" }, { en: "six", zh: "六" }
+                ],
+                "Unit 5": [
+                    { en: "color", zh: "颜色" }, { en: "yellow", zh: "黄色的" }, { en: "red", zh: "红色的" }, { en: "she", zh: "她" },
+                    { en: "he", zh: "他" }, { en: "who", zh: "谁" }, { en: "Mr.", zh: "先生" }, { en: "Ms.", zh: "女士" },
+                    { en: "worker", zh: "工人" }
+                ],
+                "Unit 6": [
+                    { en: "that", zh: "那；那个" }, { en: "come", zh: "来" }, { en: "here", zh: "在这里" }, { en: "not", zh: "不" },
+                    { en: "how", zh: "怎样；如何" }, { en: "old", zh: "岁；年纪" }, { en: "nine", zh: "九" }, { en: "ten", zh: "十" },
+                    { en: "seven", zh: "七" }, { en: "eight", zh: "八" }, { en: "happy", zh: "快乐的" }, { en: "birthday", zh: "生日" },
+                    { en: "to", zh: "给；向" }, { en: "thank", zh: "谢谢" }, { en: "card", zh: "卡片" }
+                ],
+                "Unit 7": [
+                    { en: "new", zh: "新的" }, { en: "year", zh: "年" }, { en: "for", zh: "给；对" }, { en: "dear", zh: "亲爱的" },
+                    { en: "yours", zh: "你的；你们的" }, { en: "some", zh: "一些" }, { en: "water", zh: "水" }, { en: "hungry", zh: "饥饿的" },
+                    { en: "bread", zh: "面包" }, { en: "OK", zh: "好；行" }, { en: "do", zh: "（助动词）" }, { en: "like", zh: "喜欢" },
+                    { en: "juice", zh: "果汁" }, { en: "fish", zh: "鱼肉" }
+                ],
+                "Unit 8": [
+                    { en: "driver", zh: "司机" }, { en: "farmer", zh: "农民" }, { en: "doctor", zh: "医生" }, { en: "nurse", zh: "护士" }
+                ],
+                "词组": [
+                    { en: "stand up", zh: "起立" }, { en: "sit down", zh: "坐下" }, { en: "come here", zh: "过来" }
+                ],
+            },
             "四上": {
                 "Unit 1": [
                     { en: "these", zh: "这些" }, { en: "wash", zh: "洗" }, { en: "brush", zh: "（用刷子）刷净" }, { en: "wave", zh: "挥动；挥舞" },
@@ -2985,12 +3036,12 @@ body.liquid .resume button{backdrop-filter:blur(14px) saturate(160%);
                 "Unit 8": [
                     { en: "animal", zh: "动物" }, { en: "those", zh: "那些" }, { en: "duck", zh: "鸭子" }, { en: "tiger", zh: "老虎" }
                 ],
-                "附 · 词组": [
+                "词组": [
                     { en: "nature park", zh: "自然公园" }, { en: "go out", zh: "出去" }, { en: "come in", zh: "进来" }, { en: "put up", zh: "举起来" },
                     { en: "turn right", zh: "向右转" }, { en: "turn left", zh: "向左转" }, { en: "make new friends", zh: "结交新朋友" }
                 ],
             },
-        };
+};
 
         // ================================================================
         //  教材切换：整条取词链路只有两个入口（getWordsForUnit / getAllUnits），
@@ -12997,65 +13048,126 @@ document.addEventListener('DOMContentLoaded', function() {
         //  ⚠️ 「附 · 词组」是书上「附：」那一栏（全书词组），单独一个单元，别混进 Unit。
         // ================================================================
         const JIELI_BANK = {
+            "接力三年级": {
+                upper: {
+                    "Unit 1": [
+                        { word: "hello", meaning: "你好", bold: true }, { word: "hi", meaning: "你好", bold: true }, { word: "I", meaning: "我", bold: true },
+                        { word: "am", meaning: "是", bold: true }, { word: "yes", meaning: "是；是的", bold: true }, { word: "no", meaning: "不；不是", bold: true },
+                        { word: "good", meaning: "好的", bold: true }, { word: "morning", meaning: "早晨；上午", bold: true }, { word: "dad", meaning: "爸爸", bold: true },
+                        { word: "goodbye", meaning: "再见", bold: true }, { word: "mom", meaning: "妈妈", bold: true }, { word: "Miss", meaning: "小姐；女士", bold: true },
+                        { word: "bye", meaning: "再见", bold: true }
+                    ],
+                    "Unit 2": [
+                        { word: "a", meaning: "一；一个", bold: true }, { word: "teacher", meaning: "教师；老师", bold: true }, { word: "student", meaning: "学生", bold: true },
+                        { word: "stand", meaning: "站立", bold: true }, { word: "up", meaning: "向上", bold: true }, { word: "sit", meaning: "坐", bold: true },
+                        { word: "down", meaning: "向下", bold: true }, { word: "please", meaning: "请", bold: true }, { word: "and", meaning: "和", bold: true },
+                        { word: "go", meaning: "去；走", bold: true }, { word: "stop", meaning: "停止", bold: true }, { word: "are", meaning: "是", bold: true },
+                        { word: "you", meaning: "你；你们", bold: true }, { word: "girl", meaning: "女孩", bold: true }, { word: "boy", meaning: "男孩", bold: true }
+                    ],
+                    "Unit 3": [
+                        { word: "this", meaning: "这；这个", bold: true }, { word: "is", meaning: "是", bold: true }, { word: "box", meaning: "盒；箱", bold: true },
+                        { word: "ball", meaning: "球", bold: true }, { word: "bag", meaning: "包；袋", bold: true }, { word: "cat", meaning: "猫", bold: true },
+                        { word: "book", meaning: "书", bold: true }, { word: "an", meaning: "一；一个", bold: true }, { word: "apple", meaning: "苹果", bold: true },
+                        { word: "it", meaning: "它", bold: true }, { word: "ruler", meaning: "尺子", bold: true }, { word: "pencil", meaning: "铅笔", bold: true },
+                        { word: "pen", meaning: "钢笔", bold: true }, { word: "tree", meaning: "树", bold: true }
+                    ],
+                    "Unit 4": [
+                        { word: "what", meaning: "什么", bold: true }, { word: "car", meaning: "小汽车", bold: true }, { word: "taxi", meaning: "出租车", bold: true },
+                        { word: "train", meaning: "火车", bold: true }, { word: "bus", meaning: "公共汽车", bold: true }, { word: "dog", meaning: "狗", bold: true },
+                        { word: "door", meaning: "门", bold: true }, { word: "chair", meaning: "椅子", bold: true }, { word: "banana", meaning: "香蕉", bold: true },
+                        { word: "orange", meaning: "橙子；橙红色的", bold: true }, { word: "green", meaning: "绿色的", bold: true }, { word: "blue", meaning: "蓝色的", bold: true },
+                        { word: "black", meaning: "黑色的", bold: true }, { word: "white", meaning: "白色的", bold: true }, { word: "panda", meaning: "大熊猫", bold: true },
+                        { word: "show", meaning: "展示", bold: true }, { word: "me", meaning: "我", bold: true }, { word: "have", meaning: "有", bold: true },
+                        { word: "two", meaning: "二", bold: true }, { word: "three", meaning: "三", bold: true }, { word: "one", meaning: "一", bold: true },
+                        { word: "four", meaning: "四", bold: true }, { word: "five", meaning: "五", bold: true }, { word: "six", meaning: "六", bold: true }
+                    ],
+                    "Unit 5": [
+                        { word: "color", meaning: "颜色", bold: true }, { word: "yellow", meaning: "黄色的", bold: true }, { word: "red", meaning: "红色的", bold: true },
+                        { word: "she", meaning: "她", bold: true }, { word: "he", meaning: "他", bold: true }, { word: "who", meaning: "谁", bold: true },
+                        { word: "Mr.", meaning: "先生", bold: true }, { word: "Ms.", meaning: "女士", bold: true }, { word: "worker", meaning: "工人", bold: true }
+                    ],
+                    "Unit 6": [
+                        { word: "that", meaning: "那；那个", bold: true }, { word: "come", meaning: "来", bold: true }, { word: "here", meaning: "在这里", bold: true },
+                        { word: "not", meaning: "不", bold: true }, { word: "how", meaning: "怎样；如何", bold: true }, { word: "old", meaning: "岁；年纪", bold: true },
+                        { word: "nine", meaning: "九", bold: true }, { word: "ten", meaning: "十", bold: true }, { word: "seven", meaning: "七", bold: true },
+                        { word: "eight", meaning: "八", bold: true }, { word: "happy", meaning: "快乐的", bold: true }, { word: "birthday", meaning: "生日", bold: true },
+                        { word: "to", meaning: "给；向", bold: true }, { word: "thank", meaning: "谢谢", bold: true }, { word: "card", meaning: "卡片", bold: true }
+                    ],
+                    "Unit 7": [
+                        { word: "new", meaning: "新的", bold: true }, { word: "year", meaning: "年", bold: true }, { word: "for", meaning: "给；对", bold: true },
+                        { word: "dear", meaning: "亲爱的", bold: true }, { word: "yours", meaning: "你的；你们的", bold: false }, { word: "some", meaning: "一些", bold: true },
+                        { word: "water", meaning: "水", bold: true }, { word: "hungry", meaning: "饥饿的", bold: true }, { word: "bread", meaning: "面包", bold: true },
+                        { word: "OK", meaning: "好；行", bold: true }, { word: "do", meaning: "（助动词）", bold: true }, { word: "like", meaning: "喜欢", bold: true },
+                        { word: "juice", meaning: "果汁", bold: true }, { word: "fish", meaning: "鱼肉", bold: true }
+                    ],
+                    "Unit 8": [
+                        { word: "driver", meaning: "司机", bold: true }, { word: "farmer", meaning: "农民", bold: true }, { word: "doctor", meaning: "医生", bold: true },
+                        { word: "nurse", meaning: "护士", bold: true }
+                    ],
+                    "词组": [
+                        { word: "stand up", meaning: "起立", bold: true }, { word: "sit down", meaning: "坐下", bold: true }, { word: "come here", meaning: "过来", bold: true }
+                    ],
+                },
+            },
             "接力四年级": {
                 upper: {
                     "Unit 1": [
-                        { word: "these", meaning: "这些", bold: true },{ word: "wash", meaning: "洗", bold: true },{ word: "brush", meaning: "（用刷子）刷净", bold: false },
-                        { word: "wave", meaning: "挥动；挥舞", bold: false },{ word: "body", meaning: "身体", bold: true },{ word: "shake", meaning: "摇动；抖动", bold: false },
-                        { word: "feet", meaning: "脚（foot 的复数形式）", bold: false },{ word: "with", meaning: "用", bold: true },{ word: "eat", meaning: "吃", bold: true },
-                        { word: "listen", meaning: "听", bold: true },{ word: "write", meaning: "写", bold: true },{ word: "they", meaning: "他们；她们；它们", bold: true },
-                        { word: "clock", meaning: "时钟", bold: true },{ word: "blackboard", meaning: "黑板", bold: true },{ word: "out", meaning: "（从……里）出来", bold: true },
+                        { word: "these", meaning: "这些", bold: true }, { word: "wash", meaning: "洗", bold: true }, { word: "brush", meaning: "（用刷子）刷净", bold: false },
+                        { word: "wave", meaning: "挥动；挥舞", bold: false }, { word: "body", meaning: "身体", bold: true }, { word: "shake", meaning: "摇动；抖动", bold: false },
+                        { word: "feet", meaning: "脚（foot 的复数形式）", bold: false }, { word: "with", meaning: "用", bold: true }, { word: "eat", meaning: "吃", bold: true },
+                        { word: "listen", meaning: "听", bold: true }, { word: "write", meaning: "写", bold: true }, { word: "they", meaning: "他们；她们；它们", bold: true },
+                        { word: "clock", meaning: "时钟", bold: true }, { word: "blackboard", meaning: "黑板", bold: true }, { word: "out", meaning: "（从……里）出来", bold: true },
                         { word: "say", meaning: "说", bold: true }
                     ],
                     "Unit 2": [
-                        { word: "behind", meaning: "在……后面", bold: true },{ word: "schoolbag", meaning: "书包", bold: true },{ word: "cup", meaning: "杯子", bold: true },
-                        { word: "move", meaning: "移动", bold: true },{ word: "excuse", meaning: "原谅", bold: false },{ word: "park", meaning: "公园", bold: true },
-                        { word: "along", meaning: "沿着", bold: false },{ word: "street", meaning: "街道", bold: true },{ word: "turn", meaning: "转向", bold: true },
-                        { word: "school", meaning: "学校", bold: true },{ word: "zoo", meaning: "动物园", bold: true },{ word: "hospital", meaning: "医院", bold: true },
+                        { word: "behind", meaning: "在……后面", bold: true }, { word: "schoolbag", meaning: "书包", bold: true }, { word: "cup", meaning: "杯子", bold: true },
+                        { word: "move", meaning: "移动", bold: true }, { word: "excuse", meaning: "原谅", bold: false }, { word: "park", meaning: "公园", bold: true },
+                        { word: "along", meaning: "沿着", bold: false }, { word: "street", meaning: "街道", bold: true }, { word: "turn", meaning: "转向", bold: true },
+                        { word: "school", meaning: "学校", bold: true }, { word: "zoo", meaning: "动物园", bold: true }, { word: "hospital", meaning: "医院", bold: true },
                         { word: "round", meaning: "转过来；调转方向", bold: false }
                     ],
                     "Unit 3": [
-                        { word: "sky", meaning: "天空", bold: false },{ word: "plane", meaning: "飞机", bold: true }
+                        { word: "sky", meaning: "天空", bold: false }, { word: "plane", meaning: "飞机", bold: true }
                     ],
                     "Unit 4": [
-                        { word: "weather", meaning: "天气", bold: true },{ word: "windy", meaning: "多风的", bold: true },{ word: "sunny", meaning: "晴朗的", bold: true },
-                        { word: "cool", meaning: "凉爽的", bold: true },{ word: "cloudy", meaning: "多云的", bold: true },{ word: "rainy", meaning: "下雨的", bold: false },
-                        { word: "warm", meaning: "暖和的", bold: true },{ word: "wear", meaning: "穿", bold: true },{ word: "shirt", meaning: "衬衫", bold: true },
-                        { word: "spring", meaning: "春天，春季", bold: true },{ word: "summer", meaning: "夏天，夏季", bold: true },{ word: "autumn", meaning: "秋天，秋季", bold: true },
-                        { word: "winter", meaning: "冬天，冬季", bold: true },{ word: "which", meaning: "哪一个", bold: true },{ word: "season", meaning: "季节", bold: true },
+                        { word: "weather", meaning: "天气", bold: true }, { word: "windy", meaning: "多风的", bold: true }, { word: "sunny", meaning: "晴朗的", bold: true },
+                        { word: "cool", meaning: "凉爽的", bold: true }, { word: "cloudy", meaning: "多云的", bold: true }, { word: "rainy", meaning: "下雨的", bold: false },
+                        { word: "warm", meaning: "暖和的", bold: true }, { word: "wear", meaning: "穿", bold: true }, { word: "shirt", meaning: "衬衫", bold: true },
+                        { word: "spring", meaning: "春天，春季", bold: true }, { word: "summer", meaning: "夏天，夏季", bold: true }, { word: "autumn", meaning: "秋天，秋季", bold: true },
+                        { word: "winter", meaning: "冬天，冬季", bold: true }, { word: "which", meaning: "哪一个", bold: true }, { word: "season", meaning: "季节", bold: true },
                         { word: "best", meaning: "最", bold: true }
                     ],
                     "Unit 5": [
-                        { word: "family", meaning: "家，家庭", bold: true },{ word: "father", meaning: "父亲", bold: true },{ word: "Mrs.", meaning: "太太，夫人", bold: true },
-                        { word: "sister", meaning: "姐姐，妹妹", bold: true },{ word: "brother", meaning: "哥哥，弟弟", bold: true },{ word: "his", meaning: "他的", bold: true },
-                        { word: "cleaner", meaning: "清洁工", bold: false },{ word: "dancer", meaning: "舞蹈家", bold: false },{ word: "singer", meaning: "歌唱家，歌手", bold: false }
+                        { word: "family", meaning: "家，家庭", bold: true }, { word: "father", meaning: "父亲", bold: true }, { word: "Mrs.", meaning: "太太，夫人", bold: true },
+                        { word: "sister", meaning: "姐姐，妹妹", bold: true }, { word: "brother", meaning: "哥哥，弟弟", bold: true }, { word: "his", meaning: "他的", bold: true },
+                        { word: "cleaner", meaning: "清洁工", bold: false }, { word: "dancer", meaning: "舞蹈家", bold: false }, { word: "singer", meaning: "歌唱家，歌手", bold: false }
                     ],
                     "Unit 6": [
-                        { word: "light", meaning: "浅色的", bold: true },{ word: "clean", meaning: "干净的", bold: true },{ word: "boat", meaning: "小船", bold: true },
-                        { word: "grass", meaning: "草", bold: true },{ word: "skirt", meaning: "短裙", bold: true },{ word: "milk", meaning: "牛奶", bold: true },
-                        { word: "beef", meaning: "牛肉", bold: false },{ word: "chicken", meaning: "鸡肉", bold: true },{ word: "thirsty", meaning: "渴的", bold: false }
+                        { word: "light", meaning: "浅色的", bold: true }, { word: "clean", meaning: "干净的", bold: true }, { word: "boat", meaning: "小船", bold: true },
+                        { word: "grass", meaning: "草", bold: true }, { word: "skirt", meaning: "短裙", bold: true }, { word: "milk", meaning: "牛奶", bold: true },
+                        { word: "beef", meaning: "牛肉", bold: false }, { word: "chicken", meaning: "鸡肉", bold: true }, { word: "thirsty", meaning: "渴的", bold: false }
                     ],
                     "Unit 7": [
-                        { word: "eleven", meaning: "十一", bold: true },{ word: "twelve", meaning: "十二", bold: true },{ word: "thirteen", meaning: "十三", bold: true },
-                        { word: "fourteen", meaning: "十四", bold: true },{ word: "fifteen", meaning: "十五", bold: true },{ word: "sixteen", meaning: "十六", bold: true },
-                        { word: "seventeen", meaning: "十七", bold: true },{ word: "eighteen", meaning: "十八", bold: true },{ word: "nineteen", meaning: "十九", bold: true },
-                        { word: "twenty", meaning: "二十", bold: true },{ word: "balloon", meaning: "气球", bold: false },{ word: "win", meaning: "赢，获胜", bold: true },
-                        { word: "many", meaning: "许多", bold: true },{ word: "our", meaning: "我们的", bold: true },{ word: "thirty", meaning: "三十", bold: true },
-                        { word: "study", meaning: "学习", bold: true },{ word: "fork", meaning: "叉子", bold: false },{ word: "spoon", meaning: "勺，匙，调羹", bold: false },
-                        { word: "pear", meaning: "梨", bold: false },{ word: "grape", meaning: "葡萄", bold: true },{ word: "tomato", meaning: "西红柿", bold: true }
+                        { word: "eleven", meaning: "十一", bold: true }, { word: "twelve", meaning: "十二", bold: true }, { word: "thirteen", meaning: "十三", bold: true },
+                        { word: "fourteen", meaning: "十四", bold: true }, { word: "fifteen", meaning: "十五", bold: true }, { word: "sixteen", meaning: "十六", bold: true },
+                        { word: "seventeen", meaning: "十七", bold: true }, { word: "eighteen", meaning: "十八", bold: true }, { word: "nineteen", meaning: "十九", bold: true },
+                        { word: "twenty", meaning: "二十", bold: true }, { word: "balloon", meaning: "气球", bold: false }, { word: "win", meaning: "赢，获胜", bold: true },
+                        { word: "many", meaning: "许多", bold: true }, { word: "our", meaning: "我们的", bold: true }, { word: "thirty", meaning: "三十", bold: true },
+                        { word: "study", meaning: "学习", bold: true }, { word: "fork", meaning: "叉子", bold: false }, { word: "spoon", meaning: "勺，匙，调羹", bold: false },
+                        { word: "pear", meaning: "梨", bold: false }, { word: "grape", meaning: "葡萄", bold: true }, { word: "tomato", meaning: "西红柿", bold: true }
                     ],
                     "Unit 8": [
-                        { word: "animal", meaning: "动物", bold: true },{ word: "those", meaning: "那些", bold: true },{ word: "duck", meaning: "鸭子", bold: true },
+                        { word: "animal", meaning: "动物", bold: true }, { word: "those", meaning: "那些", bold: true }, { word: "duck", meaning: "鸭子", bold: true },
                         { word: "tiger", meaning: "老虎", bold: true }
                     ],
-                    "附 · 词组": [
-                        { word: "nature park", meaning: "自然公园", bold: false },{ word: "go out", meaning: "出去", bold: false },{ word: "come in", meaning: "进来", bold: false },
-                        { word: "put up", meaning: "举起来", bold: false },{ word: "turn right", meaning: "向右转", bold: false },{ word: "turn left", meaning: "向左转", bold: false },
+                    "词组": [
+                        { word: "nature park", meaning: "自然公园", bold: false }, { word: "go out", meaning: "出去", bold: false }, { word: "come in", meaning: "进来", bold: false },
+                        { word: "put up", meaning: "举起来", bold: false }, { word: "turn right", meaning: "向右转", bold: false }, { word: "turn left", meaning: "向左转", bold: false },
                         { word: "make new friends", meaning: "结交新朋友", bold: false }
                     ],
                 },
             },
-        };
+};
 
         const PUBLISHERS = [{ id: 'pep', name: '人教版' }, { id: 'jieli', name: '接力版' }];
         const LS_PUBLISHER = 'listen.publisher';       // ⚠️ 键名带工具前缀
@@ -16038,65 +16150,126 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
         //     册仍然写 upper（四年级上册）。
         // ================================================================
         const JIELI_BANK = {
+            "接力三上": {
+                upper: {
+                    "Unit 1": [
+                        { word: "hello", chinese: "你好", isBold: true }, { word: "hi", chinese: "你好", isBold: true }, { word: "I", chinese: "我", isBold: true },
+                        { word: "am", chinese: "是", isBold: true }, { word: "yes", chinese: "是；是的", isBold: true }, { word: "no", chinese: "不；不是", isBold: true },
+                        { word: "good", chinese: "好的", isBold: true }, { word: "morning", chinese: "早晨；上午", isBold: true }, { word: "dad", chinese: "爸爸", isBold: true },
+                        { word: "goodbye", chinese: "再见", isBold: true }, { word: "mom", chinese: "妈妈", isBold: true }, { word: "Miss", chinese: "小姐；女士", isBold: true },
+                        { word: "bye", chinese: "再见", isBold: true }
+                    ],
+                    "Unit 2": [
+                        { word: "a", chinese: "一；一个", isBold: true }, { word: "teacher", chinese: "教师；老师", isBold: true }, { word: "student", chinese: "学生", isBold: true },
+                        { word: "stand", chinese: "站立", isBold: true }, { word: "up", chinese: "向上", isBold: true }, { word: "sit", chinese: "坐", isBold: true },
+                        { word: "down", chinese: "向下", isBold: true }, { word: "please", chinese: "请", isBold: true }, { word: "and", chinese: "和", isBold: true },
+                        { word: "go", chinese: "去；走", isBold: true }, { word: "stop", chinese: "停止", isBold: true }, { word: "are", chinese: "是", isBold: true },
+                        { word: "you", chinese: "你；你们", isBold: true }, { word: "girl", chinese: "女孩", isBold: true }, { word: "boy", chinese: "男孩", isBold: true }
+                    ],
+                    "Unit 3": [
+                        { word: "this", chinese: "这；这个", isBold: true }, { word: "is", chinese: "是", isBold: true }, { word: "box", chinese: "盒；箱", isBold: true },
+                        { word: "ball", chinese: "球", isBold: true }, { word: "bag", chinese: "包；袋", isBold: true }, { word: "cat", chinese: "猫", isBold: true },
+                        { word: "book", chinese: "书", isBold: true }, { word: "an", chinese: "一；一个", isBold: true }, { word: "apple", chinese: "苹果", isBold: true },
+                        { word: "it", chinese: "它", isBold: true }, { word: "ruler", chinese: "尺子", isBold: true }, { word: "pencil", chinese: "铅笔", isBold: true },
+                        { word: "pen", chinese: "钢笔", isBold: true }, { word: "tree", chinese: "树", isBold: true }
+                    ],
+                    "Unit 4": [
+                        { word: "what", chinese: "什么", isBold: true }, { word: "car", chinese: "小汽车", isBold: true }, { word: "taxi", chinese: "出租车", isBold: true },
+                        { word: "train", chinese: "火车", isBold: true }, { word: "bus", chinese: "公共汽车", isBold: true }, { word: "dog", chinese: "狗", isBold: true },
+                        { word: "door", chinese: "门", isBold: true }, { word: "chair", chinese: "椅子", isBold: true }, { word: "banana", chinese: "香蕉", isBold: true },
+                        { word: "orange", chinese: "橙子；橙红色的", isBold: true }, { word: "green", chinese: "绿色的", isBold: true }, { word: "blue", chinese: "蓝色的", isBold: true },
+                        { word: "black", chinese: "黑色的", isBold: true }, { word: "white", chinese: "白色的", isBold: true }, { word: "panda", chinese: "大熊猫", isBold: true },
+                        { word: "show", chinese: "展示", isBold: true }, { word: "me", chinese: "我", isBold: true }, { word: "have", chinese: "有", isBold: true },
+                        { word: "two", chinese: "二", isBold: true }, { word: "three", chinese: "三", isBold: true }, { word: "one", chinese: "一", isBold: true },
+                        { word: "four", chinese: "四", isBold: true }, { word: "five", chinese: "五", isBold: true }, { word: "six", chinese: "六", isBold: true }
+                    ],
+                    "Unit 5": [
+                        { word: "color", chinese: "颜色", isBold: true }, { word: "yellow", chinese: "黄色的", isBold: true }, { word: "red", chinese: "红色的", isBold: true },
+                        { word: "she", chinese: "她", isBold: true }, { word: "he", chinese: "他", isBold: true }, { word: "who", chinese: "谁", isBold: true },
+                        { word: "Mr.", chinese: "先生", isBold: true }, { word: "Ms.", chinese: "女士", isBold: true }, { word: "worker", chinese: "工人", isBold: true }
+                    ],
+                    "Unit 6": [
+                        { word: "that", chinese: "那；那个", isBold: true }, { word: "come", chinese: "来", isBold: true }, { word: "here", chinese: "在这里", isBold: true },
+                        { word: "not", chinese: "不", isBold: true }, { word: "how", chinese: "怎样；如何", isBold: true }, { word: "old", chinese: "岁；年纪", isBold: true },
+                        { word: "nine", chinese: "九", isBold: true }, { word: "ten", chinese: "十", isBold: true }, { word: "seven", chinese: "七", isBold: true },
+                        { word: "eight", chinese: "八", isBold: true }, { word: "happy", chinese: "快乐的", isBold: true }, { word: "birthday", chinese: "生日", isBold: true },
+                        { word: "to", chinese: "给；向", isBold: true }, { word: "thank", chinese: "谢谢", isBold: true }, { word: "card", chinese: "卡片", isBold: true }
+                    ],
+                    "Unit 7": [
+                        { word: "new", chinese: "新的", isBold: true }, { word: "year", chinese: "年", isBold: true }, { word: "for", chinese: "给；对", isBold: true },
+                        { word: "dear", chinese: "亲爱的", isBold: true }, { word: "yours", chinese: "你的；你们的", isBold: false }, { word: "some", chinese: "一些", isBold: true },
+                        { word: "water", chinese: "水", isBold: true }, { word: "hungry", chinese: "饥饿的", isBold: true }, { word: "bread", chinese: "面包", isBold: true },
+                        { word: "OK", chinese: "好；行", isBold: true }, { word: "do", chinese: "（助动词）", isBold: true }, { word: "like", chinese: "喜欢", isBold: true },
+                        { word: "juice", chinese: "果汁", isBold: true }, { word: "fish", chinese: "鱼肉", isBold: true }
+                    ],
+                    "Unit 8": [
+                        { word: "driver", chinese: "司机", isBold: true }, { word: "farmer", chinese: "农民", isBold: true }, { word: "doctor", chinese: "医生", isBold: true },
+                        { word: "nurse", chinese: "护士", isBold: true }
+                    ],
+                    "词组": [
+                        { word: "stand up", chinese: "起立", isBold: true }, { word: "sit down", chinese: "坐下", isBold: true }, { word: "come here", chinese: "过来", isBold: true }
+                    ],
+                },
+            },
             "接力四上": {
                 upper: {
                     "Unit 1": [
-                        { word: "these", chinese: "这些", isBold: true },{ word: "wash", chinese: "洗", isBold: true },{ word: "brush", chinese: "（用刷子）刷净", isBold: false },
-                        { word: "wave", chinese: "挥动；挥舞", isBold: false },{ word: "body", chinese: "身体", isBold: true },{ word: "shake", chinese: "摇动；抖动", isBold: false },
-                        { word: "feet", chinese: "脚（foot 的复数形式）", isBold: false },{ word: "with", chinese: "用", isBold: true },{ word: "eat", chinese: "吃", isBold: true },
-                        { word: "listen", chinese: "听", isBold: true },{ word: "write", chinese: "写", isBold: true },{ word: "they", chinese: "他们；她们；它们", isBold: true },
-                        { word: "clock", chinese: "时钟", isBold: true },{ word: "blackboard", chinese: "黑板", isBold: true },{ word: "out", chinese: "（从……里）出来", isBold: true },
+                        { word: "these", chinese: "这些", isBold: true }, { word: "wash", chinese: "洗", isBold: true }, { word: "brush", chinese: "（用刷子）刷净", isBold: false },
+                        { word: "wave", chinese: "挥动；挥舞", isBold: false }, { word: "body", chinese: "身体", isBold: true }, { word: "shake", chinese: "摇动；抖动", isBold: false },
+                        { word: "feet", chinese: "脚（foot 的复数形式）", isBold: false }, { word: "with", chinese: "用", isBold: true }, { word: "eat", chinese: "吃", isBold: true },
+                        { word: "listen", chinese: "听", isBold: true }, { word: "write", chinese: "写", isBold: true }, { word: "they", chinese: "他们；她们；它们", isBold: true },
+                        { word: "clock", chinese: "时钟", isBold: true }, { word: "blackboard", chinese: "黑板", isBold: true }, { word: "out", chinese: "（从……里）出来", isBold: true },
                         { word: "say", chinese: "说", isBold: true }
                     ],
                     "Unit 2": [
-                        { word: "behind", chinese: "在……后面", isBold: true },{ word: "schoolbag", chinese: "书包", isBold: true },{ word: "cup", chinese: "杯子", isBold: true },
-                        { word: "move", chinese: "移动", isBold: true },{ word: "excuse", chinese: "原谅", isBold: false },{ word: "park", chinese: "公园", isBold: true },
-                        { word: "along", chinese: "沿着", isBold: false },{ word: "street", chinese: "街道", isBold: true },{ word: "turn", chinese: "转向", isBold: true },
-                        { word: "school", chinese: "学校", isBold: true },{ word: "zoo", chinese: "动物园", isBold: true },{ word: "hospital", chinese: "医院", isBold: true },
+                        { word: "behind", chinese: "在……后面", isBold: true }, { word: "schoolbag", chinese: "书包", isBold: true }, { word: "cup", chinese: "杯子", isBold: true },
+                        { word: "move", chinese: "移动", isBold: true }, { word: "excuse", chinese: "原谅", isBold: false }, { word: "park", chinese: "公园", isBold: true },
+                        { word: "along", chinese: "沿着", isBold: false }, { word: "street", chinese: "街道", isBold: true }, { word: "turn", chinese: "转向", isBold: true },
+                        { word: "school", chinese: "学校", isBold: true }, { word: "zoo", chinese: "动物园", isBold: true }, { word: "hospital", chinese: "医院", isBold: true },
                         { word: "round", chinese: "转过来；调转方向", isBold: false }
                     ],
                     "Unit 3": [
-                        { word: "sky", chinese: "天空", isBold: false },{ word: "plane", chinese: "飞机", isBold: true }
+                        { word: "sky", chinese: "天空", isBold: false }, { word: "plane", chinese: "飞机", isBold: true }
                     ],
                     "Unit 4": [
-                        { word: "weather", chinese: "天气", isBold: true },{ word: "windy", chinese: "多风的", isBold: true },{ word: "sunny", chinese: "晴朗的", isBold: true },
-                        { word: "cool", chinese: "凉爽的", isBold: true },{ word: "cloudy", chinese: "多云的", isBold: true },{ word: "rainy", chinese: "下雨的", isBold: false },
-                        { word: "warm", chinese: "暖和的", isBold: true },{ word: "wear", chinese: "穿", isBold: true },{ word: "shirt", chinese: "衬衫", isBold: true },
-                        { word: "spring", chinese: "春天，春季", isBold: true },{ word: "summer", chinese: "夏天，夏季", isBold: true },{ word: "autumn", chinese: "秋天，秋季", isBold: true },
-                        { word: "winter", chinese: "冬天，冬季", isBold: true },{ word: "which", chinese: "哪一个", isBold: true },{ word: "season", chinese: "季节", isBold: true },
+                        { word: "weather", chinese: "天气", isBold: true }, { word: "windy", chinese: "多风的", isBold: true }, { word: "sunny", chinese: "晴朗的", isBold: true },
+                        { word: "cool", chinese: "凉爽的", isBold: true }, { word: "cloudy", chinese: "多云的", isBold: true }, { word: "rainy", chinese: "下雨的", isBold: false },
+                        { word: "warm", chinese: "暖和的", isBold: true }, { word: "wear", chinese: "穿", isBold: true }, { word: "shirt", chinese: "衬衫", isBold: true },
+                        { word: "spring", chinese: "春天，春季", isBold: true }, { word: "summer", chinese: "夏天，夏季", isBold: true }, { word: "autumn", chinese: "秋天，秋季", isBold: true },
+                        { word: "winter", chinese: "冬天，冬季", isBold: true }, { word: "which", chinese: "哪一个", isBold: true }, { word: "season", chinese: "季节", isBold: true },
                         { word: "best", chinese: "最", isBold: true }
                     ],
                     "Unit 5": [
-                        { word: "family", chinese: "家，家庭", isBold: true },{ word: "father", chinese: "父亲", isBold: true },{ word: "Mrs.", chinese: "太太，夫人", isBold: true },
-                        { word: "sister", chinese: "姐姐，妹妹", isBold: true },{ word: "brother", chinese: "哥哥，弟弟", isBold: true },{ word: "his", chinese: "他的", isBold: true },
-                        { word: "cleaner", chinese: "清洁工", isBold: false },{ word: "dancer", chinese: "舞蹈家", isBold: false },{ word: "singer", chinese: "歌唱家，歌手", isBold: false }
+                        { word: "family", chinese: "家，家庭", isBold: true }, { word: "father", chinese: "父亲", isBold: true }, { word: "Mrs.", chinese: "太太，夫人", isBold: true },
+                        { word: "sister", chinese: "姐姐，妹妹", isBold: true }, { word: "brother", chinese: "哥哥，弟弟", isBold: true }, { word: "his", chinese: "他的", isBold: true },
+                        { word: "cleaner", chinese: "清洁工", isBold: false }, { word: "dancer", chinese: "舞蹈家", isBold: false }, { word: "singer", chinese: "歌唱家，歌手", isBold: false }
                     ],
                     "Unit 6": [
-                        { word: "light", chinese: "浅色的", isBold: true },{ word: "clean", chinese: "干净的", isBold: true },{ word: "boat", chinese: "小船", isBold: true },
-                        { word: "grass", chinese: "草", isBold: true },{ word: "skirt", chinese: "短裙", isBold: true },{ word: "milk", chinese: "牛奶", isBold: true },
-                        { word: "beef", chinese: "牛肉", isBold: false },{ word: "chicken", chinese: "鸡肉", isBold: true },{ word: "thirsty", chinese: "渴的", isBold: false }
+                        { word: "light", chinese: "浅色的", isBold: true }, { word: "clean", chinese: "干净的", isBold: true }, { word: "boat", chinese: "小船", isBold: true },
+                        { word: "grass", chinese: "草", isBold: true }, { word: "skirt", chinese: "短裙", isBold: true }, { word: "milk", chinese: "牛奶", isBold: true },
+                        { word: "beef", chinese: "牛肉", isBold: false }, { word: "chicken", chinese: "鸡肉", isBold: true }, { word: "thirsty", chinese: "渴的", isBold: false }
                     ],
                     "Unit 7": [
-                        { word: "eleven", chinese: "十一", isBold: true },{ word: "twelve", chinese: "十二", isBold: true },{ word: "thirteen", chinese: "十三", isBold: true },
-                        { word: "fourteen", chinese: "十四", isBold: true },{ word: "fifteen", chinese: "十五", isBold: true },{ word: "sixteen", chinese: "十六", isBold: true },
-                        { word: "seventeen", chinese: "十七", isBold: true },{ word: "eighteen", chinese: "十八", isBold: true },{ word: "nineteen", chinese: "十九", isBold: true },
-                        { word: "twenty", chinese: "二十", isBold: true },{ word: "balloon", chinese: "气球", isBold: false },{ word: "win", chinese: "赢，获胜", isBold: true },
-                        { word: "many", chinese: "许多", isBold: true },{ word: "our", chinese: "我们的", isBold: true },{ word: "thirty", chinese: "三十", isBold: true },
-                        { word: "study", chinese: "学习", isBold: true },{ word: "fork", chinese: "叉子", isBold: false },{ word: "spoon", chinese: "勺，匙，调羹", isBold: false },
-                        { word: "pear", chinese: "梨", isBold: false },{ word: "grape", chinese: "葡萄", isBold: true },{ word: "tomato", chinese: "西红柿", isBold: true }
+                        { word: "eleven", chinese: "十一", isBold: true }, { word: "twelve", chinese: "十二", isBold: true }, { word: "thirteen", chinese: "十三", isBold: true },
+                        { word: "fourteen", chinese: "十四", isBold: true }, { word: "fifteen", chinese: "十五", isBold: true }, { word: "sixteen", chinese: "十六", isBold: true },
+                        { word: "seventeen", chinese: "十七", isBold: true }, { word: "eighteen", chinese: "十八", isBold: true }, { word: "nineteen", chinese: "十九", isBold: true },
+                        { word: "twenty", chinese: "二十", isBold: true }, { word: "balloon", chinese: "气球", isBold: false }, { word: "win", chinese: "赢，获胜", isBold: true },
+                        { word: "many", chinese: "许多", isBold: true }, { word: "our", chinese: "我们的", isBold: true }, { word: "thirty", chinese: "三十", isBold: true },
+                        { word: "study", chinese: "学习", isBold: true }, { word: "fork", chinese: "叉子", isBold: false }, { word: "spoon", chinese: "勺，匙，调羹", isBold: false },
+                        { word: "pear", chinese: "梨", isBold: false }, { word: "grape", chinese: "葡萄", isBold: true }, { word: "tomato", chinese: "西红柿", isBold: true }
                     ],
                     "Unit 8": [
-                        { word: "animal", chinese: "动物", isBold: true },{ word: "those", chinese: "那些", isBold: true },{ word: "duck", chinese: "鸭子", isBold: true },
+                        { word: "animal", chinese: "动物", isBold: true }, { word: "those", chinese: "那些", isBold: true }, { word: "duck", chinese: "鸭子", isBold: true },
                         { word: "tiger", chinese: "老虎", isBold: true }
                     ],
-                    "附 · 词组": [
-                        { word: "nature park", chinese: "自然公园", isBold: false },{ word: "go out", chinese: "出去", isBold: false },{ word: "come in", chinese: "进来", isBold: false },
-                        { word: "put up", chinese: "举起来", isBold: false },{ word: "turn right", chinese: "向右转", isBold: false },{ word: "turn left", chinese: "向左转", isBold: false },
+                    "词组": [
+                        { word: "nature park", chinese: "自然公园", isBold: false }, { word: "go out", chinese: "出去", isBold: false }, { word: "come in", chinese: "进来", isBold: false },
+                        { word: "put up", chinese: "举起来", isBold: false }, { word: "turn right", chinese: "向右转", isBold: false }, { word: "turn left", chinese: "向左转", isBold: false },
                         { word: "make new friends", chinese: "结交新朋友", isBold: false }
                     ],
                 },
             },
-        };
+};
 
         const PUBLISHERS = [{ id: 'pep', name: '人教版' }, { id: 'jieli', name: '接力版' }];
         const LS_PUBLISHER = 'reading.publisher';       // ⚠️ 键名带工具前缀
@@ -19343,63 +19516,106 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     //  ⚠️ isBold = **重点词**。书里打 * 的是拓展词汇 → isBold:false；没打星的才算重点。
     // ================================================================
     const JIELI_DATA = {
-        "接力·四年级上册": {
-            unit1: [
-                { en: "these", zh: "这些", isBold: true },{ en: "wash", zh: "洗", isBold: true },{ en: "brush", zh: "（用刷子）刷净", isBold: false },
-                { en: "wave", zh: "挥动；挥舞", isBold: false },{ en: "body", zh: "身体", isBold: true },{ en: "shake", zh: "摇动；抖动", isBold: false },
-                { en: "feet", zh: "脚（foot 的复数形式）", isBold: false },{ en: "with", zh: "用", isBold: true },{ en: "eat", zh: "吃", isBold: true },
-                { en: "listen", zh: "听", isBold: true },{ en: "write", zh: "写", isBold: true },{ en: "they", zh: "他们；她们；它们", isBold: true },
-                { en: "clock", zh: "时钟", isBold: true },{ en: "blackboard", zh: "黑板", isBold: true },{ en: "out", zh: "（从……里）出来", isBold: true },
-                { en: "say", zh: "说", isBold: true }
+        "接力·三年级上册": {
+            "unit1": [
+                { en: "hello", zh: "你好", isBold: true }, { en: "hi", zh: "你好", isBold: true }, { en: "I", zh: "我", isBold: true }, { en: "am", zh: "是", isBold: true },
+                { en: "yes", zh: "是；是的", isBold: true }, { en: "no", zh: "不；不是", isBold: true }, { en: "good", zh: "好的", isBold: true }, { en: "morning", zh: "早晨；上午", isBold: true },
+                { en: "dad", zh: "爸爸", isBold: true }, { en: "goodbye", zh: "再见", isBold: true }, { en: "mom", zh: "妈妈", isBold: true }, { en: "Miss", zh: "小姐；女士", isBold: true },
+                { en: "bye", zh: "再见", isBold: true }
             ],
-            unit2: [
-                { en: "behind", zh: "在……后面", isBold: true },{ en: "schoolbag", zh: "书包", isBold: true },{ en: "cup", zh: "杯子", isBold: true },
-                { en: "move", zh: "移动", isBold: true },{ en: "excuse", zh: "原谅", isBold: false },{ en: "park", zh: "公园", isBold: true },
-                { en: "along", zh: "沿着", isBold: false },{ en: "street", zh: "街道", isBold: true },{ en: "turn", zh: "转向", isBold: true },
-                { en: "school", zh: "学校", isBold: true },{ en: "zoo", zh: "动物园", isBold: true },{ en: "hospital", zh: "医院", isBold: true },
-                { en: "round", zh: "转过来；调转方向", isBold: false }
+            "unit2": [
+                { en: "a", zh: "一；一个", isBold: true }, { en: "teacher", zh: "教师；老师", isBold: true }, { en: "student", zh: "学生", isBold: true }, { en: "stand", zh: "站立", isBold: true },
+                { en: "up", zh: "向上", isBold: true }, { en: "sit", zh: "坐", isBold: true }, { en: "down", zh: "向下", isBold: true }, { en: "please", zh: "请", isBold: true },
+                { en: "and", zh: "和", isBold: true }, { en: "go", zh: "去；走", isBold: true }, { en: "stop", zh: "停止", isBold: true }, { en: "are", zh: "是", isBold: true },
+                { en: "you", zh: "你；你们", isBold: true }, { en: "girl", zh: "女孩", isBold: true }, { en: "boy", zh: "男孩", isBold: true }
             ],
-            unit3: [
-                { en: "sky", zh: "天空", isBold: false },{ en: "plane", zh: "飞机", isBold: true }
+            "unit3": [
+                { en: "this", zh: "这；这个", isBold: true }, { en: "is", zh: "是", isBold: true }, { en: "box", zh: "盒；箱", isBold: true }, { en: "ball", zh: "球", isBold: true },
+                { en: "bag", zh: "包；袋", isBold: true }, { en: "cat", zh: "猫", isBold: true }, { en: "book", zh: "书", isBold: true }, { en: "an", zh: "一；一个", isBold: true },
+                { en: "apple", zh: "苹果", isBold: true }, { en: "it", zh: "它", isBold: true }, { en: "ruler", zh: "尺子", isBold: true }, { en: "pencil", zh: "铅笔", isBold: true },
+                { en: "pen", zh: "钢笔", isBold: true }, { en: "tree", zh: "树", isBold: true }
             ],
-            unit4: [
-                { en: "weather", zh: "天气", isBold: true },{ en: "windy", zh: "多风的", isBold: true },{ en: "sunny", zh: "晴朗的", isBold: true },
-                { en: "cool", zh: "凉爽的", isBold: true },{ en: "cloudy", zh: "多云的", isBold: true },{ en: "rainy", zh: "下雨的", isBold: false },
-                { en: "warm", zh: "暖和的", isBold: true },{ en: "wear", zh: "穿", isBold: true },{ en: "shirt", zh: "衬衫", isBold: true },
-                { en: "spring", zh: "春天，春季", isBold: true },{ en: "summer", zh: "夏天，夏季", isBold: true },{ en: "autumn", zh: "秋天，秋季", isBold: true },
-                { en: "winter", zh: "冬天，冬季", isBold: true },{ en: "which", zh: "哪一个", isBold: true },{ en: "season", zh: "季节", isBold: true },
-                { en: "best", zh: "最", isBold: true }
+            "unit4": [
+                { en: "what", zh: "什么", isBold: true }, { en: "car", zh: "小汽车", isBold: true }, { en: "taxi", zh: "出租车", isBold: true }, { en: "train", zh: "火车", isBold: true },
+                { en: "bus", zh: "公共汽车", isBold: true }, { en: "dog", zh: "狗", isBold: true }, { en: "door", zh: "门", isBold: true }, { en: "chair", zh: "椅子", isBold: true },
+                { en: "banana", zh: "香蕉", isBold: true }, { en: "orange", zh: "橙子；橙红色的", isBold: true }, { en: "green", zh: "绿色的", isBold: true }, { en: "blue", zh: "蓝色的", isBold: true },
+                { en: "black", zh: "黑色的", isBold: true }, { en: "white", zh: "白色的", isBold: true }, { en: "panda", zh: "大熊猫", isBold: true }, { en: "show", zh: "展示", isBold: true },
+                { en: "me", zh: "我", isBold: true }, { en: "have", zh: "有", isBold: true }, { en: "two", zh: "二", isBold: true }, { en: "three", zh: "三", isBold: true },
+                { en: "one", zh: "一", isBold: true }, { en: "four", zh: "四", isBold: true }, { en: "five", zh: "五", isBold: true }, { en: "six", zh: "六", isBold: true }
             ],
-            unit5: [
-                { en: "family", zh: "家，家庭", isBold: true },{ en: "father", zh: "父亲", isBold: true },{ en: "Mrs.", zh: "太太，夫人", isBold: true },
-                { en: "sister", zh: "姐姐，妹妹", isBold: true },{ en: "brother", zh: "哥哥，弟弟", isBold: true },{ en: "his", zh: "他的", isBold: true },
-                { en: "cleaner", zh: "清洁工", isBold: false },{ en: "dancer", zh: "舞蹈家", isBold: false },{ en: "singer", zh: "歌唱家，歌手", isBold: false }
+            "unit5": [
+                { en: "color", zh: "颜色", isBold: true }, { en: "yellow", zh: "黄色的", isBold: true }, { en: "red", zh: "红色的", isBold: true }, { en: "she", zh: "她", isBold: true },
+                { en: "he", zh: "他", isBold: true }, { en: "who", zh: "谁", isBold: true }, { en: "Mr.", zh: "先生", isBold: true }, { en: "Ms.", zh: "女士", isBold: true },
+                { en: "worker", zh: "工人", isBold: true }
             ],
-            unit6: [
-                { en: "light", zh: "浅色的", isBold: true },{ en: "clean", zh: "干净的", isBold: true },{ en: "boat", zh: "小船", isBold: true },
-                { en: "grass", zh: "草", isBold: true },{ en: "skirt", zh: "短裙", isBold: true },{ en: "milk", zh: "牛奶", isBold: true },
-                { en: "beef", zh: "牛肉", isBold: false },{ en: "chicken", zh: "鸡肉", isBold: true },{ en: "thirsty", zh: "渴的", isBold: false }
+            "unit6": [
+                { en: "that", zh: "那；那个", isBold: true }, { en: "come", zh: "来", isBold: true }, { en: "here", zh: "在这里", isBold: true }, { en: "not", zh: "不", isBold: true },
+                { en: "how", zh: "怎样；如何", isBold: true }, { en: "old", zh: "岁；年纪", isBold: true }, { en: "nine", zh: "九", isBold: true }, { en: "ten", zh: "十", isBold: true },
+                { en: "seven", zh: "七", isBold: true }, { en: "eight", zh: "八", isBold: true }, { en: "happy", zh: "快乐的", isBold: true }, { en: "birthday", zh: "生日", isBold: true },
+                { en: "to", zh: "给；向", isBold: true }, { en: "thank", zh: "谢谢", isBold: true }, { en: "card", zh: "卡片", isBold: true }
             ],
-            unit7: [
-                { en: "eleven", zh: "十一", isBold: true },{ en: "twelve", zh: "十二", isBold: true },{ en: "thirteen", zh: "十三", isBold: true },
-                { en: "fourteen", zh: "十四", isBold: true },{ en: "fifteen", zh: "十五", isBold: true },{ en: "sixteen", zh: "十六", isBold: true },
-                { en: "seventeen", zh: "十七", isBold: true },{ en: "eighteen", zh: "十八", isBold: true },{ en: "nineteen", zh: "十九", isBold: true },
-                { en: "twenty", zh: "二十", isBold: true },{ en: "balloon", zh: "气球", isBold: false },{ en: "win", zh: "赢，获胜", isBold: true },
-                { en: "many", zh: "许多", isBold: true },{ en: "our", zh: "我们的", isBold: true },{ en: "thirty", zh: "三十", isBold: true },
-                { en: "study", zh: "学习", isBold: true },{ en: "fork", zh: "叉子", isBold: false },{ en: "spoon", zh: "勺，匙，调羹", isBold: false },
-                { en: "pear", zh: "梨", isBold: false },{ en: "grape", zh: "葡萄", isBold: true },{ en: "tomato", zh: "西红柿", isBold: true }
+            "unit7": [
+                { en: "new", zh: "新的", isBold: true }, { en: "year", zh: "年", isBold: true }, { en: "for", zh: "给；对", isBold: true }, { en: "dear", zh: "亲爱的", isBold: true },
+                { en: "yours", zh: "你的；你们的", isBold: false }, { en: "some", zh: "一些", isBold: true }, { en: "water", zh: "水", isBold: true }, { en: "hungry", zh: "饥饿的", isBold: true },
+                { en: "bread", zh: "面包", isBold: true }, { en: "OK", zh: "好；行", isBold: true }, { en: "do", zh: "（助动词）", isBold: true }, { en: "like", zh: "喜欢", isBold: true },
+                { en: "juice", zh: "果汁", isBold: true }, { en: "fish", zh: "鱼肉", isBold: true }
             ],
-            unit8: [
-                { en: "animal", zh: "动物", isBold: true },{ en: "those", zh: "那些", isBold: true },{ en: "duck", zh: "鸭子", isBold: true },
-                { en: "tiger", zh: "老虎", isBold: true }
+            "unit8": [
+                { en: "driver", zh: "司机", isBold: true }, { en: "farmer", zh: "农民", isBold: true }, { en: "doctor", zh: "医生", isBold: true }, { en: "nurse", zh: "护士", isBold: true }
             ],
-            词组: [
-                { en: "nature park", zh: "自然公园", isBold: false },{ en: "go out", zh: "出去", isBold: false },{ en: "come in", zh: "进来", isBold: false },
-                { en: "put up", zh: "举起来", isBold: false },{ en: "turn right", zh: "向右转", isBold: false },{ en: "turn left", zh: "向左转", isBold: false },
-                { en: "make new friends", zh: "结交新朋友", isBold: false }
+            "词组": [
+                { en: "stand up", zh: "起立", isBold: true }, { en: "sit down", zh: "坐下", isBold: true }, { en: "come here", zh: "过来", isBold: true }
             ],
         },
-    };
+        "接力·四年级上册": {
+            "unit1": [
+                { en: "these", zh: "这些", isBold: true }, { en: "wash", zh: "洗", isBold: true }, { en: "brush", zh: "（用刷子）刷净", isBold: false }, { en: "wave", zh: "挥动；挥舞", isBold: false },
+                { en: "body", zh: "身体", isBold: true }, { en: "shake", zh: "摇动；抖动", isBold: false }, { en: "feet", zh: "脚（foot 的复数形式）", isBold: false }, { en: "with", zh: "用", isBold: true },
+                { en: "eat", zh: "吃", isBold: true }, { en: "listen", zh: "听", isBold: true }, { en: "write", zh: "写", isBold: true }, { en: "they", zh: "他们；她们；它们", isBold: true },
+                { en: "clock", zh: "时钟", isBold: true }, { en: "blackboard", zh: "黑板", isBold: true }, { en: "out", zh: "（从……里）出来", isBold: true }, { en: "say", zh: "说", isBold: true }
+            ],
+            "unit2": [
+                { en: "behind", zh: "在……后面", isBold: true }, { en: "schoolbag", zh: "书包", isBold: true }, { en: "cup", zh: "杯子", isBold: true }, { en: "move", zh: "移动", isBold: true },
+                { en: "excuse", zh: "原谅", isBold: false }, { en: "park", zh: "公园", isBold: true }, { en: "along", zh: "沿着", isBold: false }, { en: "street", zh: "街道", isBold: true },
+                { en: "turn", zh: "转向", isBold: true }, { en: "school", zh: "学校", isBold: true }, { en: "zoo", zh: "动物园", isBold: true }, { en: "hospital", zh: "医院", isBold: true },
+                { en: "round", zh: "转过来；调转方向", isBold: false }
+            ],
+            "unit3": [
+                { en: "sky", zh: "天空", isBold: false }, { en: "plane", zh: "飞机", isBold: true }
+            ],
+            "unit4": [
+                { en: "weather", zh: "天气", isBold: true }, { en: "windy", zh: "多风的", isBold: true }, { en: "sunny", zh: "晴朗的", isBold: true }, { en: "cool", zh: "凉爽的", isBold: true },
+                { en: "cloudy", zh: "多云的", isBold: true }, { en: "rainy", zh: "下雨的", isBold: false }, { en: "warm", zh: "暖和的", isBold: true }, { en: "wear", zh: "穿", isBold: true },
+                { en: "shirt", zh: "衬衫", isBold: true }, { en: "spring", zh: "春天，春季", isBold: true }, { en: "summer", zh: "夏天，夏季", isBold: true }, { en: "autumn", zh: "秋天，秋季", isBold: true },
+                { en: "winter", zh: "冬天，冬季", isBold: true }, { en: "which", zh: "哪一个", isBold: true }, { en: "season", zh: "季节", isBold: true }, { en: "best", zh: "最", isBold: true }
+            ],
+            "unit5": [
+                { en: "family", zh: "家，家庭", isBold: true }, { en: "father", zh: "父亲", isBold: true }, { en: "Mrs.", zh: "太太，夫人", isBold: true }, { en: "sister", zh: "姐姐，妹妹", isBold: true },
+                { en: "brother", zh: "哥哥，弟弟", isBold: true }, { en: "his", zh: "他的", isBold: true }, { en: "cleaner", zh: "清洁工", isBold: false }, { en: "dancer", zh: "舞蹈家", isBold: false },
+                { en: "singer", zh: "歌唱家，歌手", isBold: false }
+            ],
+            "unit6": [
+                { en: "light", zh: "浅色的", isBold: true }, { en: "clean", zh: "干净的", isBold: true }, { en: "boat", zh: "小船", isBold: true }, { en: "grass", zh: "草", isBold: true },
+                { en: "skirt", zh: "短裙", isBold: true }, { en: "milk", zh: "牛奶", isBold: true }, { en: "beef", zh: "牛肉", isBold: false }, { en: "chicken", zh: "鸡肉", isBold: true },
+                { en: "thirsty", zh: "渴的", isBold: false }
+            ],
+            "unit7": [
+                { en: "eleven", zh: "十一", isBold: true }, { en: "twelve", zh: "十二", isBold: true }, { en: "thirteen", zh: "十三", isBold: true }, { en: "fourteen", zh: "十四", isBold: true },
+                { en: "fifteen", zh: "十五", isBold: true }, { en: "sixteen", zh: "十六", isBold: true }, { en: "seventeen", zh: "十七", isBold: true }, { en: "eighteen", zh: "十八", isBold: true },
+                { en: "nineteen", zh: "十九", isBold: true }, { en: "twenty", zh: "二十", isBold: true }, { en: "balloon", zh: "气球", isBold: false }, { en: "win", zh: "赢，获胜", isBold: true },
+                { en: "many", zh: "许多", isBold: true }, { en: "our", zh: "我们的", isBold: true }, { en: "thirty", zh: "三十", isBold: true }, { en: "study", zh: "学习", isBold: true },
+                { en: "fork", zh: "叉子", isBold: false }, { en: "spoon", zh: "勺，匙，调羹", isBold: false }, { en: "pear", zh: "梨", isBold: false }, { en: "grape", zh: "葡萄", isBold: true },
+                { en: "tomato", zh: "西红柿", isBold: true }
+            ],
+            "unit8": [
+                { en: "animal", zh: "动物", isBold: true }, { en: "those", zh: "那些", isBold: true }, { en: "duck", zh: "鸭子", isBold: true }, { en: "tiger", zh: "老虎", isBold: true }
+            ],
+            "词组": [
+                { en: "nature park", zh: "自然公园", isBold: false }, { en: "go out", zh: "出去", isBold: false }, { en: "come in", zh: "进来", isBold: false }, { en: "put up", zh: "举起来", isBold: false },
+                { en: "turn right", zh: "向右转", isBold: false }, { en: "turn left", zh: "向左转", isBold: false }, { en: "make new friends", zh: "结交新朋友", isBold: false }
+            ],
+        },
+};
 
     const PUBLISHERS = [{ id: 'pep', name: '人教版' }, { id: 'jieli', name: '接力版' }];
     const LS_PUBLISHER = 'shout.publisher';        // ⚠️ 键名带工具前缀
@@ -22451,65 +22667,126 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     //     册仍然写 upper（四年级上册）。
     // ================================================================
     const JIELI_BANK = {
+            "接力三上": {
+                upper: {
+                    "Unit 1": [
+                        { word: "hello", meaning: "你好", bold: true }, { word: "hi", meaning: "你好", bold: true }, { word: "I", meaning: "我", bold: true },
+                        { word: "am", meaning: "是", bold: true }, { word: "yes", meaning: "是；是的", bold: true }, { word: "no", meaning: "不；不是", bold: true },
+                        { word: "good", meaning: "好的", bold: true }, { word: "morning", meaning: "早晨；上午", bold: true }, { word: "dad", meaning: "爸爸", bold: true },
+                        { word: "goodbye", meaning: "再见", bold: true }, { word: "mom", meaning: "妈妈", bold: true }, { word: "Miss", meaning: "小姐；女士", bold: true },
+                        { word: "bye", meaning: "再见", bold: true }
+                    ],
+                    "Unit 2": [
+                        { word: "a", meaning: "一；一个", bold: true }, { word: "teacher", meaning: "教师；老师", bold: true }, { word: "student", meaning: "学生", bold: true },
+                        { word: "stand", meaning: "站立", bold: true }, { word: "up", meaning: "向上", bold: true }, { word: "sit", meaning: "坐", bold: true },
+                        { word: "down", meaning: "向下", bold: true }, { word: "please", meaning: "请", bold: true }, { word: "and", meaning: "和", bold: true },
+                        { word: "go", meaning: "去；走", bold: true }, { word: "stop", meaning: "停止", bold: true }, { word: "are", meaning: "是", bold: true },
+                        { word: "you", meaning: "你；你们", bold: true }, { word: "girl", meaning: "女孩", bold: true }, { word: "boy", meaning: "男孩", bold: true }
+                    ],
+                    "Unit 3": [
+                        { word: "this", meaning: "这；这个", bold: true }, { word: "is", meaning: "是", bold: true }, { word: "box", meaning: "盒；箱", bold: true },
+                        { word: "ball", meaning: "球", bold: true }, { word: "bag", meaning: "包；袋", bold: true }, { word: "cat", meaning: "猫", bold: true },
+                        { word: "book", meaning: "书", bold: true }, { word: "an", meaning: "一；一个", bold: true }, { word: "apple", meaning: "苹果", bold: true },
+                        { word: "it", meaning: "它", bold: true }, { word: "ruler", meaning: "尺子", bold: true }, { word: "pencil", meaning: "铅笔", bold: true },
+                        { word: "pen", meaning: "钢笔", bold: true }, { word: "tree", meaning: "树", bold: true }
+                    ],
+                    "Unit 4": [
+                        { word: "what", meaning: "什么", bold: true }, { word: "car", meaning: "小汽车", bold: true }, { word: "taxi", meaning: "出租车", bold: true },
+                        { word: "train", meaning: "火车", bold: true }, { word: "bus", meaning: "公共汽车", bold: true }, { word: "dog", meaning: "狗", bold: true },
+                        { word: "door", meaning: "门", bold: true }, { word: "chair", meaning: "椅子", bold: true }, { word: "banana", meaning: "香蕉", bold: true },
+                        { word: "orange", meaning: "橙子；橙红色的", bold: true }, { word: "green", meaning: "绿色的", bold: true }, { word: "blue", meaning: "蓝色的", bold: true },
+                        { word: "black", meaning: "黑色的", bold: true }, { word: "white", meaning: "白色的", bold: true }, { word: "panda", meaning: "大熊猫", bold: true },
+                        { word: "show", meaning: "展示", bold: true }, { word: "me", meaning: "我", bold: true }, { word: "have", meaning: "有", bold: true },
+                        { word: "two", meaning: "二", bold: true }, { word: "three", meaning: "三", bold: true }, { word: "one", meaning: "一", bold: true },
+                        { word: "four", meaning: "四", bold: true }, { word: "five", meaning: "五", bold: true }, { word: "six", meaning: "六", bold: true }
+                    ],
+                    "Unit 5": [
+                        { word: "color", meaning: "颜色", bold: true }, { word: "yellow", meaning: "黄色的", bold: true }, { word: "red", meaning: "红色的", bold: true },
+                        { word: "she", meaning: "她", bold: true }, { word: "he", meaning: "他", bold: true }, { word: "who", meaning: "谁", bold: true },
+                        { word: "Mr.", meaning: "先生", bold: true }, { word: "Ms.", meaning: "女士", bold: true }, { word: "worker", meaning: "工人", bold: true }
+                    ],
+                    "Unit 6": [
+                        { word: "that", meaning: "那；那个", bold: true }, { word: "come", meaning: "来", bold: true }, { word: "here", meaning: "在这里", bold: true },
+                        { word: "not", meaning: "不", bold: true }, { word: "how", meaning: "怎样；如何", bold: true }, { word: "old", meaning: "岁；年纪", bold: true },
+                        { word: "nine", meaning: "九", bold: true }, { word: "ten", meaning: "十", bold: true }, { word: "seven", meaning: "七", bold: true },
+                        { word: "eight", meaning: "八", bold: true }, { word: "happy", meaning: "快乐的", bold: true }, { word: "birthday", meaning: "生日", bold: true },
+                        { word: "to", meaning: "给；向", bold: true }, { word: "thank", meaning: "谢谢", bold: true }, { word: "card", meaning: "卡片", bold: true }
+                    ],
+                    "Unit 7": [
+                        { word: "new", meaning: "新的", bold: true }, { word: "year", meaning: "年", bold: true }, { word: "for", meaning: "给；对", bold: true },
+                        { word: "dear", meaning: "亲爱的", bold: true }, { word: "yours", meaning: "你的；你们的", bold: false }, { word: "some", meaning: "一些", bold: true },
+                        { word: "water", meaning: "水", bold: true }, { word: "hungry", meaning: "饥饿的", bold: true }, { word: "bread", meaning: "面包", bold: true },
+                        { word: "OK", meaning: "好；行", bold: true }, { word: "do", meaning: "（助动词）", bold: true }, { word: "like", meaning: "喜欢", bold: true },
+                        { word: "juice", meaning: "果汁", bold: true }, { word: "fish", meaning: "鱼肉", bold: true }
+                    ],
+                    "Unit 8": [
+                        { word: "driver", meaning: "司机", bold: true }, { word: "farmer", meaning: "农民", bold: true }, { word: "doctor", meaning: "医生", bold: true },
+                        { word: "nurse", meaning: "护士", bold: true }
+                    ],
+                    "词组": [
+                        { word: "stand up", meaning: "起立", bold: true }, { word: "sit down", meaning: "坐下", bold: true }, { word: "come here", meaning: "过来", bold: true }
+                    ],
+                },
+            },
             "接力四上": {
                 upper: {
                     "Unit 1": [
-                        { word: "these", meaning: "这些", bold: true },{ word: "wash", meaning: "洗", bold: true },{ word: "brush", meaning: "（用刷子）刷净", bold: false },
-                        { word: "wave", meaning: "挥动；挥舞", bold: false },{ word: "body", meaning: "身体", bold: true },{ word: "shake", meaning: "摇动；抖动", bold: false },
-                        { word: "feet", meaning: "脚（foot 的复数形式）", bold: false },{ word: "with", meaning: "用", bold: true },{ word: "eat", meaning: "吃", bold: true },
-                        { word: "listen", meaning: "听", bold: true },{ word: "write", meaning: "写", bold: true },{ word: "they", meaning: "他们；她们；它们", bold: true },
-                        { word: "clock", meaning: "时钟", bold: true },{ word: "blackboard", meaning: "黑板", bold: true },{ word: "out", meaning: "（从……里）出来", bold: true },
+                        { word: "these", meaning: "这些", bold: true }, { word: "wash", meaning: "洗", bold: true }, { word: "brush", meaning: "（用刷子）刷净", bold: false },
+                        { word: "wave", meaning: "挥动；挥舞", bold: false }, { word: "body", meaning: "身体", bold: true }, { word: "shake", meaning: "摇动；抖动", bold: false },
+                        { word: "feet", meaning: "脚（foot 的复数形式）", bold: false }, { word: "with", meaning: "用", bold: true }, { word: "eat", meaning: "吃", bold: true },
+                        { word: "listen", meaning: "听", bold: true }, { word: "write", meaning: "写", bold: true }, { word: "they", meaning: "他们；她们；它们", bold: true },
+                        { word: "clock", meaning: "时钟", bold: true }, { word: "blackboard", meaning: "黑板", bold: true }, { word: "out", meaning: "（从……里）出来", bold: true },
                         { word: "say", meaning: "说", bold: true }
                     ],
                     "Unit 2": [
-                        { word: "behind", meaning: "在……后面", bold: true },{ word: "schoolbag", meaning: "书包", bold: true },{ word: "cup", meaning: "杯子", bold: true },
-                        { word: "move", meaning: "移动", bold: true },{ word: "excuse", meaning: "原谅", bold: false },{ word: "park", meaning: "公园", bold: true },
-                        { word: "along", meaning: "沿着", bold: false },{ word: "street", meaning: "街道", bold: true },{ word: "turn", meaning: "转向", bold: true },
-                        { word: "school", meaning: "学校", bold: true },{ word: "zoo", meaning: "动物园", bold: true },{ word: "hospital", meaning: "医院", bold: true },
+                        { word: "behind", meaning: "在……后面", bold: true }, { word: "schoolbag", meaning: "书包", bold: true }, { word: "cup", meaning: "杯子", bold: true },
+                        { word: "move", meaning: "移动", bold: true }, { word: "excuse", meaning: "原谅", bold: false }, { word: "park", meaning: "公园", bold: true },
+                        { word: "along", meaning: "沿着", bold: false }, { word: "street", meaning: "街道", bold: true }, { word: "turn", meaning: "转向", bold: true },
+                        { word: "school", meaning: "学校", bold: true }, { word: "zoo", meaning: "动物园", bold: true }, { word: "hospital", meaning: "医院", bold: true },
                         { word: "round", meaning: "转过来；调转方向", bold: false }
                     ],
                     "Unit 3": [
-                        { word: "sky", meaning: "天空", bold: false },{ word: "plane", meaning: "飞机", bold: true }
+                        { word: "sky", meaning: "天空", bold: false }, { word: "plane", meaning: "飞机", bold: true }
                     ],
                     "Unit 4": [
-                        { word: "weather", meaning: "天气", bold: true },{ word: "windy", meaning: "多风的", bold: true },{ word: "sunny", meaning: "晴朗的", bold: true },
-                        { word: "cool", meaning: "凉爽的", bold: true },{ word: "cloudy", meaning: "多云的", bold: true },{ word: "rainy", meaning: "下雨的", bold: false },
-                        { word: "warm", meaning: "暖和的", bold: true },{ word: "wear", meaning: "穿", bold: true },{ word: "shirt", meaning: "衬衫", bold: true },
-                        { word: "spring", meaning: "春天，春季", bold: true },{ word: "summer", meaning: "夏天，夏季", bold: true },{ word: "autumn", meaning: "秋天，秋季", bold: true },
-                        { word: "winter", meaning: "冬天，冬季", bold: true },{ word: "which", meaning: "哪一个", bold: true },{ word: "season", meaning: "季节", bold: true },
+                        { word: "weather", meaning: "天气", bold: true }, { word: "windy", meaning: "多风的", bold: true }, { word: "sunny", meaning: "晴朗的", bold: true },
+                        { word: "cool", meaning: "凉爽的", bold: true }, { word: "cloudy", meaning: "多云的", bold: true }, { word: "rainy", meaning: "下雨的", bold: false },
+                        { word: "warm", meaning: "暖和的", bold: true }, { word: "wear", meaning: "穿", bold: true }, { word: "shirt", meaning: "衬衫", bold: true },
+                        { word: "spring", meaning: "春天，春季", bold: true }, { word: "summer", meaning: "夏天，夏季", bold: true }, { word: "autumn", meaning: "秋天，秋季", bold: true },
+                        { word: "winter", meaning: "冬天，冬季", bold: true }, { word: "which", meaning: "哪一个", bold: true }, { word: "season", meaning: "季节", bold: true },
                         { word: "best", meaning: "最", bold: true }
                     ],
                     "Unit 5": [
-                        { word: "family", meaning: "家，家庭", bold: true },{ word: "father", meaning: "父亲", bold: true },{ word: "Mrs.", meaning: "太太，夫人", bold: true },
-                        { word: "sister", meaning: "姐姐，妹妹", bold: true },{ word: "brother", meaning: "哥哥，弟弟", bold: true },{ word: "his", meaning: "他的", bold: true },
-                        { word: "cleaner", meaning: "清洁工", bold: false },{ word: "dancer", meaning: "舞蹈家", bold: false },{ word: "singer", meaning: "歌唱家，歌手", bold: false }
+                        { word: "family", meaning: "家，家庭", bold: true }, { word: "father", meaning: "父亲", bold: true }, { word: "Mrs.", meaning: "太太，夫人", bold: true },
+                        { word: "sister", meaning: "姐姐，妹妹", bold: true }, { word: "brother", meaning: "哥哥，弟弟", bold: true }, { word: "his", meaning: "他的", bold: true },
+                        { word: "cleaner", meaning: "清洁工", bold: false }, { word: "dancer", meaning: "舞蹈家", bold: false }, { word: "singer", meaning: "歌唱家，歌手", bold: false }
                     ],
                     "Unit 6": [
-                        { word: "light", meaning: "浅色的", bold: true },{ word: "clean", meaning: "干净的", bold: true },{ word: "boat", meaning: "小船", bold: true },
-                        { word: "grass", meaning: "草", bold: true },{ word: "skirt", meaning: "短裙", bold: true },{ word: "milk", meaning: "牛奶", bold: true },
-                        { word: "beef", meaning: "牛肉", bold: false },{ word: "chicken", meaning: "鸡肉", bold: true },{ word: "thirsty", meaning: "渴的", bold: false }
+                        { word: "light", meaning: "浅色的", bold: true }, { word: "clean", meaning: "干净的", bold: true }, { word: "boat", meaning: "小船", bold: true },
+                        { word: "grass", meaning: "草", bold: true }, { word: "skirt", meaning: "短裙", bold: true }, { word: "milk", meaning: "牛奶", bold: true },
+                        { word: "beef", meaning: "牛肉", bold: false }, { word: "chicken", meaning: "鸡肉", bold: true }, { word: "thirsty", meaning: "渴的", bold: false }
                     ],
                     "Unit 7": [
-                        { word: "eleven", meaning: "十一", bold: true },{ word: "twelve", meaning: "十二", bold: true },{ word: "thirteen", meaning: "十三", bold: true },
-                        { word: "fourteen", meaning: "十四", bold: true },{ word: "fifteen", meaning: "十五", bold: true },{ word: "sixteen", meaning: "十六", bold: true },
-                        { word: "seventeen", meaning: "十七", bold: true },{ word: "eighteen", meaning: "十八", bold: true },{ word: "nineteen", meaning: "十九", bold: true },
-                        { word: "twenty", meaning: "二十", bold: true },{ word: "balloon", meaning: "气球", bold: false },{ word: "win", meaning: "赢，获胜", bold: true },
-                        { word: "many", meaning: "许多", bold: true },{ word: "our", meaning: "我们的", bold: true },{ word: "thirty", meaning: "三十", bold: true },
-                        { word: "study", meaning: "学习", bold: true },{ word: "fork", meaning: "叉子", bold: false },{ word: "spoon", meaning: "勺，匙，调羹", bold: false },
-                        { word: "pear", meaning: "梨", bold: false },{ word: "grape", meaning: "葡萄", bold: true },{ word: "tomato", meaning: "西红柿", bold: true }
+                        { word: "eleven", meaning: "十一", bold: true }, { word: "twelve", meaning: "十二", bold: true }, { word: "thirteen", meaning: "十三", bold: true },
+                        { word: "fourteen", meaning: "十四", bold: true }, { word: "fifteen", meaning: "十五", bold: true }, { word: "sixteen", meaning: "十六", bold: true },
+                        { word: "seventeen", meaning: "十七", bold: true }, { word: "eighteen", meaning: "十八", bold: true }, { word: "nineteen", meaning: "十九", bold: true },
+                        { word: "twenty", meaning: "二十", bold: true }, { word: "balloon", meaning: "气球", bold: false }, { word: "win", meaning: "赢，获胜", bold: true },
+                        { word: "many", meaning: "许多", bold: true }, { word: "our", meaning: "我们的", bold: true }, { word: "thirty", meaning: "三十", bold: true },
+                        { word: "study", meaning: "学习", bold: true }, { word: "fork", meaning: "叉子", bold: false }, { word: "spoon", meaning: "勺，匙，调羹", bold: false },
+                        { word: "pear", meaning: "梨", bold: false }, { word: "grape", meaning: "葡萄", bold: true }, { word: "tomato", meaning: "西红柿", bold: true }
                     ],
                     "Unit 8": [
-                        { word: "animal", meaning: "动物", bold: true },{ word: "those", meaning: "那些", bold: true },{ word: "duck", meaning: "鸭子", bold: true },
+                        { word: "animal", meaning: "动物", bold: true }, { word: "those", meaning: "那些", bold: true }, { word: "duck", meaning: "鸭子", bold: true },
                         { word: "tiger", meaning: "老虎", bold: true }
                     ],
-                    "附 · 词组": [
-                        { word: "nature park", meaning: "自然公园", bold: false },{ word: "go out", meaning: "出去", bold: false },{ word: "come in", meaning: "进来", bold: false },
-                        { word: "put up", meaning: "举起来", bold: false },{ word: "turn right", meaning: "向右转", bold: false },{ word: "turn left", meaning: "向左转", bold: false },
+                    "词组": [
+                        { word: "nature park", meaning: "自然公园", bold: false }, { word: "go out", meaning: "出去", bold: false }, { word: "come in", meaning: "进来", bold: false },
+                        { word: "put up", meaning: "举起来", bold: false }, { word: "turn right", meaning: "向右转", bold: false }, { word: "turn left", meaning: "向左转", bold: false },
                         { word: "make new friends", meaning: "结交新朋友", bold: false }
                     ],
                 },
             },
-    };
+};
 
     const PUBLISHERS = [{ id: 'pep', name: '人教版' }, { id: 'jieli', name: '接力版' }];
     const LS_PUBLISHER = 'match.publisher';       // ⚠️ 键名带工具前缀
@@ -25944,7 +26221,7 @@ body.pk-mode .status-bar .info {
 const CAT_BOOKS = {"三上":{"Unit 1":[["nice","美好的",["形容词"],"adj."],["ear","耳朵",["身体"],"n."],["hand","手",["身体"],""],["eye","眼睛",["身体"],"n."],["mouth","嘴巴",["身体"],"n."],["arm","手臂",["身体"],"n."],["can","能；可以",[],"v."],["share","分享",["动词"],"v."],["smile","微笑",["动词"],"v."],["listen","听",["动词"],"v."],["help","帮助",["动词"],"v."],["say","说",["动词"],"v."],["friend","朋友",["人物"],""],["good","好的",["形容词"],"adj."]],"Unit 2":[["mum","妈妈",["家人"],"n."],["dad","爸爸",["家人"],"n."],["grandma","奶奶",["家人"],"n."],["grandpa","爷爷",["家人"],"n."],["grandfather","祖父",["家人"],"n."],["grandmother","祖母",["家人"],"n."],["mother","母亲",["家人"],"n."],["father","父亲",["家人"],"n."],["me","我",[],"pron."],["sister","姐妹",["家人"],"n."],["family","家庭",["家人"],"n."],["big","大的",["形容词"],"adj."],["cousin","表兄妹",["家人"],"n."],["brother","兄弟",["家人"],"n."],["baby","婴儿",["人物","家人"],"n."],["uncle","叔叔",["家人"],"n."],["aunt","阿姨",["家人"],"n."],["small","小的",["形容词"],"adj."]],"Unit 3":[["like","喜欢",["动词"],"v."],["dog","狗",["动物"],"n."],["pet","宠物",["动物"],"n."],["cat","猫",["动物"],"n."],["fish","鱼",["动物"],"n."],["bird","鸟",["动物"],"n."],["rabbit","兔子",["动物"],"n."],["go","去",["动词"],""],["zoo","动物园",["地点"],"n."],["fox","狐狸",["动物"],"n."],["Miss","小姐",["称呼"],""],["panda","熊猫",["动物"],"n."],["red panda","小熊猫",["动物"],"n."],["cute","可爱的",["形容词"],"adj."],["monkey","猴子",["动物"],"n."],["tiger","老虎",["动物"],"n."],["elephant","大象",["动物"],"n."],["lion","狮子",["动物"],"n."],["animal","动物",["动物"],"n."],["giraffe","长颈鹿",["动物"],"n."],["tall","高的",["形容词"],"adj."],["fast","快速的",["形容词"],"adj."]],"Unit 4":[["apple","苹果",["水果"],"n."],["banana","香蕉",["水果"],"n."],["farm","农场",["地点"],"n."],["air","空气",["自然"],"n."],["orange","橙子；橙色",["水果","颜色"],"n."],["grape","葡萄",["水果"],"n."],["school","学校",["地点"],""],["garden","花园",["地点"],"n."],["need","需要",["动词"],"v."],["water","水",["动词","自然"],""],["flower","花",["自然"],"n."],["grass","草",["自然"],"n."],["plant","植物",["动词","自然"],""],["new","新的",["形容词"],"adj."],["tree","树",["自然"],"n."],["sun","太阳",["天体","自然"],"n."],["give","给予",["动词"],"v."],["them","他们",[],"pron."]],"Unit 5":[["colour","颜色",["颜色"],"n."],["orange","橙色",["水果","颜色"],"n."],["green","绿色",["颜色"],"n."],["red","红色",["颜色"],"n."],["blue","蓝色",["颜色"],"adj."],["make","制作",["动词"],"v."],["purple","紫色",["颜色"],"n."],["brown","棕色",["颜色"],"n."],["bear","熊",["动物"],"n."],["yellow","黄色",["颜色"],"n."],["duck","鸭子",["动物"],"n."],["sea","海洋",["自然"],"n."],["pink","粉色",["颜色"],"n."],["draw","画画",["动词"],"v."],["white","白色",["颜色"],"n."],["black","黑色",["颜色"],"n."]],"Unit 6":[["one","一",["数字"],"num."],["two","二",["数字"],"num."],["three","三",["数字"],"num."],["four","四",["数字"],"num."],["five","五",["数字"],"num."],["six","六",["数字"],"num."],["seven","七",["数字"],"num."],["eight","八",["数字"],"num."],["nine","九",["数字"],"num."],["ten","十",["数字"],"num."],["old","年老的",["形容词"],"adj."],["year","年",["时间"],""],["o'clock","点钟",["时间"],""],["cut","切",["动词"],"v."],["eat","吃",["动词"],"v."],["cake","蛋糕",["食物饮料"],"n."]]},"三下":{"Unit 1":[["where","哪里",[],"pron."],["from","从...",[],"prep."],["about","关于",[],"prep."],["today","今天",["时间"],""],["teacher","老师",["职业"],"n."],["student","学生",["人物"],""],["who","谁",[],"pron."],["girl","女孩",["人物"],""],["neighbour","邻居",["人物"],""],["boy","男孩",["人物"],""],["woman","女人",["人物"],""],["man","男人",["人物"],""],["Mr","先生",["称呼"],""],["classmate","同学",["人物"],""],["he","他",["主语"],"主语"],["also","也",[],"adv."],["English","英语",["科目"],"n."],["she","她",["主语"],"主语"],["very","非常",[],"adv."],["UK","英国",["国家城市"],""],["China","中国",["国家城市"],""],["Canada","加拿大",["国家城市"],""],["USA","美国",["国家城市"],""]],"Unit 2":[["has","有",[],"v."],["long","长的",["形容词"],"adj."],["body","身体",["身体"],"n."],["short","短的",["形容词"],"adj."],["leg","腿",["身体"],"n."],["right","正确的；右边",["形容词"],""],["fat","胖的",["形容词"],"adj."],["thin","瘦的",["形容词"],"adj."],["slow","慢的",["形容词"],"adj."],["love","爱",["动词"],"v."],["her","她的",["名词所有格"],"名词所有格"],["gift","礼物",["物品"],""],["picture","图画",["物品"],""],["card","卡片",["物品"],""],["sing","唱歌",["动词"],"v."],["dance","跳舞",["动词"],"v."],["talk","说话",["动词"],"v."],["face","脸",["身体"],"n."],["or","或者",[],"conj."]],"Unit 3":[["eraser","橡皮",["文具"],"n."],["find","找到",["动词"],"v."],["ruler","尺子",["文具"],"n."],["pen","钢笔",["文具"],"n."],["pencil","铅笔",["文具"],"n."],["book","书",["文具"],""],["bag","书包",["文具"],"n."],["paper","纸",["文具"],"n."],["these","这些",[],"pron."],["see","看见",["动词"],"v."],["smell","闻",["动词","自然"],""],["taste","品尝",["动词"],"v."],["hear","听见",["动词"],"v."],["touch","触摸",["动词"],"v."],["tongue","舌头",["身体"],"n."],["class","班级",[],"v."],["in","在...里",[],"prep."],["computer","电脑",["物品"],""],["learn","学习",["动词"],"v."]],"Unit 4":[["breakfast","早餐",["食物饮料"],""],["time","时间",["时间"],""],["bread","面包",["食物饮料"],"n."],["egg","鸡蛋",["食物饮料"],"n."],["milk","牛奶",["动词","食物饮料"],""],["noodle","面条",["食物饮料"],"n."],["juice","果汁",["食物饮料"],"n."],["rice","米饭",["食物饮料"],"n."],["meat","肉",["食物饮料"],"n."],["vegetable","蔬菜",["食物饮料"],"n."],["healthy","健康的",["形容词"],"adj."],["plate","盘子",["物品"],""],["soup","汤",["食物饮料"],"n."],["fruit","水果",["食物饮料"],"n."],["colourful","色彩缤纷",["形容词"],"adj."],["candy","糖果",["食物饮料"],"n."],["yummy","美味的",[],"n."]],"Unit 5":[["boat","小船",["交通"],"n."],["cool","酷的",["天气","形容词"],""],["keep","保持",["动词"],"v."],["at","在",[],"prep."],["home","家",["地点"],""],["ball","球",["运动"],"n."],["doll","玩偶",["物品"],""],["car","汽车",["交通"],"n."],["shelf","架子",["物品"],""],["in","在...里",[],"prep."],["box","盒子",["文具","物品"],"n."],["cap","帽子",["衣服"],"n."],["map","地图",["物品"],""],["under","在下面",[],"prep."],["still","仍然",[],"adv."],["put","放置",["动词"],"v."]],"Unit 6":[["fifteen","十五",["数字"],"num."],["twelve","十二",["数字"],"num."],["fourteen","十四",["数字"],"num."],["thirteen","十三",["数字"],"num."],["eleven","十一",["数字"],"num."],["twenty","二十",["数字"],"num."],["seventeen","十七",["数字"],"num."],["sixteen","十六",["数字"],"num."],["eighteen","十八",["数字"],"num."],["nineteen","十九",["数字"],"num."],["piggy bank","储蓄罐",["物品"],""],["pay","支付",["动词"],"v."],["back","背部；返回",["身体"],"n."]]},"四上":{"Unit 1":[["PE","体育",["科目"],"n."],["job","工作",["职业"],"n."],["doctor","医生",["职业"],"n."],["farmer","农民",["职业"],"n."],["nurse","护士",["职业"],"n."],["office worker","办公室职员",["职业"],"n."],["factory worker","工厂工人",["职业"],"n."],["busy","忙碌的",["形容词"],"adj."],["tired","疲倦的",["形容词"],"adj."],["chore","家务",["家务"],""],["cook","厨师；烹饪",["动词","家务","职业"],""],["clean","清洁",["动词","家务","形容词"],""],["room","房间",["地点"],""],["look after","照顾",["动词"],"v."],["sweep","打扫",["动词","家务"],"v."],["together","一起",[],"adv."],["people","人们",["人物"],""],["child","孩子",["人物"],""]],"Unit 2":[["his","他的",["名词所有格"],"名词所有格"],["strong","强壮的",["形容词"],"adj."],["hair","头发",["身体"],"n."],["also","也",[],"adv."],["kind","和蔼的",["形容词"],"adj."],["quiet","安静的",["形容词"],"adj."],["best","最好的",["形容词"],"adj."],["read","阅读",["动词"],"v."],["Chinese","语文；中国人",["科目"],"n."],["play","玩",["动词"],"v."],["football","足球",["运动"],"n."],["basketball","篮球",["运动"],"n."],["always","总是",[],"adv."]],"Unit 3":[["afternoon","下午",["时间"],""],["there","那里",[],"adv."],["playground","操场",["地点"],"n."],["park","公园",["地点"],"n."],["over","结束",[],"prep."],["hospital","医院",["地点"],"n."],["shop","商店",["地点"],"n."],["toilet","厕所",["地点"],"n."],["bus stop","公交站",["地点"],"n."],["library","图书馆",["地点"],"n."],["sport","运动",["运动"],"n."],["walk","步行",["动词"],"v."],["favourite","最喜欢的",["形容词"],"adj."],["place","地方",["地点"],"n."],["photo","照片",["物品"],""],["buy","买",["动词"],"v."],["community","社区",["地点"],"n."]],"Unit 4":[["firefighter","消防员",["职业"],"n."],["why","为什么",[],"pron."],["driver","司机",["职业"],"n."],["cleaner","清洁工",["职业"],"n."],["cook","厨师",["动词","家务","职业"],""],["delivery worker","快递员",["职业"],"n."],["police officer","警察",["职业"],"n."],["now","现在",[],"adv."],["make the bed","整理床铺",["动词"],"v."],["old","老的",["形容词"],"adj."],["tell","告诉",["动词"],"v."],["everyone","每个人",["人物"],""],["Ms","女士",["称呼"],""]],"Unit 5":[["speak","说",["动词"],"v."],["weather","天气",["天气"],"n."],["sunny","晴朗的",["天气"],"n."],["hot","热的",["天气","形容词"],""],["bad","坏的",["形容词"],"adj."],["cold","冷的",["天气","形容词","生病"],""],["windy","有风的",["天气"],"n."],["cloudy","多云的",["天气"],"n."],["rainy","下雨的",["天气"],"n."],["snowy","下雪的",["天气"],"n."],["cool","凉爽的",["天气","形容词"],""],["warm","温暖的",["天气","形容词"],""],["tomorrow","明天",["时间"],"adv."],["closed","关闭的",["形容词"],"adj."],["idea","想法",[],"n."],["fly","飞",["动词"],"v."],["kite","风筝",["物品"],""],["snowman","雪人",[],"v."],["fun","乐趣",["形容词"],"adj."],["their","他们的",["名词所有格"],"名词所有格"],["swim","游泳",["动词","运动"],""],["Sydney","悉尼",["国家城市"],""]],"Unit 6":[["whose","谁的",["名词所有格"],"名词所有格"],["sweater","毛衣",["衣服"],"n."],["sock","袜子",["衣服"],"n."],["mine","我的",["名词所有格"],"名词所有格"],["wear","穿",["动词","衣服"],""],["shirt","衬衫",["衣服"],"n."],["coat","外套",["衣服"],"n."],["dress","连衣裙",["衣服"],"n."],["which","哪一个",[],"pron."],["season","季节",["季节"],"n."],["winter","冬天",["季节"],"n."],["snow","雪",["自然"],"n."],["get together","团聚",["动词"],"v."],["spring","春天",["季节"],"n."],["summer","夏天",["季节"],"n."],["autumn","秋天",["季节"],"n."],["T-shirt","T恤",["衣服"],"n."],["fall","秋天",["季节"],"n."],["leaf","叶子",["自然"],"n."],["leaves","叶子（复数）",["自然"],"n."],["glove","手套",["衣服"],"n."],["then","然后",[],"adv."]]},"四下":{"Unit 1":[["sorry","抱歉",["形容词"],"adj."],["hurry","赶快",["动词"],"v."],["late","迟到",["形容词"],"adj."],["class","班级",[],"v."],["ready","准备好",["形容词"],"adj."],["classroom","教室",["地点"],"n."],["turn off","关闭",["动词"],"v."],["light","灯",["物品","自然"],"n."],["blackboard","黑板",["文具"],"n."],["desk","书桌",["文具"],""],["chair","椅子",["文具"],"n."],["tidy","整洁的",["形容词"],"adj."],["music","音乐",["科目"],""],["door","门",["物品"],""],["window","窗户",["物品"],""],["fan","风扇",["物品"],""],["when","什么时候",[],"pron."],["understand","理解",["动词"],"v."],["wall","墙",["物品"],"n."],["newspaper","报纸",["物品"],""],["hand out","分发",["动词"],"v."],["workbook","练习册",["物品"],""]],"Unit 2":[["watch","手表",["动词"],"v."],["TV","电视",["物品"],""],["first","第一",["数字"],"num."],["wet","湿的",["形容词"],"adj."],["run","跑",["动词","运动"],""],["living room","客厅",["地点"],"n."],["safe","安全的",["形容词"],"adj."],["wash","洗",["动词","家务"],"v."],["helpful","有帮助的",["形容词"],"adj."],["loud","大声的",["形容词"],"adj."],["sleep","睡觉",["动词"],"v."],["bedroom","卧室",["地点"],"n."],["kitchen","厨房",["地点"],"n."],["study","书房",["动词","地点"],""],["bathroom","浴室",["地点"],"n."],["think","思考",["动词"],"v."],["work","工作",["动词"],"v."],["hard","努力地",["形容词"],"adj."],["follow","跟随",["动词"],"v."],["feel","感觉",["动词"],"v."]],"Unit 3":[["over","结束",[],"prep."],["kid","小孩",["人物"],""],["dinner","晚餐",["食物饮料"],""],["art","美术",["科目"],"n."],["lunch","午餐",["食物饮料"],"n."],["maths","数学",["科目"],"n."],["get up","起床",["动词"],"v."],["go to school","上学",["动词"],"v."],["go home","回家",["动词"],"v."],["go to bed","上床睡觉",["动词"],"v."],["want","想要",["动词"],"v."],["clock","时钟",["物品"],""],["minute","分钟",["时间"],""]],"Unit 4":[["trousers","裤子",["衣服"],"n."],["clothes","衣服",["衣服"],"n."],["those","那些",[],"pron."],["shorts","短裤",["衣服"],"n."],["jacket","夹克",["衣服"],"n."],["skirt","裙子",["衣服"],"n."],["dear","亲爱的",["形容词"],"adj."],["expensive","昂贵的",["形容词"],"adj."],["take","拿",["动词"],"v."],["cheap","便宜的",["形容词"],"adj."],["shoe","鞋子",["衣服"],"n."],["beautiful","美丽的",["形容词"],"adj."],["hat","帽子",["衣服"],"n."],["sunglasses","太阳镜",["衣服"],"n."],["free","免费的",["形容词"],"adj."],["large","大的",["形容词"],"adj."],["list","清单",["物品"],""],["try on","试穿",["动词"],"v."]],"Unit 5":[["cow","奶牛",["动物"],"n."],["horse","马",["动物"],"n."],["sheep","绵羊",["动物"],"n."],["pig","猪",["动物"],"n."],["chicken","鸡",["动物"],"n."],["tomato","西红柿",["食物饮料"],"n."],["bee","蜜蜂",["动物"],"n."],["mouse","老鼠",["动物"],"n."],["carrot","胡萝卜",["食物饮料"],"n."],["potato","土豆",["食物饮料"],"n."],["green bean","豆角",["食物饮料"],"n."],["can","罐子",[],"v."]],"Unit 6":[["feed","喂",["动词"],"v."],["pass","传递",["动词"],"v."],["pick","摘",["动词"],"v."],["milk","挤奶",["动词","食物饮料"],""],["knife","刀",["物品"],""],["fork","叉",["物品"],""],["chopstick","筷子",["物品"],""],["waste","浪费",["动词","自然"],""],["food","食物",["食物饮料"],"n."],["delicious","美味的",["形容词"],""],["clear the table","收拾餐桌",["动词"],"v."],["set the table","摆餐具",["动词"],"v."],["bowl","碗",["物品"],""],["spoon","勺子",["物品"],"n."],["supermarket","超市",["地点"],"n."],["week","星期",["时间"],""],["salad","沙拉",["食物饮料"],"n."]]},"五上":{"Unit 1":[["team","团队",["人物","运动"],"n."],["player","运动员",["人物"],""],["him","他（宾格）",[],"pron."],["lovely","可爱的",["形容词"],"adj."],["clever","聪明的",["形容词"],"adj."],["young","年轻的",["形容词"],"adj."],["hard-working","勤奋的",["形容词"],"adj."],["science","科学",["科目"],"n."],["robot","机器人",["物品"],""],["jump","跳",["动词","运动"],""],["rope","绳子",["物品"],""],["piano","钢琴",["物品"],""],["chess","国际象棋",["运动"],"n."],["easy","容易的",["形容词"],"adj."],["star","星星",["天体","自然"],"n."],["wonderful","精彩的",["形容词"],"adj."],["Australia","澳大利亚",["国家城市"],""]],"Unit 2":[["sad","悲伤的",["形容词"],"adj."],["centre","中心",["地点"],"n."],["agree","同意",["动词"],"v."],["finish","完成",["动词"],"v."],["worried","担心的",["形容词"],"adj."],["excited","兴奋的",["形容词"],"adj."],["wrong","错误的",["形容词"],"adj."],["angry","生气的",["形容词"],"adj."],["afraid","害怕的",["形容词"],"adj."],["parent","父/母",["人物"],""],["ask","问",["动词"],"v."],["laugh","笑",["动词"],"v."],["move","移动",["动词"],"v."],["yours","你的（名词性物主代词）",["名词所有格"],"名词所有格"]],"Unit 3":[["Wednesday","星期三",["星期"],"n."],["subject","科目",["科目"],"n."],["Tuesday","星期二",["星期"],"n."],["Friday","星期五",["星期"],"n."],["because","因为",[],"conj."],["Monday","星期一",["星期"],"n."],["Thursday","星期四",["星期"],"n."],["start","开始",["动词"],"v."],["usually","通常",[],"adv."],["weekend","周末",["星期"],"n."],["sometimes","有时",[],"adv."],["Saturday","星期六",["星期"],"n."],["Sunday","星期日",["星期"],"n."],["evening","晚上",["时间"],""],["answer","回答",["动词"],"v."],["ping-pong","乒乓球",["运动"],"n."],["night","夜晚",["时间"],""],["visit","参观",["动词"],"v."],["grandparent","祖父母",["人物"],""]],"Unit 4":[["stay","停留",["动词"],"v."],["should","应该",[],"v."],["flu","流感",["生病"],""],["exercise","锻炼",["运动"],"n."],["enough","足够的",["形容词"],"adj."],["if","如果",[],"conj."],["house","房屋",["地点"],"n."],["show","展示",["动词"],"v."],["phone","电话",["物品"],""],["then","然后",[],"adv."],["rest","休息",["动词"],"v."],["take care of","照顾",["动词"],"v."],["check","检查",["动词"],"v."],["brush","刷",["动词"],"v."],["tooth","牙齿（单数）",["身体"],"n."],["teeth","牙齿（复数）",["身体"],"n."],["twice","两次",["时间"],""],["hour","小时",["时间"],""],["free","免费的/自由的",["形容词"],"adj."]],"Unit 5":[["hungry","饥饿的",["形容词"],""],["beef","牛肉",["食物饮料"],"n."],["ice cream","冰淇淋",["食物饮料"],"n."],["little","小的",["形容词"],"adj."],["dumpling","饺子",["食物饮料"],"n."],["tea","茶",["食物饮料"],"n."],["hamburger","汉堡包",["食物饮料"],"n."],["Mrs","太太",["称呼"],""],["coconut","椰子",["水果"],"n."],["interesting","有趣的",["形容词"],"adj."],["seed","种子",["自然"],"n."],["pull","拉",["动词"],"v."],["stem","茎",["自然"],"n."],["root","根",["自然"],"n."],["lotus","莲花",["自然"],"n."],["lake","湖",["自然"],"n."],["world","世界",[],"n."],["round","圆的",["形容词"],"adj."],["different","不同的",["形容词"],"adj."]],"Unit 6":[["river","河流",["自然"],"n."],["nature","自然",["自然"],"n."],["waterfall","瀑布",["自然"],"n."],["forest","森林",["自然"],"n."],["famous","著名的",["形容词"],"adj."],["mountain","山",["自然"],"n."],["wind","风",["自然"],"n."],["trip","旅行",["时间"],""],["dangerous","危险的",["形容词"],"adj."],["heavy","重的",["形容词"],"adj."],["hotel","旅馆",["地点"],"n."],["close","关闭",["动词"],"v."],["umbrella","雨伞",["物品"],""],["raincoat","雨衣",["物品"],""],["worry","担心",["动词"],"v."],["fine","好的",["形容词"],"adj."],["fog","雾",["自然"],"n."],["flood","洪水",["自然"],"n."],["fire","火",["自然"],"n."],["know","知道",["动词"],"v."],["before","在...之前",[],"prep."],["go hiking","去远足",["动词"],"v."],["bring","带来",["动词"],"v."]]},"五下":{"Unit 1":[["eat breakfast","吃早餐",["动词"],"v."],["play sports","做运动",["动词"],"v."],["have class","上课",["动词"],"v."],["exercise","锻炼",["运动"],"n."],["do morning exercises","做早操",["动词"],"v."],["eat dinner","吃晚餐",["动词"],"v."],["clean my room","打扫房间",["动词"],"v."],["go for a walk","散步",["动词"],"v."],["go shopping","购物",["动词"],"v."],["take","学习；上课",["动词"],"v."],["dancing","跳舞",["动词","运动"],""],["take a dancing class","上舞蹈课",["动词"],"v."],["when","什么时候",[],"pron."],["usually","通常",[],"adv."],["a.m.","上午",["时间"],""],["p.m.","下午",["时间"],""],["why","为什么",[],"pron."],["work","工作",["动词"],"v."],["always","总是",[],"adv."],["go swimming","去游泳",["动词"],"v."]],"Unit 2":[["spring","春天",["季节"],"n."],["summer","夏天",["季节"],"n."],["autumn","秋天",["季节"],"n."],["winter","冬天",["季节"],"n."],["season","季节",["季节"],"n."],["picnic","野餐",["运动"],""],["go on a picnic","去野餐",["动词"],"v."],["pick","摘",["动词"],"v."],["pick apples","摘苹果",["动词"],"v."],["snowman","雪人",[],"v."],["make a snowman","堆雪人",["动词"],"v."],["go swimming","去游泳",["动词"],"v."],["which","哪一个",[],"pron."],["best","最",["形容词"],"adj."],["snow","雪",["自然"],"n."],["because","因为",[],"conj."],["vacation","假期",["时间"],""]],"Unit 3":[["January","一月",["月份"],""],["February","二月",["月份"],""],["March","三月",["月份"],""],["April","四月",["月份"],""],["May","五月",["月份"],""],["June","六月",["月份"],""],["July","七月",["月份"],""],["August","八月",["月份"],""],["September","九月",["月份"],""],["October","十月",["月份"],""],["November","十一月",["月份"],""],["December","十二月",["月份"],""],["few","很少",["形容词"],"adj."],["sports","运动",["运动"],"n."],["sports meet","运动会",["运动"],"n."],["trip","旅行",["时间"],""],["plant","种植",["动词","自然"],""],["contest","比赛",["运动"],"n."],["Labour Day","劳动节",["节日"],""],["the Great Wall","长城",["地点"],"n."],["national","国家的",["形容词"],"adj."],["National Day","国庆节",["节日"],""],["Thanksgiving Day","感恩节",["节日"],""],["Christmas","圣诞节",["节日"],""]],"Unit 4":[["first","第一",["数字"],"num."],["second","第二",["数字"],"num."],["third","第三",["数字"],"num."],["fourth","第四",["数字"],""],["fifth","第五",["数字"],""],["twelfth","第十二",["数字"],""],["twentieth","第二十",["数字"],""],["twenty-first","第二十一",["数字"],""],["twenty-third","第二十三",["数字"],""],["thirtieth","第三十",["数字"],""]],"Unit 5":[["mine","我的",["名词所有格"],"名词所有格"],["yours","你的",["名词所有格"],"名词所有格"],["his","他的",["名词所有格"],"名词所有格"],["hers","她的",["名词所有格"],"名词所有格"],["theirs","他们的",["名词所有格"],"名词所有格"],["ours","我们的",["名词所有格"],"名词所有格"],["climbing","攀爬",["动词","运动"],""],["eating","吃",["动词"],"v."],["playing","玩",["动词"],"v."],["jumping","跳",["动词"],"v."],["drinking","喝",["动词"],"v."],["sleeping","睡觉",["动词"],"v."]],"Unit 6":[["doing morning exercises","做早操",["动词"],"v."],["having lunch","吃午餐",["动词"],"v."],["reading a book","读书",["动词"],"v."],["listening to music","听音乐",["动词"],"v."],["keep","保持",["动词"],"v."],["keep to the right","靠右",["动词"],"v."],["keep your desk clean","保持课桌整洁",["动词"],"v."],["talk quietly","小声说话",["动词"],"v."],["turn","轮流",["动词"],"v."],["take turns","轮流",["动词"],"v."],["bamboo","竹子",["自然"],"n."],["say","说",["动词"],"v."],["teach","教",["动词"],"v."]]},"六上":{"Unit 1":[["climb","攀登（原词）",["动词"],"v."],["gingerbread house","姜饼屋",["食物饮料"],"n."],["send","发送",["动词"],"v."],["went","去（过去式）",["动词"],"v."],["thousand","千",["数字"],"num."],["clay","粘土",["物品"],""],["saw","看见（过去式）",["动词"],"v."],["village","村庄",["地点"],"n."],["ate","吃（过去式）",["动词"],"v."],["dry","干的",["形容词"],"adj."],["took","拿（过去式）",["动词"],"v."],["view","景色",["自然"],"n."],["inspiring","鼓舞人心的",["形容词"],"adj."],["bamboo","竹子",["自然"],"n."],["pumpkin","南瓜",["食物饮料"],"n."],["restaurant","餐厅",["地点"],"n."],["airport","机场",["地点"],"n."],["New Zealand","新西兰",["国家城市"],""],["Hong Kong-Zhuhai-Macao Bridge","港珠澳大桥",["地点"],"n."],["Paris","巴黎",["国家城市"],""],["Eiffel Tower","埃菲尔铁塔",["地点"],"n."],["Terracotta Warriors","兵马俑",["地点"],"n."],["Jinggangshan Revolution Museum","井冈山革命博物馆",["地点"],"n."],["the Red Army","红军",["人物"],""]],"Unit 2":[["dress","连衣裙",["衣服"],"n."],["gala","盛会",["节日"],""],["marathon","马拉松",["运动"],"n."],["race","比赛",["运动"],"n."],["ran","跑（过去式）",["动词"],"v."],["cheer","欢呼",["动词"],"v."],["book fair","书展",["地点"],"n."],["writer","作家",["职业"],"n."],["read","读（过去式）",["动词"],"v."],["made","制作（过去式）",["动词"],"v."],["sang","唱歌（过去式）",["动词"],"v."],["wore","穿（过去式）",["动词"],"v."],["yesterday","昨天",["时间"],""],["woke","醒来（过去式）",["动词"],"v."],["judge","评判",["动词"],"v."],["begin","开始",["动词"],"v."],["won","赢（过去式）",["动词"],"v."],["winner","获胜者",["人物"],""],["exciting","令人兴奋的",["形容词"],"adj."]],"Unit 3":[["cold","感冒",["天气","形容词","生病"],""],["ill","生病的",["形容词","生病"],"adj."],["head","头",["身体"],"n."],["runny nose","流鼻涕",["身体"],"n."],["soon","不久",[],"adv."],["fever","发烧",["生病"],""],["cough","咳嗽",["动词","生病"],"v."],["discuss","讨论",["动词"],"v."],["diet","饮食",[],"n."],["stay up","熬夜",["动词"],"v."],["cry","哭",["动词"],"v."],["call","打电话",["动词"],"v."],["email","电子邮件",["物品"],""],["unhappy","不高兴的",["形容词"],"adj."],["glass","玻璃",["物品"],""],["may","可以",["月份"],""],["add","添加",["动词"],"v."],["video","视频",["物品"],""],["better","更好的",["形容词"],"adj."]],"Unit 4":[["money","钱",["物品"],""],["money pocket","钱袋",["物品"],""],["schoolbag","书包",["文具"],"n."],["goods","商品",["物品"],""],["drink","饮料",["动词","食物饮料"],""],["microscope","显微镜",["物品"],""],["lucky","幸运的",["形容词"],"adj."],["save up","储蓄",["动词"],"v."],["ticket","票",["物品"],""],["manage","管理",["动词"],"v."],["sell","卖",["动词"],"v."],["jar","罐子",["物品"],""]],"Unit 5":[["planet","行星",["天体"],""],["earth","地球",["天体","自然"],"n."],["sky","天空",["天体","自然"],"n."],["daytime","白天",["时间"],""],["cloud","云",["天体","自然"],"n."],["moon","月亮",["天体","自然"],"n."],["star","星星",["天体","自然"],"n."],["space","太空",["天体"],"n."],["space station","空间站",["地点"],"n."],["marble","大理石",["物品"],""],["satellite","卫星",["天体"],""],["soil","土壤",["自然"],"n."],["alien","外星人",["人物"],""],["sunrise","日出",["天体"],""],["rover","漫游者",["天体"],""],["into","进入",[],"prep."],["telescope","望远镜",["天体"],""],["astronaut","宇航员",["人物"],""],["spaceship","宇宙飞船",["天体"],""],["month","月",["月份"],""],["taikonaut","中国宇航员",["人物"],""],["cloth","布料",["物品"],""],["toothpaste","牙膏",["物品"],""],["sunset","日落",["天体"],""],["time","时间",["时间"],""],["Mars","火星",["天体"],""]],"Unit 6":[["power","电力",["自然"],"n."],["electricity","电",["自然"],"n."],["solar","太阳的",["天体"],""],["energy","能量",["自然"],"n."],["light","光",["物品","自然"],"n."],["head","头",["身体"],"n."],["cool","凉爽的",["天气","形容词"],""],["run","使...运转",["动词","运动"],""],["resource","资源",["自然"],"n."],["run out","耗尽",["动词"],"v."],["change","变化",["动词"],"v."],["quick","快速的",["形容词"],"adj."],["shower","淋浴",["物品"],""],["unplug","拔掉插头",["动词"],"v."],["reduce","减少",["动词"],"v."],["air conditioner","空调",["物品"],""],["drive","驾驶",["动词"],"v."],["reuse","再利用",["动词"],"v."],["own","自己的",["形容词"],"adj."],["market","市场",["地点"],"n."],["bottle","瓶子",["物品"],""],["top","顶部",["形容词"],"adj."],["useful","有用的",["形容词"],"adj."],["dirty","肮脏的",["形容词"],"adj."]]},"六下":{"Unit 1":[["younger","更年轻的",["形容词"],"adj."],["older","更年长的",["形容词"],"adj."],["taller","更高的",["形容词"],"adj."],["shorter","更矮的",["形容词"],"adj."],["longer","更长的",["形容词"],"adj."],["thinner","更瘦的",["形容词"],"adj."],["heavier","更重的",["形容词"],"adj."],["bigger","更大的",["形容词"],"adj."],["smaller","更小的",["形容词"],"adj."],["stronger","更强壮的",["形容词"],"adj."],["dinosaur","恐龙",["动物"],"n."],["hall","大厅",["地点"],"n."],["than","比",[],"conj."],["countryside","乡村",["地点"],"n."],["lower","更低的",["形容词"],"adj."],["shadow","影子",["自然"],"n."],["become","变成",["动词"],"v."]],"Unit 2":[["cleaned","打扫了",["动词"],"v."],["stayed","待了",["动词"],"v."],["washed","洗了",["动词"],"v."],["watched","看了",["动词"],"v."],["had","有；吃",[],"v."],["had a cold","感冒了",["动词"],"v."],["slept","睡了",["动词"],"v."],["read","读了",["动词"],"v."],["saw","看见了",["动词"],"v."],["last","上一个",["形容词"],"adj."],["yesterday","昨天",["时间"],""],["before","在...之前",[],"prep."],["drank","喝了",["动词"],"v."],["show","演出",["动词"],"v."],["magazine","杂志",["物品"],""],["better","更好的",["形容词"],"adj."],["faster","更快的",["形容词"],"adj."],["hotel","旅馆",["地点"],"n."],["fixed","修理了",["动词"],"v."],["broken","破碎的",["形容词"],"adj."],["lamp","台灯",["物品"],""],["loud","大声的",["形容词"],"adj."],["enjoy","享受",["动词"],"v."],["stay","停留",["动词"],"v."]],"Unit 3":[["went","去了",["动词"],"v."],["camp","露营",["运动"],"n."],["went camping","去露营",["动词"],"v."],["fish","鱼；钓鱼",["动物"],"n."],["went fishing","去钓鱼",["动词"],"v."],["rode","骑了",["动词"],"v."],["hurt","受伤",["动词","生病"],"v."],["ate","吃了",["动词"],"v."],["took","拿了",["动词"],"v."],["took pictures","拍照",["动词"],"v."],["bought","买了",["动词"],"v."],["gift","礼物",["物品"],""],["fell","摔倒",["动词"],"v."],["off","离开",[],"v."],["mule","骡子",["动物"],"n."],["Turpan","吐鲁番",["国家城市"],""],["could","可以",[],"v."],["beach","海滩",["地点"],"n."],["laughed","笑了",["动词"],"v."]],"Unit 4":[["dining hall","餐厅",["地点"],"n."],["grass","草",["自然"],"n."],["gym","体育馆",["地点"],"n."],["ago","以前",["时间"],""],["cycling","骑自行车",["运动"],"n."],["go cycling","去骑自行车",["动词"],"v."],["ice-skate","滑冰",["动词","运动"],""],["badminton","羽毛球",["运动"],"n."],["star","星星",["天体","自然"],"n."],["easy","容易的",["形容词"],"adj."],["look up","查阅",["动词"],"v."],["different","不同的",["形容词"],"adj."],["active","活跃的",["形容词"],"adj."],["race","赛跑",["运动"],"n."],["thought","想",["动词"],"v."],["felt","感觉",["动词"],"v."],["cheetah","猎豹",["动物"],"n."],["trip","绊倒",["时间"],""],["woke","醒来",["动词"],"v."],["dream","梦",["动词"],"v."]]}};
 const POS_ORDER = ["n.", "v.", "adj.", "adv.", "pron.", "num.", "prep.", "conj.", "主语", "名词所有格"];
 const BOOK_ORDER = ["三上", "三下", "四上", "四下", "五上", "五下", "六上", "六下"];
-const JIELI_BOOKS = {"四上":{"Unit 1":[["these","这些",[],"pron."],["wash","洗",["动词","家务"],"v."],["brush","（用刷子）刷净",["动词"],"v."],["wave","挥动；挥舞",["动词"],"v."],["body","身体",["身体"],"n."],["shake","摇动；抖动",["动词"],"v."],["feet","脚（foot 的复数形式）",["身体"],"n."],["with","用",[],"prep."],["eat","吃",["动词"],"v."],["listen","听",["动词"],"v."],["write","写",["动词"],"v."],["they","他们；她们；它们",[],"主语"],["clock","时钟",["物品"],""],["blackboard","黑板",["文具"],"n."],["out","（从……里）出来",[],"adv."],["say","说",["动词"],"v."]],"Unit 2":[["behind","在……后面",[],"prep."],["schoolbag","书包",["文具"],"n."],["cup","杯子",["物品"],"n."],["move","移动",["动词"],"v."],["excuse","原谅",["动词"],"v."],["park","公园",["地点"],"n."],["along","沿着",[],"prep."],["street","街道",["地点"],"n."],["turn","转向",["动词"],"v."],["school","学校",["地点"],"n."],["zoo","动物园",["地点"],"n."],["hospital","医院",["地点"],"n."],["round","转过来；调转方向",["形容词"],"adj."]],"Unit 3":[["sky","天空",["天体","自然"],"n."],["plane","飞机",["交通"],"n."]],"Unit 4":[["weather","天气",["天气"],"n."],["windy","多风的",["天气"],"n."],["sunny","晴朗的",["天气"],"n."],["cool","凉爽的",["天气","形容词"],"adj."],["cloudy","多云的",["天气"],"n."],["rainy","下雨的",["天气"],"n."],["warm","暖和的",["天气","形容词"],"adj."],["wear","穿",["动词","衣服"],"n."],["shirt","衬衫",["衣服"],"n."],["spring","春天，春季",["季节"],"n."],["summer","夏天，夏季",["季节"],"n."],["autumn","秋天，秋季",["季节"],"n."],["winter","冬天，冬季",["季节"],"n."],["which","哪一个",[],"pron."],["season","季节",["季节"],"n."],["best","最",["形容词"],"adj."]],"Unit 5":[["family","家，家庭",["家人"],"n."],["father","父亲",["家人"],"n."],["Mrs.","太太，夫人",["称呼"],"n."],["sister","姐姐，妹妹",["家人"],"n."],["brother","哥哥，弟弟",["家人"],"n."],["his","他的",["名词所有格"],"pron."],["cleaner","清洁工",["职业"],"n."],["dancer","舞蹈家",["职业"],"n."],["singer","歌唱家，歌手",["职业"],"n."]],"Unit 6":[["light","浅色的",["物品","自然"],"n."],["clean","干净的",["动词","家务","形容词"],"adj."],["boat","小船",["交通"],"n."],["grass","草",["自然"],"n."],["skirt","短裙",["衣服"],"n."],["milk","牛奶",["动词","食物饮料"],"n."],["beef","牛肉",["食物饮料"],"n."],["chicken","鸡肉",["动物"],"n."],["thirsty","渴的",["形容词"],"adj."]],"Unit 7":[["eleven","十一",["数字"],"num."],["twelve","十二",["数字"],"num."],["thirteen","十三",["数字"],"num."],["fourteen","十四",["数字"],"num."],["fifteen","十五",["数字"],"num."],["sixteen","十六",["数字"],"num."],["seventeen","十七",["数字"],"num."],["eighteen","十八",["数字"],"num."],["nineteen","十九",["数字"],"num."],["twenty","二十",["数字"],"num."],["balloon","气球",["物品"],"n."],["win","赢，获胜",["动词"],"v."],["many","许多",["形容词"],"adj."],["our","我们的",[],"名词所有格"],["thirty","三十",["数字"],"num."],["study","学习",["动词","地点"],"n."],["fork","叉子",["物品"],""],["spoon","勺，匙，调羹",["物品"],"n."],["pear","梨",["水果"],"n."],["grape","葡萄",["水果"],"n."],["tomato","西红柿",["食物饮料"],"n."]],"Unit 8":[["animal","动物",["动物"],"n."],["those","那些",[],"pron."],["duck","鸭子",["动物"],"n."],["tiger","老虎",["动物"],"n."]],"词组":[["nature park","自然公园",["地点"],"n."],["go out","出去",["动词"],"v."],["come in","进来",["动词"],"v."],["put up","举起来",["动词"],"v."],["turn right","向右转",["动词"],"v."],["turn left","向左转",["动词"],"v."],["make new friends","结交新朋友",["动词"],"v."]]}};
+const JIELI_BOOKS = {"三上":{"Unit 1":[["hello","你好",["问候"],""],["hi","你好",["问候"],""],["I","我",[],"主语"],["am","是",["动词"],"v."],["yes","是；是的",["应答"],""],["no","不；不是",["应答"],""],["good","好的",["形容词"],"adj."],["morning","早晨；上午",["时间"],"n."],["dad","爸爸",["家人"],"n."],["goodbye","再见",["问候"],""],["mom","妈妈",["家人"],"n."],["Miss","小姐；女士",["称呼"],""],["bye","再见",["问候"],""]],"Unit 2":[["a","一；一个",["冠词"],""],["teacher","教师；老师",["职业"],"n."],["student","学生",["人物"],""],["stand","站立",["动词"],"v."],["up","向上",["方向"],"adv."],["sit","坐",["动词"],"v."],["down","向下",["方向"],"adv."],["please","请",["问候"],""],["and","和",[],"conj."],["go","去；走",["动词"],"n."],["stop","停止",["动词"],"v."],["are","是",["动词"],"v."],["you","你；你们",[],"pron."],["girl","女孩",["人物"],""],["boy","男孩",["人物"],""]],"Unit 3":[["this","这；这个",[],"pron."],["is","是",["动词"],"v."],["box","盒；箱",["文具","物品"],"n."],["ball","球",["运动"],"n."],["bag","包；袋",["文具"],"n."],["cat","猫",["动物"],"n."],["book","书",["文具"],"n."],["an","一；一个",["冠词"],""],["apple","苹果",["水果"],"n."],["it","它",[],"pron."],["ruler","尺子",["文具"],"n."],["pencil","铅笔",["文具"],"n."],["pen","钢笔",["文具"],"n."],["tree","树",["自然"],"n."]],"Unit 4":[["what","什么",["疑问词"],"pron."],["car","小汽车",["交通"],"n."],["taxi","出租车",["交通"],"n."],["train","火车",["交通"],"n."],["bus","公共汽车",["交通"],"n."],["dog","狗",["动物"],"n."],["door","门",["物品"],""],["chair","椅子",["文具"],"n."],["banana","香蕉",["水果"],"n."],["orange","橙子；橙红色的",["水果","颜色"],"n."],["green","绿色的",["颜色"],"n."],["blue","蓝色的",["颜色"],"adj."],["black","黑色的",["颜色"],"n."],["white","白色的",["颜色"],"n."],["panda","大熊猫",["动物"],"n."],["show","展示",["动词"],"v."],["me","我",[],"pron."],["have","有",["动词"],"v."],["two","二",["数字"],"num."],["three","三",["数字"],"num."],["one","一",["数字"],"num."],["four","四",["数字"],"num."],["five","五",["数字"],"num."],["six","六",["数字"],"num."]],"Unit 5":[["color","颜色",["颜色"],"n."],["yellow","黄色的",["颜色"],"n."],["red","红色的",["颜色"],"n."],["she","她",["主语"],"pron."],["he","他",["主语"],"pron."],["who","谁",[],"pron."],["Mr.","先生",["称呼"],"n."],["Ms.","女士",["称呼"],"n."],["worker","工人",["职业"],"n."]],"Unit 6":[["that","那；那个",[],"pron."],["come","来",["动词"],"v."],["here","在这里",["方向"],"adv."],["not","不",["应答"],""],["how","怎样；如何",["疑问词"],"adv."],["old","岁；年纪",["形容词"],"adj."],["nine","九",["数字"],"num."],["ten","十",["数字"],"num."],["seven","七",["数字"],"num."],["eight","八",["数字"],"num."],["happy","快乐的",["形容词"],"adj."],["birthday","生日",["节日"],"n."],["to","给；向",[],"prep."],["thank","谢谢",["动词"],"v."],["card","卡片",["物品"],""]],"Unit 7":[["new","新的",["形容词"],"adj."],["year","年",["时间"],""],["for","给；对",[],"prep."],["dear","亲爱的",["形容词"],"adj."],["yours","你的；你们的",["名词所有格"],"pron."],["water","水",["动词","自然"],"n."],["hungry","饥饿的",["形容词"],"adj."],["bread","面包",["食物饮料"],"n."],["OK","好；行",["问候"],""],["do","（助动词）",["动词"],"v."],["like","喜欢",["动词"],"v."],["juice","果汁",["食物饮料"],"n."],["fish","鱼肉",["动物"],"n."]],"Unit 8":[["driver","司机",["职业"],"n."],["farmer","农民",["职业"],"n."],["doctor","医生",["职业"],"n."],["nurse","护士",["职业"],"n."]],"词组":[["stand up","起立",["动词"],"v."],["sit down","坐下",["动词"],"v."],["come here","过来",["动词"],"v."]]},"四上":{"Unit 1":[["these","这些",[],"pron."],["wash","洗",["动词","家务"],"v."],["brush","（用刷子）刷净",["动词"],"v."],["wave","挥动；挥舞",["动词"],"v."],["body","身体",["身体"],"n."],["shake","摇动；抖动",["动词"],"v."],["feet","脚（foot 的复数形式）",["身体"],"n."],["with","用",[],"prep."],["eat","吃",["动词"],"v."],["listen","听",["动词"],"v."],["write","写",["动词"],"v."],["they","他们；她们；它们",[],"主语"],["clock","时钟",["物品"],""],["blackboard","黑板",["文具"],"n."],["out","（从……里）出来",[],"adv."],["say","说",["动词"],"v."]],"Unit 2":[["behind","在……后面",[],"prep."],["schoolbag","书包",["文具"],"n."],["cup","杯子",["物品"],"n."],["move","移动",["动词"],"v."],["excuse","原谅",["动词"],"v."],["park","公园",["地点"],"n."],["along","沿着",[],"prep."],["street","街道",["地点"],"n."],["turn","转向",["动词"],"v."],["school","学校",["地点"],"n."],["zoo","动物园",["地点"],"n."],["hospital","医院",["地点"],"n."],["round","转过来；调转方向",["形容词"],"adj."]],"Unit 3":[["sky","天空",["天体","自然"],"n."],["plane","飞机",["交通"],"n."]],"Unit 4":[["weather","天气",["天气"],"n."],["windy","多风的",["天气"],"n."],["sunny","晴朗的",["天气"],"n."],["cool","凉爽的",["天气","形容词"],"adj."],["cloudy","多云的",["天气"],"n."],["rainy","下雨的",["天气"],"n."],["warm","暖和的",["天气","形容词"],"adj."],["wear","穿",["动词","衣服"],"n."],["shirt","衬衫",["衣服"],"n."],["spring","春天，春季",["季节"],"n."],["summer","夏天，夏季",["季节"],"n."],["autumn","秋天，秋季",["季节"],"n."],["winter","冬天，冬季",["季节"],"n."],["which","哪一个",[],"pron."],["season","季节",["季节"],"n."],["best","最",["形容词"],"adj."]],"Unit 5":[["family","家，家庭",["家人"],"n."],["father","父亲",["家人"],"n."],["Mrs.","太太，夫人",["称呼"],"n."],["sister","姐姐，妹妹",["家人"],"n."],["brother","哥哥，弟弟",["家人"],"n."],["his","他的",["名词所有格"],"pron."],["cleaner","清洁工",["职业"],"n."],["dancer","舞蹈家",["职业"],"n."],["singer","歌唱家，歌手",["职业"],"n."]],"Unit 6":[["light","浅色的",["物品","自然"],"n."],["clean","干净的",["动词","家务","形容词"],"adj."],["boat","小船",["交通"],"n."],["grass","草",["自然"],"n."],["skirt","短裙",["衣服"],"n."],["milk","牛奶",["动词","食物饮料"],"n."],["beef","牛肉",["食物饮料"],"n."],["chicken","鸡肉",["动物"],"n."],["thirsty","渴的",["形容词"],"adj."]],"Unit 7":[["eleven","十一",["数字"],"num."],["twelve","十二",["数字"],"num."],["thirteen","十三",["数字"],"num."],["fourteen","十四",["数字"],"num."],["fifteen","十五",["数字"],"num."],["sixteen","十六",["数字"],"num."],["seventeen","十七",["数字"],"num."],["eighteen","十八",["数字"],"num."],["nineteen","十九",["数字"],"num."],["twenty","二十",["数字"],"num."],["balloon","气球",["物品"],"n."],["win","赢，获胜",["动词"],"v."],["many","许多",["形容词"],"adj."],["our","我们的",[],"名词所有格"],["thirty","三十",["数字"],"num."],["study","学习",["动词","地点"],"n."],["fork","叉子",["物品"],""],["spoon","勺，匙，调羹",["物品"],"n."],["pear","梨",["水果"],"n."],["grape","葡萄",["水果"],"n."],["tomato","西红柿",["食物饮料"],"n."]],"Unit 8":[["animal","动物",["动物"],"n."],["those","那些",[],"pron."],["duck","鸭子",["动物"],"n."],["tiger","老虎",["动物"],"n."]],"词组":[["nature park","自然公园",["地点"],"n."],["go out","出去",["动词"],"v."],["come in","进来",["动词"],"v."],["put up","举起来",["动词"],"v."],["turn right","向右转",["动词"],"v."],["turn left","向左转",["动词"],"v."],["make new friends","结交新朋友",["动词"],"v."]]}};
 /* ============================================================
    分类大师 · 主体
    （骨架来自「中英消消乐」：header / 设置条 / 棋盘 / 状态栏 / 结算 / 玻璃与主题，
@@ -26031,7 +26308,8 @@ function bookOf(b) {
 }
 /* 当前教材下有的册 —— 接力版目前只有四年级上册 */
 function booksOf() {
-  return (S && S.publisher === 'jieli') ? ['四上'] : BOOK_ORDER;
+  // 接力版目前有哪几册，以题库为准（现在三上 + 四上），别再写死
+  return (S && S.publisher === 'jieli') ? Object.keys(JIELI_BOOKS) : BOOK_ORDER;
 }
 function unitsOf(b) {
   var o = bookOf(b);
@@ -29219,9 +29497,10 @@ function playWord(word, onStatus, onEnd) {
    ============================================================ */
 var EXAM_WORDS_JIELI = {"四上":{"Unit 1":[["these","这些",1],["wash","洗",1],["brush","（用刷子）刷净",0],["wave","挥动；挥舞",0],["body","身体",1],["shake","摇动；抖动",0],["feet","脚（foot 的复数形式）",0],["with","用",1],["eat","吃",1],["listen","听",1],["write","写",1],["they","他们；她们；它们",1],["clock","时钟",1],["blackboard","黑板",1],["out","（从……里）出来",1],["say","说",1]],"Unit 2":[["behind","在……后面",1],["schoolbag","书包",1],["cup","杯子",1],["move","移动",1],["excuse","原谅",0],["park","公园",1],["along","沿着",0],["street","街道",1],["turn","转向",1],["school","学校",1],["zoo","动物园",1],["hospital","医院",1],["round","转过来；调转方向",0]],"Unit 3":[["sky","天空",0],["plane","飞机",1]],"Unit 4":[["weather","天气",1],["windy","多风的",1],["sunny","晴朗的",1],["cool","凉爽的",1],["cloudy","多云的",1],["rainy","下雨的",0],["warm","暖和的",1],["wear","穿",1],["shirt","衬衫",1],["spring","春天，春季",1],["summer","夏天，夏季",1],["autumn","秋天，秋季",1],["winter","冬天，冬季",1],["which","哪一个",1],["season","季节",1],["best","最",1]],"Unit 5":[["family","家，家庭",1],["father","父亲",1],["Mrs.","太太，夫人",1],["sister","姐姐，妹妹",1],["brother","哥哥，弟弟",1],["his","他的",1],["cleaner","清洁工",0],["dancer","舞蹈家",0],["singer","歌唱家，歌手",0]],"Unit 6":[["light","浅色的",1],["clean","干净的",1],["boat","小船",1],["grass","草",1],["skirt","短裙",1],["milk","牛奶",1],["beef","牛肉",0],["chicken","鸡肉",1],["thirsty","渴的",0]],"Unit 7":[["eleven","十一",1],["twelve","十二",1],["thirteen","十三",1],["fourteen","十四",1],["fifteen","十五",1],["sixteen","十六",1],["seventeen","十七",1],["eighteen","十八",1],["nineteen","十九",1],["twenty","二十",1],["balloon","气球",0],["win","赢，获胜",1],["many","许多",1],["our","我们的",1],["thirty","三十",1],["study","学习",1],["fork","叉子",0],["spoon","勺，匙，调羹",0],["pear","梨",0],["grape","葡萄",1],["tomato","西红柿",1]],"Unit 8":[["animal","动物",1],["those","那些",1],["duck","鸭子",1],["tiger","老虎",1]],"词组":[["nature park","自然公园",0],["go out","出去",0],["come in","进来",0],["put up","举起来",0],["turn right","向右转",0],["turn left","向左转",0],["make new friends","结交新朋友",0]]}};
 
+/* 接力版暂时不进考核（老师：接力社内容暂时不支持考核）——
+   题库只留人教版；万一存档里还留着 jieli，也一律按人教版处理。 */
 var PUBLISHERS = [
-  { k: 'pep',   nm: '人教版' },
-  { k: 'jieli', nm: '接力版' }
+  { k: 'pep', nm: '人教版' }
 ];
 
 function bankOf(book) {
@@ -29338,7 +29617,7 @@ var S = {
 
 function restorePrefs() {
   var pub = lsGet(LS.pub, 'pep');
-  S.publisher = (pub === 'jieli') ? 'jieli' : 'pep';
+  S.publisher = 'pep';   // 接力版暂不支持考核，存档里残留也忽略
   try {
     var off = JSON.parse(lsGet(LS.off, '{}') || '{}');
     S.offTypes = (off && typeof off === 'object') ? off : {};
