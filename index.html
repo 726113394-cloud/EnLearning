@@ -28797,6 +28797,27 @@ body.advanced .tbtn.active,body.advanced .mbtn.active{
   <div class="sh-ft"><span class="spacer"></span><button class="big" id="hsOk" type="button">知道了</button></div>
 </div>
 
+<!-- 口令框（只有"取消题型"才要，口令 1229） -->
+<div class="sheet" id="pwSheet" role="dialog" aria-modal="true" aria-labelledby="pwH" aria-hidden="true">
+  <div class="sh-bd cf">
+    <div class="cficon">🔒</div>
+    <h3 id="pwH">老师口令</h3>
+    <p>改动题型要老师确认。输入口令后 30 秒内不用再输。</p>
+    <p style="margin-top:10px">
+      <input id="pwInput" type="tel" inputmode="numeric" autocomplete="off" maxlength="8"
+             aria-label="老师口令"
+             style="font-size:1.4rem;letter-spacing:.3em;text-align:center;width:60%;min-height:52px;
+                    border-radius:12px;border:2px solid currentColor;background:transparent;color:inherit">
+    </p>
+    <p id="pwErr" class="bhint warn" style="min-height:1.2em"></p>
+  </div>
+  <div class="sh-ft">
+    <span class="spacer"></span>
+    <button class="mini" id="pwNo" type="button">取消</button>
+    <button class="big" id="pwYes" type="button">确定</button>
+  </div>
+</div>
+
 <!-- 确认框 -->
 <div class="sheet" id="confirmSheet" role="dialog" aria-modal="true" aria-labelledby="cfH" aria-hidden="true">
   <div class="sh-bd cf">
@@ -28884,17 +28905,41 @@ function paperSupported() {
 }
 
 /* 题量必须**事先算死**，否则界面报的题数和实际对不上 */
+/* 关掉的卷面题型不出题（planPaper 与实际组卷必须用同一套判定） */
 function paperCount() {
   var pb = paperBlocks();
-  var n = Math.min(PAPER_CLOZE_N, pb.cloze.length);
-  if (pb.words.length) n += 5;
-  if (pb.dialog.length) n += 5;
-  if (pb.tf.length) n += 5;
+  var n = 0;
+  if (!typeOff('cloze') && pb.cloze.length) n += Math.min(PAPER_CLOZE_N, pb.cloze.length);
+  if (!typeOff('words') && pb.words.length) n += 5;
+  if (!typeOff('dialog') && pb.dialog.length) n += 5;
+  if (!typeOff('tf') && pb.tf.length) n += 5;
   return n;
+}
+
+/* 一个词在每种单词题型上分到多少份额：配对先吃掉一批（4 个一组），
+   剩下的在还开着的选择题型之间均分。关掉一种，份额自动并给另一个。 */
+function wordShare(W, act) {
+  var out = { listen: 0, read: 0, match: 0 };
+  act = act || activeWordTypes();
+  var nMatch = 0;
+  if (act.indexOf('match') >= 0) {
+    nMatch = Math.min(W, MATCH_PAIRS * Math.max(1, Math.round(W / (MATCH_PAIRS * 2))));
+  }
+  out.match = nMatch;
+  var rest = W - nMatch;
+  var picks = act.filter(function (k) { return k !== 'match'; });
+  if (!picks.length) return out;
+  var each = Math.floor(rest / picks.length), carry = rest - each * picks.length;
+  picks.forEach(function (k, i) { out[k] = each + (i < carry ? 1 : 0); });
+  return out;
 }
 
 function buildPaperQuestions() {
   var pb = paperBlocks(), out = [];
+  if (typeOff('cloze')) pb.cloze = [];
+  if (typeOff('words')) pb.words = [];
+  if (typeOff('dialog')) pb.dialog = [];
+  if (typeOff('tf')) pb.tf = [];
   shuffle(pb.cloze.slice()).slice(0, PAPER_CLOZE_N).forEach(function (x) {
     out.push({ t: 'cloze', book: S.book, unit: x.unit, prompt: x.s,
                texts: x.o.slice(), ansIdx: x.a, en: '', zh: x.s });
@@ -28956,7 +29001,20 @@ var WORD_TYPES = ['listen', 'read', 'match'];   // 消耗单词的三种题型�
 var MATCH_PER_BOARD = 4;              // 一组配对题消耗 4 个词
 
 var BOOKS = ['三上', '三下', '四上', '四下', '五上', '五下', '六上', '六下'];
-var PER_Q_SEC = 30;          // 计时模式下每题秒数
+/* 每种题型各自的倒计时（老师定：按难度给，不统一 30 秒）。
+   键与 TYPES 的 k 对应；缺省 30 秒兜底。 */
+var TYPE_SEC = {
+  listen: 20,     // 听音选词：听到就能选
+  read:   30,     // 看中文选英文：要回忆拼写
+  match:  40,     // 中英配对：一组 4 对，要扫两遍
+  order:  90,     // 句子排序：整句重排
+  cloze:  90,     // 句子填空：读句子 + 想语法
+  words:  100,    // 方框选词：五个词都要看一遍
+  dialog: 150,    // 补全对话：读整段对话
+  tf:     150     // 阅读判断：读短文再判断
+};
+function secOf(t) { return TYPE_SEC[t] || 30; }
+var PER_Q_SEC = 30;          // 仅作兜底（有些地方要一个单值示意）
 var MATCH_PAIRS = 4;         // 配对题每组几对
 var SENT_MIN_WORDS = 3;      // 排序题的句子最少几个词（2 个词排起来没有意义）
 var SENT_MAX_WORDS = 10;     // 最多几个词（再多手机上一屏排不下）
@@ -28968,7 +29026,8 @@ var LS = {
   glass: 'exam.glassEnabled',
   sfx:   'exam.sfxOff',
   wrong: 'exam.wrong',
-  pub:   'exam.publisher'
+  pub:   'exam.publisher',
+  off:   'exam.offTypes'
 };
 /* 大小写别名：听力练习场的 getAudioUrl 是"别名表 || 原词"直接拼名字、没有大小写回退，
    而 Windows/NTFS 不区分大小写、GitHub Pages（Linux）区分 —— 库里实际存的是 May.mp3。
@@ -29258,6 +29317,7 @@ function bookHasSents(book) {
    ============================================================ */
 var S = {
   view: 'setup',
+  offTypes: {},              // 老师关掉的题型（{k:1}），默认全开
   publisher: 'pep',           // 'pep' 人教版 / 'jieli' 接力版
   book: null,
   units: [],
@@ -29279,6 +29339,10 @@ var S = {
 function restorePrefs() {
   var pub = lsGet(LS.pub, 'pep');
   S.publisher = (pub === 'jieli') ? 'jieli' : 'pep';
+  try {
+    var off = JSON.parse(lsGet(LS.off, '{}') || '{}');
+    S.offTypes = (off && typeof off === 'object') ? off : {};
+  } catch (e) { S.offTypes = {}; }
   var b = lsGet(LS.book, '');
   S.book = (b && bankOf(b)) ? b : null;
   var u = lsGetJSON(LS.units, null);
@@ -29297,6 +29361,7 @@ function restorePrefs() {
 }
 function savePrefs() {
   lsSet(LS.pub, S.publisher || 'pep');
+  lsSet(LS.off, JSON.stringify(S.offTypes || {}));
   lsSet(LS.book, S.book || '');
   lsSetJSON(LS.units, S.units);
   // 每个词考几遍 / 计时 都改成写死的了，老存档里这几个键清掉
@@ -29439,6 +29504,42 @@ function typeUnavailable(T) {
   return null;
 }
 
+var PW_CODE = '1229';        // 老师定的口令（只挡"取消题型"，不加任何加密）
+var PW_GRACE_MS = 30000;     // 输对一次，30 秒内不再问
+var pwOkAt = 0;
+function pwFresh() { return Date.now() - pwOkAt < PW_GRACE_MS; }
+
+function typeOff(k) { return !!(S.offTypes && S.offTypes[k]); }
+/* 还开着的单词题型（组卷的轮换只在这些里面转） */
+function activeWordTypes() {
+  return WORD_TYPES.filter(function (k) { return !typeOff(k); });
+}
+function activeTypeKeys() {
+  return TYPES.filter(function (T) { return !typeOff(T.k); }).map(function (T) { return T.k; });
+}
+
+function askPassword(then) {
+  if (pwFresh()) { then(); return; }
+  var inp = $('pwInput'), err = $('pwErr');
+  if (!inp) { then(); return; }
+  inp.value = '';
+  if (err) { err.textContent = ''; }
+  openSheet('pwSheet');
+  setTimeout(function () { try { inp.focus(); } catch (e) {} }, 60);
+  pwPending = function () {
+    if (inp.value.trim() !== PW_CODE) {
+      if (err) err.textContent = '口令不对，再试一次';
+      sfxBad();
+      return;
+    }
+    pwOkAt = Date.now();
+    closeSheet();
+    sfxOk();
+    toast('已解锁，30 秒内不用再输口令', 2200);
+    then();
+  };
+}
+
 function availableTypes() {
   var out = { listen: true, read: true, match: true, order: false };
   out.order = bookHasSents(S.book) && poolSents().length > 0;
@@ -29466,16 +29567,22 @@ function paintTypes() {
   var blocked = [];
   TYPES.forEach(function (T) {
     var why = typeUnavailable(T);
-    var ok = av[T.k] && !why;
+    var off = typeOff(T.k);
+    var ok = av[T.k] && !why && !off;
     /* ★ 四种题型是**固定的**（老师要求"全部功能都要考"），所以这里画成"锁定的已选"：
        满色 + 一把小锁 + disabled。点它不会有任何反应，也不该有反应 ——
        ⚠️ 别用 .chip[disabled] 那套"灰掉"，那看起来像"不许选"，而不是"已固定"。 */
-    var b = chip(T.nm, { ic: T.ic, on: true, cls: ok ? 'locked' : 'locked dead', disabled: true });
-    var note = why ? ('这次不考：' + why) : '固定要考';
+    var b = chip(T.nm, { ic: T.ic, on: !off, cls: why ? 'locked dead' : (off ? 'offchip' : 'locked') });
+    b.disabled = !!why;                       // 这一版根本没有的题型不给点
+    if (!why) {
+      b.addEventListener('click', function () { toggleType(T.k); });
+    }
+    var note = why ? ('这次不考：' + why) : (off ? '已取消（点一下恢复，需口令）' : '要考');
     b.setAttribute('aria-label', T.nm + '（' + note + '）：' + T.ds);
     b.title = T.ds + '　—— ' + note;
     b.dataset.note = why ? why : '';
     if (why) blocked.push(T.nm + '（' + why + '）');
+    else if (off) blocked.push(T.nm + '（已取消）');
     else if (!ok) blocked.push(T.nm);
     box.appendChild(b);
   });
@@ -29488,6 +29595,32 @@ function paintTypes() {
       + '每次都要考（固定），不用选。';
     hint.className = 'bhint';
   }
+}
+
+/* 点题型卡片 = 取消 / 恢复它。要口令，且不能把单词题型全关光
+   （单词覆盖是整卷的骨架，全关掉就没法保证"每个词都考到"）。 */
+function toggleType(k) {
+  askPassword(function () {
+    if (typeOff(k)) {
+      delete S.offTypes[k];
+      sfxTap();
+    } else {
+      if (WORD_TYPES.indexOf(k) >= 0 && activeWordTypes().length <= 1) {
+        toast('单词题型至少要留一种', 2600);
+        sfxBad();
+        return;
+      }
+      if (activeTypeKeys().length <= 1) {
+        toast('至少要留一种题型', 2600);
+        sfxBad();
+        return;
+      }
+      S.offTypes[k] = 1;
+      sfxTap();
+    }
+    savePrefs();
+    paintAll();
+  });
 }
 
 function paintRounds() {
@@ -29506,10 +29639,11 @@ function paintTimer() {
   var box = $('timerChips');
   box.innerHTML = '';
   /* 写死的配置：每题计时，不给用户选（老师："每题计时不可选"）。 */
-  var b = chip('每题 ' + PER_Q_SEC + ' 秒', { ic: '⏳', on: true, cls: 'locked', disabled: true });
+  var b = chip('按题型计时', { ic: '⏳', on: true, cls: 'locked', disabled: true });
   b.id = 'timerChip';
-  b.setAttribute('aria-label', '每题计时 ' + PER_Q_SEC + ' 秒（固定）');
-  b.title = '固定配置：每题 ' + PER_Q_SEC + ' 秒';
+  var detail = TYPES.map(function (T) { return T.nm + ' ' + secOf(T.k) + 's'; }).join(' · ');
+  b.setAttribute('aria-label', '倒计时按题型给：' + detail);
+  b.title = '倒计时按题型难度给：' + detail;
   box.appendChild(b);
 }
 
@@ -29534,7 +29668,7 @@ function paintStart() {
     var pl = planPaper();
     hint.textContent = '本次共 ' + pl.total + ' 题 · 覆盖 ' + pl.W + ' 个单词 · '
       + '每个词考 ' + pl.passes + ' 遍（三遍换三种题型）· '
-      + '每题 ' + PER_Q_SEC + ' 秒';
+      + '倒计时按题型 ' + secOf('listen') + '～' + secOf('tf') + ' 秒';
   }
 }
 
@@ -29679,22 +29813,24 @@ function matchChunks(n) {
 function planPaper() {
   var W = poolWords().length;
   var passes = Math.max(1, S.rounds);
-  var nMatch = Math.min(W, MATCH_PAIRS * Math.max(1, Math.round(W / (MATCH_PAIRS * 2))));
-  var rest = W - nMatch;
-  var nL = Math.ceil(rest / 2), nR = rest - nL;
-  var sizes = [nL, nR, nMatch];          // 对应 WORD_TYPES 里 listen / read / match 的"基础组"
+  var act = activeWordTypes();                       // 只算还开着的单词题型
+  var share = wordShare(W, act);                     // {listen:n, read:n, match:n}
   var boards = 0, choices = 0;
   for (var r = 0; r < passes; r++) {
-    for (var bi = 0; bi < 3; bi++) {
-      var kind = WORD_TYPES[(bi + r) % WORD_TYPES.length], n = sizes[bi];
-      if (kind === 'match') boards += matchChunks(n).length;
+    act.forEach(function (k) {
+      var n = share[k] || 0;
+      if (k === 'match') boards += matchChunks(n).length;
       else choices += n;
-    }
+    });
   }
-  var sents = poolSents().length;
-  var perPass = sents ? Math.max(1, Math.min(6, Math.round(W / 6), sents)) : 0;
-  var order = Math.min(perPass * passes, sents);
-  var paperN = paperCount();
+  var nOrder = 0;
+  if (!typeOff('order')) {
+    var sents = poolSents().length;
+    var perPass = sents ? Math.max(1, Math.min(6, Math.round(W / 6), sents)) : 0;
+    nOrder = Math.min(perPass * passes, sents);
+  }
+  var order = nOrder;
+  var paperN = paperCount(true);
   return { W: W, passes: passes, boards: boards, choices: choices, order: order,
            paper: paperN, total: boards + choices + order + paperN };
 }
@@ -29707,19 +29843,30 @@ function buildPaper() {
   var used = {};
   var lists = { listen: [], read: [], match: [], order: [] };
   var words = shuffle(pool.slice());
-  var nMatch = plan.match * MATCH_PAIRS;
+  var act = activeWordTypes();
+  var share = wordShare(pool.length, act);
   /* ★ 给每个词定一个"**起始考法**"：前 nMatch 个走中英配对，剩下的听音 / 看中文交替。
      之后**每多考一遍就把考法轮换一位** —— 于是同一个词的三遍一定是
      配对 / 听音 / 看中文各一次（这才是"每个词考三次"的意义），
      而且每一遍里每个词仍然只出现一次、四种题型也都在。
      （旧版是"每遍重新打乱"，实测 19 个词里有 5 个两遍题型相同 —— 那就白考了。） */
-  var base = words.map(function (w, i) {
-    return i < nMatch ? 2 : (i % 2);
+  /* 每个词的"起始考法"：先按配对名额占位，其余在选择题型之间对半分；
+     之后每多考一遍就往后轮一位 —— 关掉某种题型时，还有几种就在几种里轮。 */
+  var base = [];
+  var nMatch = share.match || 0;
+  var pickIdx = 0;
+  words.forEach(function (w, i) {
+    if (i < nMatch) { base.push(act.indexOf('match')); return; }
+    var picks = act.filter(function (k) { return k !== 'match'; });
+    var k = picks.length ? picks[pickIdx % picks.length] : act[0];
+    if (picks.length) pickIdx++;
+    base.push(act.indexOf(k));
   });
   for (var r = 0; r < rounds; r++) {
     var byType = { listen: [], read: [], match: [] };
     words.forEach(function (w, i) {
-      byType[WORD_TYPES[(base[i] + r) % WORD_TYPES.length]].push(w);
+      var k = act[(base[i] + r) % act.length];
+      if (byType[k]) byType[k].push(w);
     });
     var at = 0;
     matchChunks(byType.match.length).forEach(function (size) {
@@ -29755,15 +29902,21 @@ function buildPaper() {
   lists.match.forEach(function (q) {
     q.pairs.forEach(function (x) { seen[x.en.toLowerCase()] = 1; });
   });
+  var coverKinds = act.filter(function (k) { return k !== 'match'; });
   pool.filter(function (w) { return !seen[w.en.toLowerCase()]; })
     .forEach(function (w, i) {
-      var kind = (i % 2) ? 'read' : 'listen';
-      var q = makeChoiceFor(kind, w, pool) || makeChoiceFor(kind === 'listen' ? 'read' : 'listen', w, pool);
+      var kind = coverKinds.length ? coverKinds[i % coverKinds.length] : 'listen';
+      var alt = coverKinds.filter(function (k) { return k !== kind; })[0];
+      var q = makeChoiceFor(kind, w, pool) || (alt ? makeChoiceFor(alt, w, pool) : null);
       if (q) lists[q.t].push(q);
     });
   // 卷面题统一排在最后：单词题先热身，卷面题最后做
-  return interleave([lists.listen, lists.read, lists.match, lists.order])
-    .concat(buildPaperQuestions());
+  var head = [];
+  if (!typeOff('listen')) head.push(lists.listen);
+  if (!typeOff('read')) head.push(lists.read);
+  if (!typeOff('match')) head.push(lists.match);
+  if (!typeOff('order')) head.push(lists.order);
+  return interleave(head).concat(buildPaperQuestions());
 }
 
 /* 某道听力题读不到录音时找替补：从词池里挑一个**这场还没考过**的词 */
@@ -29871,7 +30024,8 @@ function startClock() {
   if (!S.timed) return;
   var c = $('qClock');
   c.hidden = false;
-  S.left = PER_Q_SEC;
+  var q0 = S.paper[S.idx];
+  S.left = secOf(q0 && q0.t);          // 按题型给时间，不统一 30 秒
   c.textContent = S.left + 's';
   c.classList.remove('hurry');
   S.clockH = setInterval(function () {
@@ -30344,13 +30498,16 @@ function paintSettings() {
   } else {
     rows.push(['考核范围', esc((s.book || '—') + ' · ' + (s.units.length ? s.units.join('、') : '—'))]);
     rows.push(['题型', esc(typeNames(s.types && s.types.length ? s.types : ALL_TYPES))
-      + ' <span class="sm">（固定要考）</span>']);
+      + (activeTypeKeys().length < TYPES.length
+        ? ' <span class="sm">（本次按老师设置只考这几种）</span>' : '')]);
     rows.push(['题量', '共 ' + s.total + ' 题，覆盖 ' + s.covered + ' 个单词'
       + '（每个词考 ' + s.rounds + ' 遍）']);
   }
-  rows.push(['计时', '每题 ' + PER_Q_SEC + ' 秒']);
+  rows.push(['计时', '按题型给：' + TYPES.filter(function (T) {
+      return s.types && s.types.indexOf(T.k) >= 0;
+    }).map(function (T) { return T.nm + ' ' + secOf(T.k) + ' 秒'; }).join('　')]);
   rows.push(['固定配置', '四种题型全考 · 每个词考 ' + s.rounds
-    + ' 遍（三遍换三种题型）· 每题 ' + PER_Q_SEC + ' 秒']);
+    + ' 遍（三遍换三种题型）· 倒计时按题型给']);
   rows.forEach(function (r) {
     var dt = document.createElement('dt');
     dt.textContent = r[0];
@@ -30628,6 +30785,12 @@ function bind() {
     S.units = [];
     savePrefs(); paintAll();
   });
+  var pwYes = $('pwYes'), pwNo = $('pwNo'), pwInp = $('pwInput');
+  if (pwYes) pwYes.addEventListener('click', function () { if (pwPending) pwPending(); });
+  if (pwNo) pwNo.addEventListener('click', function () { pwPending = null; closeSheet(); sfxTap(); });
+  if (pwInp) pwInp.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && pwPending) { e.preventDefault(); pwPending(); }
+  });
   $('startBtn').addEventListener('click', function () { sfxTap(); startFromSetup(); });
   $('againBtn').addEventListener('click', function () { sfxTap(); startFromSetup(); });
   $('backSetupBtn').addEventListener('click', function () { sfxTap(); setView('setup'); paintAll(); });
@@ -30716,6 +30879,7 @@ function bind() {
     if (openSheets.length) { backTap(); closeSheet(); }
   });
 }
+var pwPending = null;
 function tap() { sfxTap(); }
 function backTap() { var n = Date.now(); if (n - lastBeep < 60) return; lastBeep = n; beep([520, 400], 0.06, 0.1); }
 
