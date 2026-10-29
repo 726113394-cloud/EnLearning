@@ -1108,9 +1108,36 @@ body.liquid .resume button{backdrop-filter:blur(14px) saturate(160%);
   .tl-dot{animation:none}
   .tl-bar em{animation:none; left:0; width:100%; opacity:.65}
 }
+
+/* ===== 首屏加载遮罩（HTML 一开就盖住，脚本起来后淡出） ===== */
+#bootMask{
+  position:fixed; inset:0; z-index:9999;
+  display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(1200px 700px at 30% 20%,#f2f7ff,#eef3fb 60%,#e9eff8);
+  transition:opacity .4s ease;
+}
+#bootMask.out{opacity:0; pointer-events:none}
+.bm-card{display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; color:#1d3354}
+.bm-card b{font-size:1.05rem}
+.bm-card small{font-size:.8rem; color:#5b708f}
+.bm-spin{width:36px; height:36px; border-radius:50%;
+  border:3px solid rgba(37,99,235,.18); border-top-color:#2563eb;
+  animation:bm-spin .9s linear infinite}
+.bm-bar{position:relative; display:block; width:210px; height:6px; border-radius:99px;
+  background:rgba(37,99,235,.14); overflow:hidden}
+.bm-bar em{position:absolute; top:0; left:-40%; width:40%; height:100%;
+  border-radius:99px; background:linear-gradient(90deg,#3b82f6,#60a5fa);
+  animation:bm-slide 1.15s ease-in-out infinite}
+@keyframes bm-spin{to{transform:rotate(360deg)}}
+@keyframes bm-slide{0%{left:-40%}60%{left:60%}100%{left:100%}}
+@media (prefers-reduced-motion: reduce){
+  .bm-spin{animation:none}
+  .bm-bar em{animation:none; left:0; width:100%; opacity:.65}
+}
 </style>
 </head>
 <body>
+<div id="bootMask" role="status" aria-live="polite"><div class="bm-card"><span class="bm-spin"></span><b>正在进入英语站台…</b><i class="bm-bar"><em></em></i><small>第一次打开要载入 8 个工具，稍等一下</small></div></div>
   <!-- 站台浮标：所有站台控件都收在这里面，不再占屏幕高度 -->
   <button class="menu-fab" id="menuBtn" aria-label="打开站台菜单" aria-expanded="false" aria-controls="panel">
     <span class="fab-ico i-target">🎯</span>
@@ -29945,11 +29972,6 @@ function toggleType(k) {
       delete S.offTypes[k];
       sfxTap();
     } else {
-      if (WORD_TYPES.indexOf(k) >= 0 && activeWordTypes().length <= 1) {
-        toast('单词题型得留至少一种：先打开听音选词或中英配对，再取消这个', 3200);
-        sfxBad();
-        return;
-      }
       if (activeTypeKeys().length <= 1) {
         toast('至少要留一种题型', 2600);
         sfxBad();
@@ -30194,6 +30216,7 @@ function buildPaper() {
      之后每多考一遍就往后轮一位 —— 关掉某种题型时，还有几种就在几种里轮。 */
   var base = [];
   var nMatch = share.match || 0;
+  // act 为空（只考句子题/卷面题）时 base 保持空，下面的轮换自然不出单词题
   var pickIdx = 0;
   words.forEach(function (w, i) {
     if (i < nMatch) { base.push(act.indexOf('match')); return; }
@@ -30243,7 +30266,8 @@ function buildPaper() {
     q.pairs.forEach(function (x) { seen[x.en.toLowerCase()] = 1; });
   });
   var coverKinds = act.filter(function (k) { return k !== 'match'; });
-  pool.filter(function (w) { return !seen[w.en.toLowerCase()]; })
+  // 老师可能只考句子题/卷面题：这时没有单词题型，别硬塞题
+  (act.length ? pool.filter(function (w) { return !seen[w.en.toLowerCase()]; }) : [])
     .forEach(function (w, i) {
       var kind = coverKinds.length ? coverKinds[i % coverKinds.length] : 'listen';
       var alt = coverKinds.filter(function (k) { return k !== kind; })[0];
@@ -32420,6 +32444,26 @@ else init();
       document.addEventListener('keydown', gBlockKeys, true);
     }, 700);
   }
+
+  /* 首屏遮罩淡出：等一帧再撤，避免白屏闪一下 */
+  (function dismissBoot() {
+    var m = document.getElementById('bootMask');
+    if (!m) return;
+    requestAnimationFrame(function () {
+      setTimeout(function () {
+        m.classList.add('out');
+        setTimeout(function () { if (m.parentNode) m.parentNode.removeChild(m); }, 460);
+      }, 80);
+    });
+  })();
+
+  /* 每次打开站台都把「考核中心」的设置清空（老师要求刷新即重置）：
+     只清设置，**错题本 exam.wrong 保留**。 */
+  try {
+    ['exam.book', 'exam.units', 'exam.offTypes', 'exam.publisher'].forEach(function (k) {
+      localStorage.removeItem(k);
+    });
+  } catch (e) {}
 })();
 </script>
 </body>
