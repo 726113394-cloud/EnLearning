@@ -1134,6 +1134,42 @@ body.liquid .resume button{backdrop-filter:blur(14px) saturate(160%);
   .bm-spin{animation:none}
   .bm-bar em{animation:none; left:0; width:100%; opacity:.65}
 }
+
+/* ===== 手机首页：卡片紧凑版（不跟 PC/Pad 同步） =====
+   家长/学生多是用手机竖屏，原来 238px 的下限在 360px 屏上只能排一列、
+   每张 186px 高，八张要滑好长。手机改成两列小卡，信息保留但不占地方。 */
+@media (max-width: 620px){
+  .cards{
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:10px; max-width:none; padding:0 12px;
+  }
+  .card{
+    min-height:104px; padding:12px 8px; gap:3px; border-radius:16px;
+    border-width:1.5px; box-shadow:0 3px 12px rgba(44,84,140,.08);
+    touch-action:manipulation;                 /* 去掉 iOS 的 300ms 点击延迟 */
+  }
+  .card:hover{transform:none;box-shadow:0 3px 12px rgba(44,84,140,.08)}
+  .card:active{transform:scale(.97)}
+  .card .ico{font-size:1.6rem}
+  .card .txt{gap:2px}
+  .card .nm{font-size:.88rem;line-height:1.25}
+  .card .ds{
+    font-size:.7rem; line-height:1.35; color:#5b7397;
+    display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;
+    overflow:hidden;
+  }
+  .card .go{
+    margin-top:4px; padding:5px 14px; font-size:.76rem; min-height:32px;
+    border-radius:30px;
+  }
+}
+/* 超窄屏（≤360px）再收一档，两列也放得下 */
+@media (max-width: 360px){
+  .card{min-height:96px; padding:10px 6px}
+  .card .nm{font-size:.82rem}
+  .card .ds{-webkit-line-clamp:1}
+  .card .go{font-size:.72rem; padding:4px 10px}
+}
 </style>
 </head>
 <body>
