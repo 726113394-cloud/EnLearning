@@ -31839,7 +31839,21 @@ else init();
   }
   paintLand();
   // 上次选过横屏就沿用（只在窄屏有意义，宽屏那边按钮本身是藏着的）
-  if (lsGet(LS_LAND, '0') === '1') setLand(true);
+  // ⚠️ 只在**竖屏**时才恢复横屏：手机本来就横着的时候再转 90°，
+  //    #stage 会按 100vh×100vw 摆成竖条，画面只露出一半（老师报过）。
+  if (lsGet(LS_LAND, '0') === '1' && window.innerHeight > window.innerWidth) setLand(true);
+
+  /* 设备已经横过来了就自动退出「横屏模式」——那是给竖屏设备用的补丁，
+     在真横屏上只会把画面切掉一半。转回竖屏时不强制打开，尊重老师的选择。 */
+  (function guardLand() {
+    function check() {
+      var wide = window.innerWidth > window.innerHeight + 8;
+      if (wide && document.body.classList.contains('land')) setLand(false);
+    }
+    window.addEventListener('resize', check);
+    window.addEventListener('orientationchange', function () { setTimeout(check, 280); });
+    setTimeout(check, 320);
+  })();
 
   /* ================================================================
      跟随鼠标的发光点（只在开了玻璃、鼠标设备、非低配、非工具页时出现）
