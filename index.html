@@ -1170,6 +1170,21 @@ body.liquid .resume button{backdrop-filter:blur(14px) saturate(160%);
   .card .ds{-webkit-line-clamp:1}
   .card .go{font-size:.72rem; padding:4px 10px}
 }
+
+/* ===== 「横屏」只对竖着拿的设备有意义 =====
+   设备本来就是横的（orientation:landscape）时，绝不能再用
+   width:100vh / height:100vw + rotate(90deg) 那一套 —— 那会把画面
+   转成一条竖条、只露出一半（老师实测）。
+   这里做兜底：不管 JS / 存档 / 缓存怎么残留 body.land，只要是真横屏
+   就恢复成普通满屏布局。 */
+@media (orientation: landscape){ /* needs-portrait */
+  body.land #stage{
+    width:100vw; height:100vh;
+    transform:none; transform-origin:0 0;
+    left:0; top:0;
+  }
+  body.land .menu-fab{top:auto;bottom:12px}
+}
 </style>
 </head>
 <body>
