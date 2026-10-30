@@ -28986,6 +28986,25 @@ body.advanced .tbtn.active,body.advanced .mbtn.active{
 .tut-tap{position:fixed;z-index:9001;width:64px;height:64px;border-radius:50%;pointer-events:none;
   border:2.5px solid rgba(255,255,255,.95);animation:tutTap .85s ease-out forwards}
 @keyframes tutTap{from{transform:scale(.3);opacity:.95}</style>
+<style>
+/* ===== 窄屏（手机竖屏）修复：「下一题」必须能点到 ===== */
+@media (max-width: 620px){
+  /* 考核视图整体可滚，别让底部按钮被挤出视口 */
+  #quiz{ overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+  #quiz .qbody{ padding-bottom: 4px; }
+  /* 按钮区吸在底部，带安全区内边距（iPhone 底部横条） */
+  #quiz .qfoot{
+    position:sticky; bottom:0; z-index:20;
+    padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));
+    background:linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.96) 40%);
+  }
+  #quiz .qfoot .big{
+    width:100%; min-height:56px; font-size:1.06rem; border-radius:14px;
+  }
+  /* 选项本身也放大一点，竖屏别点串 */
+  #quiz .opt{ min-height:56px; }
+}
+</style>
 </head>
 <body>
 <div class="app">
@@ -29847,7 +29866,15 @@ function typeUnavailable(T) {
   return null;
 }
 
-var PW_CODE = '1229';        // 老师定的口令（只挡"取消题型"，不加任何加密）
+/* 老师口令：线上 388414、线下（双击打开的 HTML / 压缩包）1229。
+   站台里工具跑在 srcdoc 里，location.protocol 是 about:，所以优先用站台注入的
+   __REAL_PROTOCOL__；单独双击打开的工具没有这个变量，就看自己的 protocol。 */
+var PW_CODE = (function () {
+  var proto = (typeof window.__REAL_PROTOCOL__ === 'string')
+    ? window.__REAL_PROTOCOL__
+    : String(location.protocol || '');
+  return proto.indexOf('file') === 0 ? '1229' : '388414';
+})();
 var PW_GRACE_MS = 30000;     // 输对一次，30 秒内不再问
 var pwOkAt = 0;
 function pwFresh() { return Date.now() - pwOkAt < PW_GRACE_MS; }
@@ -30812,6 +30839,8 @@ function showFeedback(ok, msg, kind) {
   b.textContent = last ? '看成绩 →' : '下一题 →';
   b.addEventListener('click', nextQuestion);
   foot.appendChild(b);
+  // 竖屏上按钮可能刚好在视口外：滚一下，保证「下一题」看得见、点得到
+  try { b.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) {}
 }
 
 function nextSoon() { setTimeout(nextQuestion, 700); }
