@@ -281,7 +281,11 @@ body.liquid .scrim{backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
 
 body.land #stage{
   position:fixed;left:0;top:0;
+  /* 手机上 100vh 含浏览器地址栏/工具栏占位，比真正看得见的高度大 →
+     转 90° 之后整块超出屏幕，只露出一半（老师实测）。
+     svh/svw 是「小视口」，就是最小可见区域，转多少都不会溢出。 */
   width:100vh;height:100vw;
+  width:100svh;height:100svw;
   transform:rotate(90deg) translateY(-100%);
   transform-origin:0 0;
 }
@@ -1177,14 +1181,6 @@ body.liquid .resume button{backdrop-filter:blur(14px) saturate(160%);
    转成一条竖条、只露出一半（老师实测）。
    这里做兜底：不管 JS / 存档 / 缓存怎么残留 body.land，只要是真横屏
    就恢复成普通满屏布局。 */
-@media (orientation: landscape){ /* needs-portrait */
-  body.land #stage{
-    width:100vw; height:100vh;
-    transform:none; transform-origin:0 0;
-    left:0; top:0;
-  }
-  body.land .menu-fab{top:auto;bottom:12px}
-}
 </style>
 </head>
 <body>
@@ -31890,21 +31886,9 @@ else init();
   }
   paintLand();
   // 上次选过横屏就沿用（只在窄屏有意义，宽屏那边按钮本身是藏着的）
-  // ⚠️ 只在**竖屏**时才恢复横屏：手机本来就横着的时候再转 90°，
-  //    #stage 会按 100vh×100vw 摆成竖条，画面只露出一半（老师报过）。
-  if (lsGet(LS_LAND, '0') === '1' && window.innerHeight > window.innerWidth) setLand(true);
-
-  /* 设备已经横过来了就自动退出「横屏模式」——那是给竖屏设备用的补丁，
-     在真横屏上只会把画面切掉一半。转回竖屏时不强制打开，尊重老师的选择。 */
-  (function guardLand() {
-    function check() {
-      var wide = window.innerWidth > window.innerHeight + 8;
-      if (wide && document.body.classList.contains('land')) setLand(false);
-    }
-    window.addEventListener('resize', check);
-    window.addEventListener('orientationchange', function () { setTimeout(check, 280); });
-    setTimeout(check, 320);
-  })();
+  // 「横屏」= 把这个页面转 90°，跟手机自己朝哪边**无关**（老师明确过口径）。
+  // 所以这里无条件恢复上次的选择；尺寸溢出问题在 CSS 里用 svh/svw 解决。
+  if (lsGet(LS_LAND, '0') === '1') setLand(true);
 
   /* ================================================================
      跟随鼠标的发光点（只在开了玻璃、鼠标设备、非低配、非工具页时出现）
