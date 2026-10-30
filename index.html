@@ -31810,6 +31810,21 @@ else init();
   function fsSupported() {
     return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
   }
+  /* 横屏联动用：进/退全屏，失败一律静默（iPhone 的 Safari 不支持元素全屏，
+     那里就只靠页面旋转 + svh 尺寸，不能因为全屏失败就不给转）。 */
+  function tryFs() {
+    if (!fsSupported() || fsEl()) return;
+    var el = document.documentElement;
+    var r = el.requestFullscreen ? el.requestFullscreen()
+                                 : (el.webkitRequestFullscreen ? el.webkitRequestFullscreen() : null);
+    if (r && r.catch) r.catch(function () {});
+  }
+  function exitFs() {
+    if (!fsEl()) return;
+    var p = document.exitFullscreen ? document.exitFullscreen()
+                                    : (document.webkitExitFullscreen ? document.webkitExitFullscreen() : null);
+    if (p && p.catch) p.catch(function () {});
+  }
   function paintFs() {
     if (!fsBtn) return;
     var on = !!fsEl();
@@ -31842,6 +31857,16 @@ else init();
       });
       document.addEventListener('fullscreenchange', paintFs);
       document.addEventListener('webkitfullscreenchange', paintFs);
+      /* 老师定的口径：全屏没了就别再横着 —— 否则工具栏回来、版面只剩半屏 */
+      function landFollowFs() {
+        paintFs();
+        if (!fsEl() && document.body.classList.contains('land')) {
+          setLand(false);
+          toast('🔄 已退出横屏', 1800);
+        }
+      }
+      document.addEventListener('fullscreenchange', landFollowFs);
+      document.addEventListener('webkitfullscreenchange', landFollowFs);
       paintFs();
     }
   }
@@ -31869,6 +31894,10 @@ else init();
     document.body.classList.toggle('land', on);
     lsSet(LS_LAND, on ? '1' : '0');
     paintLand();
+    // 横屏 = 把页面转 90°，顺便把浏览器工具栏收掉：工具栏那点高度会让
+    // 旋转后的版面算不准（半屏就是这么来的）。安卓能全屏，iPhone 不能，
+    // 失败就算了 —— 尺寸已经按 svh 取"最小可见区"，照样放得下。
+    if (on) tryFs(); else exitFs();
     // 转完要让工具重排一次（iframe 的视口尺寸变了，卡片位置得重算）
     if (frame) {
       try {
