@@ -28324,6 +28324,11 @@ select{
 .end{text-align:center;padding:10px 0}
 .end b{font-size:2.4rem;display:block;margin:6px 0}
 .hide{display:none}
+.hintbox{
+  margin-top:12px; padding:12px 14px; border-radius:14px; font-size:.94rem; line-height:1.7;
+  background:#f6f9ff; border:1.5px dashed #b9cdea; color:#274168;
+}
+.hintbox b{color:#b0457e}
 @media (prefers-reduced-motion: reduce){.opt{transition:none}}
 </style>
 </head>
@@ -28343,9 +28348,11 @@ select{
     <div class="hint" id="dirLine"></div>
     <p class="q" id="qLine">选好册和单元，点「开始」。</p>
     <div class="opts" id="opts"></div>
+    <div class="hintbox hide" id="hintBox"></div>
     <div class="fb" id="fb"></div>
     <div class="foot">
       <button class="big" id="nextBtn" type="button" disabled>下一题 →</button>
+      <button class="mini" id="hintBtn" type="button">💡 提示</button>
       <span class="pill" id="scorePill">0 / 0</span>
     </div>
     <div class="prog"><i id="progBar"></i></div>
@@ -28373,6 +28380,7 @@ function fillSel() {
   $('unitSel').addEventListener('change', function () { S.unit = this.value; });
   $('startBtn').addEventListener('click', start);
   $('nextBtn').addEventListener('click', next);
+  $('hintBtn').addEventListener('click', function () { $('hintBox').classList.toggle('hide'); });
 }
 
 function fillUnits() {
@@ -28396,7 +28404,7 @@ function start() {
   if (!pool.length) { $('qLine').textContent = '这个单元还没有情境题。'; return; }
   S.items = shuffle(pool.slice()).slice(0, PER_ROUND);
   S.idx = 0; S.right = 0;
-  $('startBtn').textContent = '换一组';
+  $('startBtn').classList.add('hide');
   draw();
 }
 
@@ -28414,6 +28422,11 @@ function draw() {
   $('nextBtn').textContent = (S.idx === S.items.length - 1) ? '看结果 →' : '下一题 →';
   $('scorePill').textContent = S.right + ' / ' + (S.idx + (S.locked ? 1 : 0));
   $('progBar').style.width = ((S.idx / S.items.length) * 100).toFixed(1) + '%';
+
+  var hi = $('hintBox');
+  hi.classList.add('hide');
+  hi.innerHTML = '<div>题干中文：' + (it.zh || '（暂无译文）') + '</div>' +
+    '<div style="margin-top:6px">本题公式：' + (it.tip || '') + '</div>';
 
   var box = $('opts');
   box.innerHTML = '';
@@ -28465,6 +28478,7 @@ function finish() {
   $('fb').textContent = '';
   $('nextBtn').disabled = true;
   $('scorePill').textContent = S.right + ' / ' + n;
+  $('startBtn').classList.remove('hide');
 }
 
 fillSel();
