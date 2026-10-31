@@ -20299,7 +20299,7 @@ window.__showToast=function(msg,ms){var el=document.getElementById('__toast');
     let currentWordBank = [];
     let currentWordIndex = 0, currentRepeat = 0, repeatTimes = 4;
     let isPlaying = false, isPaused = false, gameTimeout = null, wordDuration = 900;
-    let isSoundOn = true, isClassMode = false, onlyKeyWords = true, showChineseInThreeWords = true;
+    let isSoundOn = true, isClassMode = false, onlyKeyWords = false, showChineseInThreeWords = true;  // 重点词默认关（全部词）
     let difficultyValue = 40; // 0-100 连续值
     let wordScores = [], currentWordVolumes = [];
     let mediaStream = null, audioContext = null, analyserNode = null, isMicActive = false, animationId = null;
