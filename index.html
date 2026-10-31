@@ -29051,6 +29051,17 @@ body.advanced .tbtn.active,body.advanced .mbtn.active{
   /* 选项本身也放大一点，竖屏别点串 */
   #quiz .opt{ min-height:56px; }
 }
+
+/* ===== 选择题区域滚不动（学生反馈「拉不下来」）的根因修复 =====
+   ① .qbody 是 flex 列 + justify-content:center。内容一旦超过高度，
+      居中会把溢出的那半截推到容器上边界之外 —— 那块**滚不到**，
+      下面的选项也就跟着看不见（阅读篇/对话/方框题最容易触发）。
+      改成 safe center：放得下就居中，放不下自动退化成顶部对齐。
+   ② #quiz 原来只在窄屏才允许滚动，平板/投影上直接溢出、没得滚。
+      改成所有尺寸都可滚。 */
+#quiz{ overflow-y:auto; -webkit-overflow-scrolling:touch; }
+#quiz .qbody{ justify-content:flex-start; justify-content:safe center; }
+#quiz .qfoot{ margin-bottom:6px; }
 </style>
 </head>
 <body>
