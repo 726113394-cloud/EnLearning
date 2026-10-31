@@ -29062,6 +29062,14 @@ body.advanced .tbtn.active,body.advanced .mbtn.active{
 #quiz{ overflow-y:auto; -webkit-overflow-scrolling:touch; }
 #quiz .qbody{ justify-content:flex-start; justify-content:safe center; }
 #quiz .qfoot{ margin-bottom:6px; }
+
+/* ===== 选项一律竖排 + 卡片不再被切出横向滚动条 =====
+   两列网格在长选项（"We often play football together."）上会挤成两行，
+   手机上还会溢出，出现一条横向滚动条、卡片像被切了一刀。 */
+#quiz .opts{ grid-template-columns:1fr; gap:10px }
+#quiz .opts .opt{ text-align:center }
+#quiz{ overflow-x:hidden }
+#quiz .qbody{ width:auto; max-width:100%; box-sizing:border-box }
 </style>
 </head>
 <body>
