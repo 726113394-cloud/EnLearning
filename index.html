@@ -30971,6 +30971,17 @@ function paintSettings() {
 
 function finishQuiz(quit) {
   forceCloseOverlays();          // 先收浮层，保证成绩页可见、可点
+  /* ⚠️ 「教学」那一层要**硬清**：tutHide() 在 TUT.running 为 false 时直接返回，
+     而 tutMask 有可能已经挂在 .on 上（老师报过「结束考核后又卡一层全屏遮罩」）。
+     遮罩亮着却没有讲解卡，任何状态都不是合法状态，这里无条件收掉。 */
+  try {
+    if (typeof tutHide === 'function') tutHide();
+    TUT.running = false;
+    ['tutMask', 'tutSpot', 'tutCard'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.remove('on');
+    });
+  } catch (e) {}
   stopClock();
   S.locked = true;
   stopAudioAttempt();
