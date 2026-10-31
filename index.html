@@ -1190,6 +1190,22 @@ body.liquid .resume button{backdrop-filter:blur(14px) saturate(160%);
   border-radius:12px; pointer-events:none;
 }
 .menu-fab{padding:2px}
+
+/* ===== 画质面板（渲染 / 动画 两轴三级） ===== */
+.qpanel{margin:6px 0 2px;padding:8px 10px;border-radius:14px;
+  background:rgba(255,255,255,.66);border:1px solid rgba(120,150,190,.28)}
+.qpanel.hide{display:none}
+.qrow{display:flex;align-items:center;gap:6px;margin:4px 0}
+.qlab{flex:0 0 34px;font-size:.76rem;color:#5b7396}
+.qchip{flex:1 1 0;min-height:36px;border-radius:10px;border:1px solid rgba(120,150,190,.35);
+  background:rgba(255,255,255,.9);color:#2b4a78;font-size:.8rem;font-family:inherit;cursor:pointer}
+.qchip.on{background:linear-gradient(135deg,#2f5d9e,#b0457e);color:#fff;border-color:transparent;font-weight:700}
+.qhint{margin:6px 0 0;font-size:.74rem;color:#5b7396;line-height:1.5}
+/* 动画「关闭」：整页不跑动画/过渡（不动 transform 的最终态） */
+body.no-anim *,body.no-anim *::before,body.no-anim *::after{
+  animation-duration:.001ms !important;animation-iteration-count:1 !important;
+  transition-duration:.001ms !important;scroll-behavior:auto !important;
+}
 </style>
 </head>
 <body>
@@ -1217,6 +1233,11 @@ body.liquid .resume button{backdrop-filter:blur(14px) saturate(160%);
           <span class="au-nm">来自太空的小头脑</span>
           <a class="au-mail" href="mailto:lztkdxtn@qq.com">lztkdxtn@qq.com</a>
         </span>
+      </div>
+      <div class="qpanel hide" id="qualityPanel">
+        <div class="qrow"><span class="qlab">渲染</span><button class="qchip" data-axis="render" data-val="high" type="button">高级</button><button class="qchip" data-axis="render" data-val="auto" type="button">默认</button><button class="qchip" data-axis="render" data-val="low" type="button">流畅</button></div>
+        <div class="qrow"><span class="qlab">动画</span><button class="qchip" data-axis="motion" data-val="full" type="button">全量</button><button class="qchip" data-axis="motion" data-val="auto" type="button">默认</button><button class="qchip" data-axis="motion" data-val="off" type="button">关闭</button></div>
+        <p class="qhint" id="qualityNote"></p>
       </div>
     </div>
     <div class="pnav" id="pnav">
@@ -32338,7 +32359,54 @@ else init();
      顺手把历史遗留的 hub.perf 清掉（旧版本存过 'low'，本来就会永久降档）。 */
   try { localStorage.removeItem('hub.perf'); } catch (e) {}
 
-  var liquidBtn = document.getElementById('liquidBtn');
+  /* ===== 画质设置：两轴三级（渲染 / 动画） =====
+   ⚠️ 不新增探测开销：只用前面已经拿到的静态线索（weakHardware）判一次，
+      不做帧率采样（那会在主线程上一直占用，老师明确说过别占大头）。 */
+var QUALITY_AXES = { render: 'hub.render', motion: 'hub.motion' };
+var qLevel = {
+  render: (function () { var v = lsGet(QUALITY_AXES.render, 'auto'); return (v === 'high' || v === 'low') ? v : 'auto'; })(),
+  motion: (function () { var v = lsGet(QUALITY_AXES.motion, 'auto'); return (v === 'full' || v === 'off') ? v : 'auto'; })()
+};
+function qApply() {
+  // —— 渲染
+  var autoLow = weakHardware;                 // 只有真的小（≤2 核/≤2G）才自动让路
+  var renderHigh = qLevel.render === 'high' ? true : (qLevel.render === 'low' ? false : !autoLow);
+  liquidOn = renderHigh;
+  if (typeof paintLiquid === 'function') paintLiquid(); else document.body.classList.toggle('liquid', renderHigh);
+  // —— 动画
+  var noAnim = qLevel.motion === 'off';
+  document.body.classList.toggle('no-anim', noAnim);
+  var note = document.getElementById('qualityNote');
+  if (note) {
+    note.textContent = (renderHigh ? '渲染：液态玻璃全开' : '渲染：轻量（玻璃已关）') +
+      ' · ' + (noAnim ? '动画：已关闭' : (qLevel.motion === 'full' ? '动画：全部开启' : '动画：按系统偏好')) +
+      (qLevel.render === 'auto' ? '（默认档按设备自动判定）' : '');
+  }
+  var hint = document.getElementById('qualityHint');
+  if (hint) hint.textContent = (renderHigh ? '高级' : '流畅') + '·' + (noAnim ? '无动画' : '动画');
+  try { lsSet(QUALITY_AXES.render, qLevel.render); lsSet(QUALITY_AXES.motion, qLevel.motion); } catch (e) {}
+  document.querySelectorAll('.qchip').forEach(function (b) {
+    var ax = b.dataset.axis, val = b.dataset.val;
+    b.classList.toggle('on', qLevel[ax] === val);
+  });
+}
+document.querySelectorAll('.qchip').forEach(function (b) {
+  b.addEventListener('click', function () {
+    qLevel[b.dataset.axis] = b.dataset.val;
+    qApply();
+    try { tapSfx(); } catch (e) {}
+  });
+});
+(function () {
+  var btn = document.getElementById('qualityBtn'), panel = document.getElementById('qualityPanel');
+  if (btn && panel) btn.addEventListener('click', function () {
+    panel.classList.toggle('hide');
+    btn.setAttribute('aria-expanded', panel.classList.contains('hide') ? 'false' : 'true');
+  });
+})();
+qApply();
+
+var liquidBtn = document.getElementById('liquidBtn');
   var liquidHint = document.getElementById('liquidHint');
 
   var lgTimer = null;
