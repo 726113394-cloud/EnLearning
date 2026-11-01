@@ -29397,6 +29397,27 @@ body.advanced .tbtn.active,body.advanced .mbtn.active{
 #quiz .opts .opt{ text-align:center }
 #quiz{ overflow-x:hidden }
 #quiz .qbody{ width:auto; max-width:100%; box-sizing:border-box }
+
+/* ===== 倒计时：越接近 0 越红越大 ===== */
+#qClock{
+  transition:color .25s ease, transform .25s ease, text-shadow .25s ease;
+  font-variant-numeric:tabular-nums;
+}
+#qClock.warn{
+  color:#b45309; transform:scale(1.16); font-weight:800;
+}
+#qClock.hurry{
+  color:#b91c1c; transform:scale(1.42); font-weight:900;
+  text-shadow:0 0 12px rgba(185,28,28,.35);
+  animation:clock-breathe .9s ease-in-out infinite;
+}
+@keyframes clock-breathe{
+  0%,100%{transform:scale(1.42)}
+  50%{transform:scale(1.56)}
+}
+@media (prefers-reduced-motion: reduce){
+  #qClock.hurry{animation:none}
+}
 </style>
 </head>
 <body>
@@ -30847,7 +30868,8 @@ function startClock() {
       return;
     }
     c.textContent = S.left + 's';
-    if (S.left <= 5) c.classList.add('hurry'); else c.classList.remove('hurry');
+    c.classList.toggle('hurry', S.left <= 5);
+    c.classList.toggle('warn', S.left > 5 && S.left <= 15);
   }, 1000);
 }
 
