@@ -29380,6 +29380,16 @@ body.advanced .tbtn.active,body.advanced .mbtn.active{
 #quiz .qbody{ justify-content:flex-start; justify-content:safe center; }
 #quiz .qfoot{ margin-bottom:6px; }
 
+/* ===== 修：iPhone SE 上底部约 1/5 屏幕点不动 =====
+   窄屏那条规则把 qfoot 做成 position:sticky + 半透明白色渐变 + z-index:20，
+   它贴在底部、盖在最后一个选项上方，那一带的点击全被它吃掉。
+   这里改回正常流式排布（按钮照样整行、照样能被 scrollIntoView 带进视口），
+   并把渐变背景去掉，只保留安全区内边距。 */
+#quiz .qfoot{
+  position:static; z-index:auto; background:none;
+  padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));
+}
+
 /* ===== 选项一律竖排 + 卡片不再被切出横向滚动条 =====
    两列网格在长选项（"We often play football together."）上会挤成两行，
    手机上还会溢出，出现一条横向滚动条、卡片像被切了一刀。 */
