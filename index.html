@@ -29418,6 +29418,27 @@ body.advanced .tbtn.active,body.advanced .mbtn.active{
 @media (prefers-reduced-motion: reduce){
   #qClock.hurry{animation:none}
 }
+<style>
+/* ===== 整组一屏：空位 + 选项 ===== */
+.gwrap{display:block}
+.gdoc{font-size:1.04rem;line-height:2.1;margin-bottom:10px}
+.gline{padding:2px 0}
+.gbox{border:1.5px solid rgba(20,40,70,.45);border-radius:12px;padding:10px 12px;
+  display:flex;flex-wrap:wrap;gap:10px 16px;font-size:.98rem;margin-bottom:12px}
+.gopt{cursor:pointer;padding:4px 6px;border-radius:8px;background:rgba(47,93,158,.08)}
+.gopt:active{background:rgba(47,93,158,.2)}
+.gslots{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.gslotwrap{display:flex;align-items:center;gap:6px}
+.gnum{font-size:.78rem;color:#5b7396}
+.gslot{min-width:56px;min-height:46px;border-radius:12px;border:1.5px dashed rgba(47,93,158,.5);
+  background:#fff;font-family:inherit;font-size:1rem;font-weight:700;color:#1d3354;cursor:pointer}
+.gslot.act{border-style:solid;border-color:#b0457e;box-shadow:0 0 0 3px rgba(176,69,126,.16)}
+.gslot.has{border-style:solid;background:rgba(47,93,158,.1)}
+.gslot.ok{border-color:#15803d;background:#eefdf3;color:#15803d}
+.gslot.no{border-color:#b91c1c;background:#fef3f2;color:#b91c1c}
+.gfix{font-size:.76rem;color:#b91c1c}
+.foot-row{display:flex;gap:10px;margin-top:6px}
+@media (max-width:420px){ .gdoc{font-size:.98rem;line-height:1.95} }
 </style>
 </head>
 <body>
@@ -29715,22 +29736,28 @@ function buildPaperQuestions() {
   if (pb.words.length) {
     var w = shuffle(pb.words.slice())[0], b = w.blk;
     var boxLines = b.box.map(function (x, i) { return String.fromCharCode(65 + i) + '. ' + x; });
+    var wGrp = 'words|' + S.book + '|' + w.unit;
+    var wSlot = 0;
     b.items.forEach(function (it) {
       var idx = b.box.indexOf(it.a);
       if (idx < 0) return;
       out.push({ t: 'words', book: S.book, unit: w.unit, prompt: it.s, box: boxLines,
-                 texts: b.box.slice(), ansIdx: idx, en: '', zh: it.s });
+                 texts: b.box.slice(), ansIdx: idx, en: '', zh: it.s,
+                 grp: wGrp, slot: wSlot++ });
     });
   }
   if (pb.dialog.length) {
     var d = shuffle(pb.dialog.slice())[0], g = d.blk;
     var gbox = g.box.map(function (x, i) { return String.fromCharCode(65 + i) + '. ' + x; });
+    var dGrp = 'dialog|' + S.book + '|' + d.unit;
+    var dSlot = 0;
     g.a.forEach(function (letter, k) {
       var idx = letter.toUpperCase().charCodeAt(0) - 65;
       if (idx < 0 || idx >= g.box.length) return;
       out.push({ t: 'dialog', book: S.book, unit: d.unit, title: g.title, lines: g.lines,
                  box: gbox, blankIdx: k, texts: g.box.slice(), ansIdx: idx,
-                 en: '', zh: g.title || '补全对话' });
+                 en: '', zh: g.title || '补全对话',
+                 grp: dGrp, slot: dSlot++ });
     });
   }
   if (!typeOff('scene')) {
@@ -30917,7 +30944,8 @@ function renderQuestion() {
   body.innerHTML = '<div class="qwrap">' + qPromptHTML(q) + '<div id="qZone"></div></div>';
   var zone = $('qZone');
 
-  if (q.t === 'listen' || q.t === 'read') renderChoice(q, zone);
+  if (q.grp && q.slot === 0) renderGroup(q, zone);
+  else if (q.t === 'listen' || q.t === 'read') renderChoice(q, zone);
   else if (q.ansIdx != null) renderPaperQ(q, zone);
   else if (q.t === 'match') renderMatch(q, zone);
   else renderOrder(q, zone);
@@ -31101,6 +31129,159 @@ function renderPaperQ(q, zone) {
     enterAnim(b, i);
     b.addEventListener('click', function () { pickOption(i, b); });
     box.appendChild(b);
+  });
+}
+
+/* ===== 整组一屏（方框选词 / 补全对话）=====
+   学生先把 5 个空都填好，再点「校验」一次性判 —— 避免"选到第 4 空就忘了前 3 空"。
+   判完这一组直接跳到组后第一题；5 条记录照旧写入，成绩口径不变。 */
+function groupMembers(q) {
+  var out = [];
+  for (var i = S.idx; i < S.paper.length; i++) {
+    if (S.paper[i].grp !== q.grp) break;
+    out.push(S.paper[i]);
+  }
+  return out;
+}
+
+function renderGroup(q, zone) {
+  var members = groupMembers(q);
+  var placed = {};          // slot -> 选项下标
+  var active = 0;           // 当前正在填第几个空
+  var checked = false;
+
+  function slotHTML(k) {
+    var v = placed[k];
+    var txt = (v == null) ? '　' : String.fromCharCode(65 + v);
+    var cls = 'gslot' + (k === active && !checked ? ' act' : '') + (v != null ? ' has' : '');
+    return '<button type="button" class="' + cls + '" data-slot="' + k + '">' + txt + '</button>';
+  }
+
+  function build() {
+    var h = '';
+    if (q.t === 'dialog') {
+      if (q.title) h += '<p class="qsub">' + esc(q.title) + '</p>';
+      h += '<div class="gdoc">';
+      members.forEach(function (m) {
+        var k = m.slot;
+        h += '<div class="gline">' + esc(m.prompt).replace(/^[A-Za-z]+:\s*/, function (x) { return x; }) + '</div>';
+      });
+      h += '</div>';
+    } else {
+      h += '<div class="gdoc">';
+      members.forEach(function (m) {
+        h += '<div class="gline">' + (m.slot + 1) + '. ' + esc(m.prompt) + '</div>';
+      });
+      h += '</div>';
+    }
+    return h;
+  }
+
+  zone.innerHTML = '<div class="gwrap">' + build() +
+    '<div class="gbox">' + (q.box || []).map(function (x) { return '<span class="gopt">' + esc(x) + '</span>'; }).join('') + '</div>' +
+    '<div class="gslots" id="gSlots"></div>' +
+    '<p class="qsub" id="gTip"></p>' +
+    '<div class="foot-row"><button class="big" id="gCheck" type="button" disabled>校验这 5 个空</button></div>' +
+    '</div>';
+
+  var slots = $('gSlots');
+  slots.innerHTML = '';
+  members.forEach(function (m, k) {
+    var w = document.createElement('div');
+    w.className = 'gslotwrap';
+    w.innerHTML = '<span class="gnum">' + (k + 1) + '</span>' + slotHTML(k);
+    slots.appendChild(w);
+  });
+
+  function repaint() {
+    var box = $('gSlots');
+    box.innerHTML = '';
+    members.forEach(function (m, k) {
+      var w = document.createElement('div');
+      w.className = 'gslotwrap';
+      w.innerHTML = '<span class="gnum">' + (k + 1) + '</span>' + slotHTML(k);
+      box.appendChild(w);
+    });
+    var left = members.length - Object.keys(placed).length;
+    var tip = $('gTip');
+    if (tip) tip.textContent = left > 0 ? ('还有 ' + left + ' 个空没填（点空位，再点下方选项）')
+                                        : '都填好了，点「校验这 5 个空」';
+    var btn = $('gCheck');
+    if (btn) btn.disabled = left > 0 || checked;
+    Array.prototype.forEach.call(box.querySelectorAll('.gslot'), function (b) {
+      b.addEventListener('click', function () {
+        if (checked) return;
+        var k = +b.dataset.slot;
+        if (placed[k] != null) { delete placed[k]; active = k; }
+        else active = k;
+        repaint();
+      });
+    });
+  }
+
+  // 选项：点一下填进"当前空"
+  Array.prototype.forEach.call(zone.querySelectorAll('.gopt'), function (el, oi) {
+    el.addEventListener('click', function () {
+      if (checked) return;
+      // 已经被用掉的选项不再可填（同一组内一个选项只对应一个空）
+      var used = Object.keys(placed).map(function (k) { return placed[k]; });
+      if (used.indexOf(oi) >= 0) { toast('这个选项已经用过了', 1600); return; }
+      var target = active;
+      // 找一个还没填的空
+      if (placed[target] != null) {
+        for (var k = 0; k < members.length; k++) if (placed[k] == null) { target = k; break; }
+      }
+      placed[target] = oi;
+      // 自动跳到下一个空
+      for (var n = 0; n < members.length; n++) {
+        var cand = (target + 1 + n) % members.length;
+        if (placed[cand] == null) { active = cand; break; }
+      }
+      sfxTap();
+      repaint();
+    });
+  });
+
+  repaint();
+
+  var checkBtn = $('gCheck');
+  if (checkBtn) checkBtn.addEventListener('click', function () {
+    if (checked) return;
+    checked = true;
+    var right = 0;
+    members.forEach(function (m, k) {
+      var ok = (placed[k] === m.ansIdx);
+      if (ok) right++;
+      record(m, ok, placed[k] == null ? null : m.texts[placed[k]]);
+    });
+    // 标对错：绿=对、红=错，错的旁边给正确答案
+    var box = $('gSlots');
+    Array.prototype.forEach.call(box.querySelectorAll('.gslot'), function (b, k) {
+      var m = members[k];
+      var ok = (placed[k] === m.ansIdx);
+      b.classList.add(ok ? 'ok' : 'no');
+      b.disabled = true;
+      if (!ok) {
+        var tip = document.createElement('span');
+        tip.className = 'gfix';
+        tip.textContent = '应为 ' + String.fromCharCode(65 + m.ansIdx);
+        b.parentNode.appendChild(tip);
+      }
+    });
+    if (right === members.length) sfxOk(); else sfxBad();
+    showFeedback(right === members.length,
+      '这一组 ' + right + ' / ' + members.length + ' 对', q.t);
+    // 「下一题」要跳过整组
+    var nb = $('nextBtn');
+    if (nb) {
+      nb.textContent = (S.idx + members.length >= S.paper.length) ? '看成绩 →' : '下一题 →';
+      nb.onclick = null;
+      nb.addEventListener('click', function () {
+        if (S.idx + members.length >= S.paper.length) { finishQuiz(false); return; }
+        S.idx += members.length;
+        renderQuestion();
+      });
+    }
   });
 }
 
