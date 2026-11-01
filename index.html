@@ -32364,7 +32364,7 @@ else init();
       不做帧率采样（那会在主线程上一直占用，老师明确说过别占大头）。 */
 var QUALITY_AXES = { render: 'hub.render', motion: 'hub.motion' };
 var qLevel = {
-  render: (function () { var v = lsGet(QUALITY_AXES.render, 'auto'); return (v === 'high' || v === 'low') ? v : 'auto'; })(),
+  render: (function () { var v = lsGet(QUALITY_AXES.render, 'low'); return (v === 'high' || v === 'low') ? v : 'low'; })(),   // 默认=流畅（老师定）
   motion: (function () { var v = lsGet(QUALITY_AXES.motion, 'auto'); return (v === 'full' || v === 'off') ? v : 'auto'; })()
 };
 function qApply() {
