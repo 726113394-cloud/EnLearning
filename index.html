@@ -29421,6 +29421,26 @@ body.advanced .tbtn.active,body.advanced .mbtn.active{
 <style>
 /* ===== 整组一屏：空位 + 选项 ===== */
 .gwrap{display:block}
+
+/* ===== 整组题的版式：大屏左右分栏，手机上下滚动 =====
+   大屏（投影/平板横放）左边是整段文字、右边是选项+空位+校验，
+   视线不用来回跑；窄屏只有一列，靠 #quiz 的纵向滚动（已经可滚）。 */
+@media (min-width: 820px){
+  .gwrap{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    column-gap:22px;
+    align-items:start;
+  }
+  .gdoc{ grid-column:1; grid-row:1 / span 4; margin-bottom:0;
+         max-height:58vh; overflow-y:auto; padding-right:6px; }
+  .gbox,.gslots,#gTip,.foot-row{ grid-column:2; }
+  .gslots{ margin-top:2px; }
+  .foot-row .big{ width:100%; }
+}
+@media (max-width: 819px){
+  .gdoc{ max-height:none; }
+}
 .gdoc{font-size:1.04rem;line-height:2.1;margin-bottom:10px}
 .gline{padding:2px 0}
 .gbox{border:1.5px solid rgba(20,40,70,.45);border-radius:12px;padding:10px 12px;
