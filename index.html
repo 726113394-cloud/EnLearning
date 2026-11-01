@@ -29881,6 +29881,16 @@ function beep(freqs, dur, vol, type) {
 function sfxTap()  { var n = Date.now(); if (n - lastBeep < 60) return; lastBeep = n; beep([660], 0.05, 0.1); }
 function sfxOk()   { var n = Date.now(); if (n - lastBeep < 60) return; lastBeep = n; beep([784, 1046], 0.09, 0.14); }
 function sfxBad()  { var n = Date.now(); if (n - lastBeep < 60) return; lastBeep = n; beep([330, 247], 0.1, 0.13); }
+
+/* 倒计时最后 10 秒的提示音：越接近 0，音更高、更响、更连（老师要“越来越紧迫”）。
+   ⚠️ 走同一个 beep()，所以「音效」关掉时它也不会响；也不做任何定时器堆叠。 */
+function tickSound(left) {
+  if (left > 10 || left <= 0) return;
+  if (left > 6)       beep([880], 0.05, 0.09);            // 10..7：一秒一下
+  else if (left > 3)  beep([988], 0.055, 0.13);           // 6..4：升高、加重
+  else if (left > 1)  beep([1175, 1175], 0.05, 0.17);     // 3..2：双响
+  else                beep([1319, 1319, 1319], 0.05, 0.22); // 最后 1 秒：三连
+}
 function sfxDone() { var n = Date.now(); if (n - lastBeep < 60) return; lastBeep = n; beep([600, 800, 1000, 1320], 0.1, 0.13); }
 
 /* ============================================================
@@ -30868,6 +30878,7 @@ function startClock() {
       return;
     }
     c.textContent = S.left + 's';
+    tickSound(S.left);
     c.classList.toggle('hurry', S.left <= 5);
     c.classList.toggle('warn', S.left > 5 && S.left <= 15);
   }, 1000);
