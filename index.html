@@ -29471,6 +29471,38 @@ body.advanced .tbtn.active,body.advanced .mbtn.active{
 /* 对话整组里的圈号 */
 .gmark{color:#b0457e;font-weight:800;margin:0 2px}
 .gdoc .gline{padding:3px 0}
+
+/* ===== 配对被选中的卡片：高级渲染用发光圈，流畅渲染用扁平色条 =====
+   原来只有 border-color 变色，投影上看不清我现在选的是哪张。
+   高级（body.advanced）= 外发光 + 轻微放大；流畅 = 左侧 4px 实色条 + 底色，
+   扁平、不发光、不花钱。 */
+.mcard.pick{ position:relative; }
+body.advanced .mcard.pick{
+  border-color:#2f5d9e;
+  background:#eaf2fd;
+  box-shadow:0 0 0 3px rgba(47,93,158,.35), 0 0 18px 2px rgba(47,93,158,.45);
+  transform:translateY(-2px) scale(1.02);
+  animation:pickGlow 1.1s ease-in-out infinite;
+}
+@keyframes pickGlow{
+  0%,100%{box-shadow:0 0 0 3px rgba(47,93,158,.30), 0 0 14px 1px rgba(47,93,158,.38)}
+  50%{box-shadow:0 0 0 4px rgba(47,93,158,.45), 0 0 24px 4px rgba(47,93,158,.55)}
+}
+/* 流畅渲染：不要光晕，只要一条明显的扁平条 */
+body:not(.advanced) .mcard.pick{
+  border-color:#2f5d9e;
+  background:#eef4fd;
+  box-shadow:none;
+  border-left:6px solid #2f5d9e;
+}
+body:not(.advanced) .mcard.pick::after{
+  content:'选中';
+  position:absolute; top:6px; right:8px;
+  font-size:.68rem; color:#2f5d9e; font-weight:700;
+}
+@media (prefers-reduced-motion: reduce){
+  body.advanced .mcard.pick{animation:none}
+}
 </style>
 </head>
 <body>
