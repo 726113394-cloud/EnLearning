@@ -29459,6 +29459,18 @@ body.advanced .tbtn.active,body.advanced .mbtn.active{
 .gfix{font-size:.76rem;color:#b91c1c}
 .foot-row{display:flex;gap:10px;margin-top:6px}
 @media (max-width:420px){ .gdoc{font-size:.98rem;line-height:1.95} }
+<style>
+/* ===== 阅读判断：小屏上下 / 大屏左右 ===== */
+.tfwrap{display:block}
+.tfdoc{font-size:1.04em;line-height:1.95;margin-bottom:12px}
+@media (min-width: 820px){
+  .tfwrap{display:grid;grid-template-columns:1.05fr .95fr;column-gap:22px;align-items:start}
+  .tfdoc{grid-column:1;margin-bottom:0;max-height:56vh;overflow-y:auto;padding-right:6px}
+  .tfask{grid-column:2}
+}
+/* 对话整组里的圈号 */
+.gmark{color:#b0457e;font-weight:800;margin:0 2px}
+.gdoc .gline{padding:3px 0}
 </style>
 </head>
 <body>
@@ -31133,8 +31145,11 @@ function renderPaperQ(q, zone) {
       (q.askMode ? '别人这样回应 —— 你该问什么？' : '别人这样说 —— 你该怎么回应？') + '</p>' +
       '<p class="qprompt" style="font-size:1.3em;line-height:1.8">“' + esc(q.prompt) + '”</p>';
   } else {
-    html += '<p class="qsub" style="font-size:1.06em;line-height:1.95">' + esc(q.passage) + '</p>' +
-      '<p class="qprompt" style="font-size:1.2em">' + esc(q.prompt) + '</p>';
+    // 阅读判断：短文在左、题目+选项在右（窄屏合成一列，靠页面纵向滚动）
+    html += '<div class="tfwrap">' +
+      '<div class="tfdoc">' + esc(q.passage) + '</div>' +
+      '<div class="tfask"><p class="qprompt" style="font-size:1.2em">' + esc(q.prompt) + '</p></div>' +
+      '</div>';
   }
   html += '<div class="opts" id="qOpts"></div>';
   zone.innerHTML = html;
@@ -31180,11 +31195,14 @@ function renderGroup(q, zone) {
   function build() {
     var h = '';
     if (q.t === 'dialog') {
+      // ⚠️ 对话题没有 prompt 字段（只有 lines / blankIdx），之前拿 m.prompt 画，
+      //    结果整段是空行、第一小题看起来"丢了"。这里直接画原对话，圈号码高亮。
       if (q.title) h += '<p class="qsub">' + esc(q.title) + '</p>';
       h += '<div class="gdoc">';
-      members.forEach(function (m) {
-        var k = m.slot;
-        h += '<div class="gline">' + esc(m.prompt).replace(/^[A-Za-z]+:\s*/, function (x) { return x; }) + '</div>';
+      (q.lines || []).forEach(function (ln) {
+        var t = esc(ln).replace(/([\u2460-\u2464])/g,
+          '<span class="gmark">$1</span>');
+        h += '<div class="gline">' + t + '</div>';
       });
       h += '</div>';
     } else {
