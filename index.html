@@ -30629,6 +30629,8 @@ function pickDistractors(pool, target, kind, need) {
   var clash = function (w) {
     if (w.en.toLowerCase() === target.en.toLowerCase()) return true;
     if (w.zh === target.zh) return true;      // 释义撞了就是两个正确答案
+    // 听力题的选项是中文释义，但它的英文题干必须是"词"，否则没有 `词.mp3`
+    if (kind === 'listen' && looksLikeSentence(w.en)) return true;
     return false;
   };
   var keyOf = function (w) { return kind === 'listen' ? w.zh : w.en.toLowerCase(); };
@@ -30647,9 +30649,22 @@ function pickDistractors(pool, target, kind, need) {
   return out;
 }
 
+/* 一句话 vs 一个词：听力题的录音是 `<词>.mp3`，句子没有录音，
+   所以这个题型只收"看起来是词/词组"的条目。判据故意宽松一点：
+   以句末标点结尾，或≥5 个空格分开的词，就当作句子。 */
+function looksLikeSentence(txt) {
+  var t = String(txt || '').trim();
+  if (!t) return true;
+  if (/[.?!。？！]$/.test(t)) return true;
+  var words = t.split(/\s+/).filter(Boolean);
+  return words.length >= 5;
+}
+
 /* 给**指定的那个词**出一道单选（不再自己随机挑目标 —— 覆盖优先靠外面排好顺序） */
 function makeChoiceFor(kind, target, pool) {
   if (!target) return null;
+  // 听力题只出词：目标是句子就直接放弃（交给覆盖兜底把它降级成"看中文选英文"）
+  if (kind === 'listen' && looksLikeSentence(target.en)) return null;
   var dis = pickDistractors(pool, target, kind, 3);
   if (dis.length < 1) return null;             // 连一个干扰项都凑不出来，出不了单选题
   var opts = shuffle([target].concat(dis));
